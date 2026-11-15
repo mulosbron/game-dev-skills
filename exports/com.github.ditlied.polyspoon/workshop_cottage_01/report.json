@@ -1,0 +1,67 @@
+{
+  "family": "cottage",
+  "version": "0.6.0",
+  "dimensions": [
+    6.787296295166016,
+    4.950000003576278,
+    5.010000013113022
+  ],
+  "anchors": {
+    "ground": [
+      0,
+      0,
+      0
+    ],
+    "chimney": [
+      -1.4000000000000001,
+      4.949999999999999,
+      -0.88
+    ],
+    "workSurface": [
+      3.05,
+      1.03,
+      -0.48
+    ],
+    "entrance": [
+      0,
+      0.22,
+      2.48
+    ],
+    "ridge": [
+      0,
+      4.101919999999999,
+      0
+    ]
+  },
+  "geometry": {
+    "errors": [],
+    "parts": 246,
+    "triangles": 9696,
+    "vertices": 28200,
+    "bounds": {
+      "min": [
+        -3.017296314239502,
+        0,
+        -2.4800000190734863
+      ],
+      "max": [
+        3.7699999809265137,
+        4.950000003576278,
+        2.5299999940395357
+      ]
+    }
+  },
+  "glbSha256": "27f0b986c92c5eb72816e28b146e6bdfb353dd23595de910ee019655262e1e31",
+  "formats": {},
+  "controls": "asset.controls.json",
+  "toolkit": {
+    "recipe": "bench",
+    "recipeVersion": "1.1.0",
+    "deliveryRevision": 4,
+    "sha256": "da63ef6e143b9c75d64efa2fb0d1ef61e1972a8fe4708c1dae21b1c0097610dd",
+    "sourceHash": "6aa0892764ae32e723fa2f58ae044b051f4de57b22dbab6bb49ce2342412459c"
+  },
+  "limits": [
+    "Geometry/export evidence only; inspect actual views and verify the requested target separately."
+  ]
+}

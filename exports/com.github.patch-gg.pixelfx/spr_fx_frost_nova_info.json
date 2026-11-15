@@ -1,0 +1,15 @@
+{
+  "sprite_name": "spr_fx_frost_nova",
+  "effect_id": "ice/frost-nova",
+  "frame_count": 103,
+  "frame_width": 288,
+  "frame_height": 192,
+  "fps": 30,
+  "pivot": [
+    144,
+    150
+  ],
+  "suggested_origin": "Custom",
+  "origin_x": 144,
+  "origin_y": 150
+}

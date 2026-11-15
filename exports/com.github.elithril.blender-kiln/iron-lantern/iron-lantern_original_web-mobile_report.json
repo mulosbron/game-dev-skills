@@ -1,0 +1,258 @@
+{
+  "ok": true,
+  "inputPath": "D:\\GameMaker\\exports\\com.github.elithril.blender-kiln\\iron-lantern\\iron-lantern_original.glb",
+  "outputPath": "D:\\GameMaker\\exports\\com.github.elithril.blender-kiln\\iron-lantern\\iron-lantern_original_web-mobile.glb",
+  "preset": "web-mobile",
+  "savedBytes": 32188,
+  "savedKB": 31.43,
+  "savedPercent": 67.09,
+  "triangleReductionPercent": 0,
+  "before": {
+    "fileBytes": 47976,
+    "fileKB": 46.85,
+    "fileMB": 0.046,
+    "meshCount": 12,
+    "nodeCount": 12,
+    "drawCalls": 12,
+    "materialCount": 4,
+    "textureCount": 0,
+    "animationCount": 0,
+    "skinCount": 0,
+    "totalVertices": 1116,
+    "totalTriangles": 604,
+    "totalTextureBytes": 0,
+    "totalTextureKB": 0,
+    "estimatedVRAM_MB": 0,
+    "bounds": {
+      "min": [
+        -0.1126,
+        0,
+        -0.13
+      ],
+      "max": [
+        0.1126,
+        0.4383,
+        0.13
+      ],
+      "dimensionsMeters": [
+        0.2252,
+        0.4383,
+        0.26
+      ],
+      "groundedAtZeroY": true
+    },
+    "extensionsUsed": [
+      "KHR_materials_emissive_strength"
+    ],
+    "meshes": [
+      {
+        "name": "Cylinder",
+        "primitives": 1,
+        "vertices": 36,
+        "triangles": 20
+      },
+      {
+        "name": "Cylinder.001",
+        "primitives": 1,
+        "vertices": 72,
+        "triangles": 44
+      },
+      {
+        "name": "Cone",
+        "primitives": 1,
+        "vertices": 72,
+        "triangles": 44
+      },
+      {
+        "name": "Cylinder.002",
+        "primitives": 1,
+        "vertices": 36,
+        "triangles": 20
+      },
+      {
+        "name": "Torus",
+        "primitives": 1,
+        "vertices": 576,
+        "triangles": 288
+      },
+      {
+        "name": "Cone.001",
+        "primitives": 1,
+        "vertices": 36,
+        "triangles": 20
+      },
+      {
+        "name": "Cylinder.003",
+        "primitives": 1,
+        "vertices": 48,
+        "triangles": 28
+      },
+      {
+        "name": "Cylinder.004",
+        "primitives": 1,
+        "vertices": 48,
+        "triangles": 28
+      },
+      {
+        "name": "Cylinder.005",
+        "primitives": 1,
+        "vertices": 48,
+        "triangles": 28
+      },
+      {
+        "name": "Cylinder.006",
+        "primitives": 1,
+        "vertices": 48,
+        "triangles": 28
+      },
+      {
+        "name": "Cylinder.007",
+        "primitives": 1,
+        "vertices": 48,
+        "triangles": 28
+      },
+      {
+        "name": "Cylinder.008",
+        "primitives": 1,
+        "vertices": 48,
+        "triangles": 28
+      }
+    ],
+    "textures": []
+  },
+  "after": {
+    "fileBytes": 15788,
+    "fileKB": 15.42,
+    "fileMB": 0.015,
+    "meshCount": 12,
+    "nodeCount": 12,
+    "drawCalls": 12,
+    "materialCount": 4,
+    "textureCount": 0,
+    "animationCount": 0,
+    "skinCount": 0,
+    "totalVertices": 1116,
+    "totalTriangles": 604,
+    "totalTextureBytes": 0,
+    "totalTextureKB": 0,
+    "estimatedVRAM_MB": 0,
+    "bounds": {
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "dimensionsMeters": [
+        2,
+        2,
+        2
+      ],
+      "groundedAtZeroY": false
+    },
+    "extensionsUsed": [
+      "EXT_meshopt_compression",
+      "KHR_materials_emissive_strength",
+      "KHR_mesh_quantization"
+    ],
+    "meshes": [
+      {
+        "name": "Cylinder",
+        "primitives": 1,
+        "vertices": 36,
+        "triangles": 20
+      },
+      {
+        "name": "Cylinder.001",
+        "primitives": 1,
+        "vertices": 72,
+        "triangles": 44
+      },
+      {
+        "name": "Cone",
+        "primitives": 1,
+        "vertices": 72,
+        "triangles": 44
+      },
+      {
+        "name": "Cylinder.002",
+        "primitives": 1,
+        "vertices": 36,
+        "triangles": 20
+      },
+      {
+        "name": "Torus",
+        "primitives": 1,
+        "vertices": 576,
+        "triangles": 288
+      },
+      {
+        "name": "Cone.001",
+        "primitives": 1,
+        "vertices": 36,
+        "triangles": 20
+      },
+      {
+        "name": "Cylinder.003",
+        "primitives": 1,
+        "vertices": 48,
+        "triangles": 28
+      },
+      {
+        "name": "Cylinder.004",
+        "primitives": 1,
+        "vertices": 48,
+        "triangles": 28
+      },
+      {
+        "name": "Cylinder.005",
+        "primitives": 1,
+        "vertices": 48,
+        "triangles": 28
+      },
+      {
+        "name": "Cylinder.006",
+        "primitives": 1,
+        "vertices": 48,
+        "triangles": 28
+      },
+      {
+        "name": "Cylinder.007",
+        "primitives": 1,
+        "vertices": 48,
+        "triangles": 28
+      },
+      {
+        "name": "Cylinder.008",
+        "primitives": 1,
+        "vertices": 48,
+        "triangles": 28
+      }
+    ],
+    "textures": []
+  },
+  "validationAfter": {
+    "valid": true,
+    "numErrors": 0,
+    "numWarnings": 0,
+    "numInfos": 2,
+    "messages": [
+      {
+        "code": "UNSUPPORTED_EXTENSION",
+        "severity": "info",
+        "message": "Cannot validate an extension as it is not supported by the validator: 'EXT_meshopt_compression'.",
+        "pointer": "/extensionsUsed/0"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "severity": "info",
+        "message": "This object may be unused.",
+        "pointer": "/buffers/0"
+      }
+    ]
+  }
+}

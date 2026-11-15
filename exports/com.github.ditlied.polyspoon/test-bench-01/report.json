@@ -1,0 +1,52 @@
+{
+  "family": "bench",
+  "version": "1.1.0",
+  "dimensions": [
+    2.200000047683716,
+    0.4500000052154064,
+    0.4500000011324883
+  ],
+  "anchors": {
+    "ground": [
+      0,
+      0,
+      0
+    ],
+    "seat": [
+      0,
+      0.45,
+      0
+    ]
+  },
+  "geometry": {
+    "errors": [],
+    "parts": 12,
+    "triangles": 768,
+    "vertices": 2304,
+    "bounds": {
+      "min": [
+        -1.100000023841858,
+        -5.364418020903372e-9,
+        -0.22500000056624414
+      ],
+      "max": [
+        1.100000023841858,
+        0.4499999998509884,
+        0.22500000056624414
+      ]
+    }
+  },
+  "glbSha256": "b97b2e6dc7886bf85aac1a77473d63fe349869fde05b5e9887fdbc043e7942e5",
+  "formats": {},
+  "controls": "asset.controls.json",
+  "toolkit": {
+    "recipe": "bench",
+    "recipeVersion": "1.1.0",
+    "deliveryRevision": 4,
+    "sha256": "da63ef6e143b9c75d64efa2fb0d1ef61e1972a8fe4708c1dae21b1c0097610dd",
+    "sourceHash": "6aa0892764ae32e723fa2f58ae044b051f4de57b22dbab6bb49ce2342412459c"
+  },
+  "limits": [
+    "Geometry/export evidence only; inspect actual views and verify the requested target separately."
+  ]
+}

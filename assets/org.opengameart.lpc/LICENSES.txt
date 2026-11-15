@@ -1,0 +1,80 @@
+================================================================================
+MASTER LPC (LIBERATED PIXEL CUP) REVERSE-DOMAIN ATTRIBUTION & LICENSE LEDGER
+================================================================================
+
+Workspace Root: .
+Asset Collection: Liberated Pixel Cup (LPC) Master Ecosystem
+Standard: 32x32 tiles, 64x64 character animation cells, 3/4 top-down perspective.
+
+All packages listed below are 100% free for commercial and non-commercial game development.
+Reverse domain naming uniquely identifies source repositories and ensures total traceability.
+
+--------------------------------------------------------------------------------
+1. com.github.elizawy.lpc (LPC Revised / Four Seasons World Kit)
+--------------------------------------------------------------------------------
+• Reverse Domain: com.github.elizawy.lpc
+• Source URL:     https://github.com/ElizaWy/LPC
+• Local Path:     libraries\com.github.elizawy.lpc
+• Author/Curator: Eliza Wyatt (DeathsDarling / ElizaWy)
+• Contributors:   Lanea Zimmerman (Sharm), Stephen Challener (Redshrike), Johannes Sjölund (Wulax),
+                  BlueCarrot16, BenCreating, Durrani, YuriNikolai, Craftpix.net
+• Primary License: OGA-BY 3.0 (OpenGameArt Attribution 3.0) / CC-BY 3.0
+• Commercial Use: 100% Allowed (OGA-BY removes technical DRM restrictions, safe for Steam & App Store).
+• Contents:       Four Seasons terrain (Spring, Summer, Autumn, Winter), medieval & modern structures,
+                  furniture, interior props, vases, elemental FX, 170-color unified palette.
+
+--------------------------------------------------------------------------------
+2. com.github.liberatedpixelcup.universal-lpc-character-generator
+--------------------------------------------------------------------------------
+• Reverse Domain: com.github.liberatedpixelcup.universal-lpc-spritesheet-character-generator
+• Source URL:     https://github.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator
+• Local Path:     libraries\com.github.liberatedpixelcup.universal-lpc-spritesheet-character-generator
+• Maintainers:    bluecarrot16, JaidynReiman, sanderfrenken, Gaurav0, ElizaWy
+• Primary Licenses: CC-BY-SA 3.0/4.0, CC-BY 3.0/4.0, OGA-BY 3.0, CC0 1.0, GPL 3.0
+• Commercial Use: 100% Allowed provided author attribution is displayed in game credits.
+• Attribution:    Individual asset attributions are documented per-file in CREDITS.csv (3.9 MB).
+• Contents:       89,359 modular character pieces (bodies, hairstyles, eyes, beards, shirts,
+                  chainmail, plate armor, robes, boots, helmets, wizard hats, swords, staves, bows).
+
+--------------------------------------------------------------------------------
+3. org.opengameart.liberatedpixelcup (Original Official LPC Base Assets)
+--------------------------------------------------------------------------------
+• Reverse Domain: org.opengameart.liberatedpixelcup
+• Source URL:     https://github.com/OpenGameArt/LiberatedPixelCup
+• Local Path:     libraries\org.opengameart.liberatedpixelcup
+• Origin:         OpenGameArt.org, Mozilla, Free Software Foundation, Creative Commons (2012)
+• Authors:        Bart Kelsey, Chris Webber, Stephen Challener (Redshrike), Lanea Zimmerman (Sharm),
+                  Charles Sanchez (CharlesGabriel), Daniel Eddeland (daneeklu), Manuel Riecke (MrBeast)
+• Primary Licenses: CC-BY-SA 3.0 / GPL 3.0 / OGA-BY 3.0
+• Commercial Use: 100% Allowed.
+• Contents:       Foundational LPC sprites, monster animations (bats, skeletons, golems),
+                  overworld terrain tilesets, dungeon tiles, castle walls, combat animations.
+
+--------------------------------------------------------------------------------
+4. com.github.bluecarrot16.lpctools (LPC Manipulation & Compilation Toolkit)
+--------------------------------------------------------------------------------
+• Reverse Domain: com.github.bluecarrot16.lpctools
+• Source URL:     https://github.com/bluecarrot16/lpctools
+• Local Path:     libraries\com.github.bluecarrot16.lpctools
+• Author:         bluecarrot16
+• Primary License: GPL 3.0 / MIT
+• Contents:       Python CLI utilities for re-packing, slicing, re-aligning, and palette-swapping
+                  LPC tilesets and character sheets.
+
+--------------------------------------------------------------------------------
+5. com.github.liberatedpixelcup.rpg_maker_mz_lpc_starter_kit
+--------------------------------------------------------------------------------
+• Reverse Domain: com.github.liberatedpixelcup.rpg_maker_mz_lpc_starter_kit
+• Source URL:     https://github.com/LiberatedPixelCup/RPG_Maker_MZ_LPC_Starter_Kit
+• Local Path:     libraries\com.github.liberatedpixelcup.rpg_maker_mz_lpc_starter_kit
+• Authors:        Liberated Pixel Cup Organization
+• Primary Licenses: CC-BY-SA 3.0 / OGA-BY 3.0 / MIT
+• Contents:       Pre-configured Tiled autotiles, RPG Maker MZ / Godot compatible map files,
+                  passability/collision configurations.
+
+================================================================================
+Attribution Compliance Notice:
+To maintain full legal compliance in any game or project utilizing these assets,
+include the authors listed in this ledger or generated by 'tools/lpc_character_builder.py'
+in your game's credits screen or CREDITS.txt distribution.
+================================================================================

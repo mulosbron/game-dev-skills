@@ -1,0 +1,39 @@
+================================================================================
+PIXEL ART ATLAS 1.4M - DATASET STRUCTURE & USAGE INSTRUCTIONS
+================================================================================
+
+Source: https://huggingface.co/datasets/Angais/pixel-art-atlas-1.4m
+Reverse-DNS ID: co.huggingface.angais.pixel-art-atlas-1.4m
+
+Directory Layout:
+- LICENSES.txt: Master legal clearance & attribution ledger (CC0 1.0)
+- DOWNLOAD_SOURCES.txt: This overview document
+- README.md: Original Hugging Face dataset card
+- LICENSE: Original CC0 1.0 license text
+- banner.png: Preview banner of selected sprites
+- tokens.npy: (688 MB) Memory-mapped palette index tokens (1,409,404 x 256 uint8)
+- palette.npy: (768 bytes) RGB color lookup table (256 x 3 uint8)
+- captions.json: (60 MB) Parallel list of 1,409,404 English prompt captions
+- objects.json: (21 MB) Parallel list of 1,409,404 subject/object labels
+- split.npy: (1.3 MB) Train/validation split array (0 = train, 1 = validation)
+- pixel-art-16x16-1.4m.zip: Original archive (259 MB)
+- data/: Parquet split files for HuggingFace datasets library:
+    train-000.parquet ... train-014.parquet (15 shards)
+    validation-000.parquet (1 shard)
+
+Quick CLI Commands:
+1. Search categories & captions:
+   python tools/pixel_atlas_manager.py search "sword" --limit 10
+
+2. Export a specific sprite by ID to PNG:
+   python tools/pixel_atlas_manager.py export --id 42 --scale 4
+
+3. Export a GameMaker horizontal animation strip (_stripN.png):
+   python tools/pixel_atlas_manager.py strip --subject "dragon" --count 6 --scale 2
+
+4. Generate 2D normal map for dynamic lighting:
+   python tools/pixel_atlas_manager.py normal --id 42
+
+5. Display dataset statistics:
+   python tools/pixel_atlas_manager.py stats
+================================================================================

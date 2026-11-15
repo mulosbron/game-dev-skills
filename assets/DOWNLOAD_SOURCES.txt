@@ -1,0 +1,70 @@
+================================================================================
+GAME ASSETS MASTER DOWNLOAD DIRECTORY & SOURCE REPOSITORIES
+================================================================================
+
+Due to GitHub repository size limits and individual file size caps (100 MB),
+large binary 3D meshes (.glb, .blend, .fbx), high-res textures, and raw asset
+datasets are stored locally and excluded from Git version control.
+
+All asset catalogs, CLI downloaders, and license attribution ledgers are 
+fully tracked in this repository under `tools/`, `catalogs/`, and `assets/`.
+
+To download or rebuild any asset collection, use the verified commands below:
+
+--------------------------------------------------------------------------------
+1. 🛋️ Amazon Berkeley Objects (ABO) - 7,953 Game-Ready 3D Models
+--------------------------------------------------------------------------------
+* Source: https://amazon-berkeley-objects.s3.amazonaws.com/index.html
+* Hugging Face Mirror: https://huggingface.co/datasets/codepawl/abo-glb
+* License: Creative Commons Attribution 4.0 International (CC-BY-4.0)
+* Download CLI:
+    python tools/abo_manager.py search "chair"
+    python tools/abo_manager.py download --limit 50
+* Offline Catalog: `catalogs/abo_catalog.jsonl` (7,953 products searchable offline)
+
+--------------------------------------------------------------------------------
+2. 🌐 ThreeJS Assets - 1,041 Free Low-Poly 3D Models
+--------------------------------------------------------------------------------
+* Source: https://threejsassets.com/
+* License: Free Commercial Asset License v1 (Royalty-free commercial use)
+* Download CLI:
+    python tools/threejsassets_manager.py search "car"
+    python tools/threejsassets_manager.py download --limit 50
+* Offline Catalog: `catalogs/threejsassets_catalog.json`
+
+--------------------------------------------------------------------------------
+3. 🧊 Sand3D 100,000+ Parametric Code-Driven 3D Models
+--------------------------------------------------------------------------------
+* Source Datasets:
+    - Objaverse: https://huggingface.co/datasets/Sandflow/sand3d-objaverse
+    - SimReady:  https://huggingface.co/datasets/Sandflow/sand3d-simready
+    - CAD:       https://huggingface.co/datasets/Sandflow/sand3d-cad
+    - Articraft: https://huggingface.co/datasets/Sandflow/sand3d-articraft
+    - Automate:  https://huggingface.co/datasets/Sandflow/sand3d-automate
+* License: 100% Commercial Cleared (CC-BY-4.0, CC0 1.0, Apache 2.0)
+* Rebuild & Export CLI (via Headless Blender 5.2 + Sand3D):
+    # Search remote Parquet shards without downloading gigabytes:
+    python tools/sand3d_builder.py search "bunker" --wanted 5
+    # Rebuild and optimize as .GLB with grounded bottom-center pivot:
+    python tools/sand3d_builder.py build 1 --budget 10000
+
+--------------------------------------------------------------------------------
+4. 🎨 Liberated Pixel Cup (LPC) Master Ecosystem
+--------------------------------------------------------------------------------
+* Official Base: https://opengameart.org/content/lpc-collection
+* Revised 4-Seasons Biomes: https://github.com/ElizaWy/LPC
+* Character Generator (89,000+ modular parts):
+    https://github.com/universal-lpc-spritesheet-character-generator/universal-lpc-spritesheet-character-generator
+* License: CC-BY-SA 3.0 / GPL 3.0 / Dual-Licensed
+* Assembly CLI:
+    python tools/lpc_character_builder.py build --gender male --hair afro --out exports/lpc
+
+--------------------------------------------------------------------------------
+5. 🐉 Procedural Pixel Creatures (Zero-Image Monster Generation)
+--------------------------------------------------------------------------------
+* Source: https://github.com/idlerunner00/procedural-pixel-creatures
+* License: MIT License
+* Generation CLI:
+    python tools/creature_gen.py generate --family reptile --seed 42 --clips idle,walk
+
+================================================================================

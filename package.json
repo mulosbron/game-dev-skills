@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "67js": "npm:@codepawlhq/67js@^0.16.0"
+  }
+}

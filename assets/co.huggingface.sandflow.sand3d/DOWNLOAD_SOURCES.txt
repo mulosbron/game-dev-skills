@@ -1,0 +1,30 @@
+================================================================================
+SAND3D 100,000+ 3D MODELS - DOWNLOAD & RECONSTRUCTION SOURCES
+================================================================================
+
+Sand3D models are procedural, code-defined Python models cleared 100% for
+commercial use under CC-BY-4.0, CC0 1.0, and Apache 2.0.
+
+Because these assets can be reconstructed on-demand from code without storing
+tens of gigabytes of meshes on GitHub, binary GLB and Blend files are excluded.
+
+Official Hugging Face Repositories:
+- Sandflow/sand3d-objaverse: https://huggingface.co/datasets/Sandflow/sand3d-objaverse
+- Sandflow/sand3d-simready:  https://huggingface.co/datasets/Sandflow/sand3d-simready
+- Sandflow/sand3d-cad:       https://huggingface.co/datasets/Sandflow/sand3d-cad
+- Sandflow/sand3d-articraft: https://huggingface.co/datasets/Sandflow/sand3d-articraft
+- Sandflow/sand3d-automate:  https://huggingface.co/datasets/Sandflow/sand3d-automate
+
+Reconstruction Commands (via Headless Blender 5.2 + Sand3D):
+1. Search across remote Parquet text columns without heavy downloads:
+   python tools/sand3d_builder.py search "<keyword>" --wanted 6
+
+2. Reconstruct chosen prop as .GLB/.Blend with grounded bottom-center pivot:
+   python tools/sand3d_builder.py build <#number or ID> --budget 10000
+
+3. Batch build for natural language scene prompts (e.g. bunker, cafe):
+   python tools/sand3d_builder.py batch "post-apocalyptic bunker props" --count 5
+
+Master Commercial Attribution & Legal Ledger:
+See `LICENSES.txt` in this directory.
+================================================================================

@@ -1,0 +1,47 @@
+================================================================================
+AMAZON BERKELEY OBJECTS (ABO) - 3D COLLECTION COMMERCIAL LICENSE DECLARATION
+================================================================================
+
+1. LEGAL STATUS & COMMERCIAL RIGHTS
+--------------------------------------------------------------------------------
+All 3D assets in this collection originate from Amazon Berkeley Objects (ABO)
+and are distributed under the Creative Commons Attribution 4.0 International
+License (CC-BY-4.0).
+
+COMMERCIAL USE IS 100% PERMITTED:
+- You are free to use, adapt, and bundle these 3D models into commercial games,
+  interactive web applications, architectural scenes, and simulations.
+- Zero non-commercial (NC) restrictions.
+- Zero copyleft (SA) restrictions.
+
+2. MANDATORY ATTRIBUTION NOTICE (CC-BY-4.0)
+--------------------------------------------------------------------------------
+When using these assets in your game or project, provide attribution in your
+game's credits or documentation:
+
+  "3D models from Amazon Berkeley Objects (ABO) by Amazon (https://amazon-berkeley-objects.s3.amazonaws.com/index.html),
+   licensed under CC BY 4.0. Repackaged with WebP PBR textures, convex collision hulls,
+   and real-world meter scaling by An Xuan Nguyen (CodePawl)."
+
+3. ASSET PROVENANCE LEDGER
+--------------------------------------------------------------------------------
+
+- [table] B002CM3J2A: SuccessfulHome Dining Table Sturdy Wooden Table top, Comfortable and Roomy (Grey) | License: CC-BY-4.0 | Attribution: Amazon Berkeley Objects, repackaged by CodePawl
+
+- [table] B003DQ5B2U: Movian Amazon Brand Corona Nest Of Tables, Solid Pine Wood | License: CC-BY-4.0 | Attribution: Amazon Berkeley Objects, repackaged by CodePawl
+
+- [table] B003PBOMJ6: kovalenthor Console Table - Black, for Entryway for Living Room (Grey) | License: CC-BY-4.0 | Attribution: Amazon Berkeley Objects, repackaged by CodePawl
+
+- [table] B0075URYK2: Vida Design Corona Chest Of Drawers, 4 Drawers, Solid Pine Wood | License: CC-BY-4.0 | Attribution: Amazon Berkeley Objects, repackaged by CodePawl
+
+- [table] B009S7IYKY: Vida Designs Corona Dining Set 4 Seater, Solid Pine Wood, Dining Table With 4 Chairs | License: CC-BY-4.0 | Attribution: Amazon Berkeley Objects, repackaged by CodePawl
+
+- [chair] B00EUL2B16: Ashley Furniture Signature Design - Leahlyn Dining Upholstered Side Chair - Pierced Splat Back - Set of 2 - Medium Brown | License: CC-BY-4.0 | Attribution: Amazon Berkeley Objects, repackaged by CodePawl
+
+- [chair] B00IFHPVEU: AmazonBasics Leather-Padded, Adjustable, Swivel Office Desk Chair with Armrest, Black | License: CC-BY-4.0 | Attribution: Amazon Berkeley Objects, repackaged by CodePawl
+
+- [chair] B00IIFW2L4: AmazonBasics Mesh, Mid-Back, Adjustable, Swivel Office Desk Chair with Armrests, Black | License: CC-BY-4.0 | Attribution: Amazon Berkeley Objects, repackaged by CodePawl
+
+- [chair] B00XBC3BF0: AmazonBasics High-Back, Leather Executive, Swivel, Adjustable Office Desk Chair with Casters, Black | License: CC-BY-4.0 | Attribution: Amazon Berkeley Objects, repackaged by CodePawl
+
+- [chair] B00XBC3J84: AmazonBasics Upholstered, Low-Back, Adjustable, Swivel Office Desk Chair, Black | License: CC-BY-4.0 | Attribution: Amazon Berkeley Objects, repackaged by CodePawl

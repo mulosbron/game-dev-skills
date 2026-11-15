@@ -1,0 +1,25 @@
+================================================================================
+THREEJSASSETS.COM FREE ASSET COMMERCIAL LICENSE & PROVENANCE LEDGER
+================================================================================
+
+Source: https://threejsassets.com/
+License Reference: https://threejsassets.com/license#free-asset-license
+Reverse Domain Identifier: com.threejsassets
+Asset Format: Web-ready low-poly glTF Binary (.glb) with embedded PBR textures.
+
+--------------------------------------------------------------------------------
+TERMS OF USE (Free Asset License v1):
+--------------------------------------------------------------------------------
+• Public label: Free Commercial License.
+• Scope of use: Free assets can be used in personal, open-source, educational,
+  client, commercial, game, app, website, video, and shipped product work.
+• Modification: You may modify, transform, combine, and embed them in your projects.
+• Royalties: 100% royalty-free, no trial, no watermark.
+• Restriction: Do not resell, mirror, share, repackage, or redistribute raw
+  asset files or download access as a competing stock/asset pack.
+
+================================================================================
+CATALOG OVERVIEW:
+All models listed in 'catalogs/threejsassets_catalog.json' are covered under this
+Free Commercial License.
+================================================================================

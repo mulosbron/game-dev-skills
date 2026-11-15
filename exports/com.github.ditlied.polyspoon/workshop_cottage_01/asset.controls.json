@@ -1,0 +1,909 @@
+{
+  "formatVersion": 1,
+  "kind": "polyspoon.model-controls",
+  "title": "Workshop cottage",
+  "family": "cottage",
+  "familyVersion": "0.6.0",
+  "recipeVersion": "0.6.0",
+  "units": {
+    "length": "m",
+    "up": "+Y",
+    "handedness": "right"
+  },
+  "parameters": [
+    {
+      "kind": "range",
+      "key": "width",
+      "label": "Footprint width",
+      "default": 5,
+      "min": 3.6,
+      "max": 7.2,
+      "step": 0.05,
+      "group": "shape",
+      "hint": "Roof rise must be at most 0.4 × footprint width. Widen the footprint or lower roof rise.",
+      "affects": [
+        "geometry"
+      ],
+      "targets": [
+        "cottage"
+      ],
+      "unit": "m",
+      "inputUnit": "m",
+      "displayUnit": "m",
+      "value": 5
+    },
+    {
+      "kind": "range",
+      "key": "depth",
+      "label": "Footprint depth",
+      "default": 4,
+      "min": 3,
+      "max": 5.5,
+      "step": 0.05,
+      "group": "shape",
+      "hint": "Roof rise must be at most 0.4 × footprint width. Widen the footprint or lower roof rise.",
+      "affects": [
+        "geometry"
+      ],
+      "targets": [
+        "cottage"
+      ],
+      "unit": "m",
+      "inputUnit": "m",
+      "displayUnit": "m",
+      "value": 4
+    },
+    {
+      "kind": "range",
+      "key": "wallHeight",
+      "label": "Wall height",
+      "default": 2.8,
+      "min": 2.5,
+      "max": 3.4,
+      "step": 0.05,
+      "group": "shape",
+      "hint": "Roof rise must be at most 0.4 × footprint width. Widen the footprint or lower roof rise.",
+      "affects": [
+        "geometry"
+      ],
+      "targets": [
+        "cottage"
+      ],
+      "unit": "m",
+      "inputUnit": "m",
+      "displayUnit": "m",
+      "value": 2.8
+    },
+    {
+      "kind": "range",
+      "key": "roofRise",
+      "label": "Roof rise",
+      "default": 1.4,
+      "min": 1,
+      "max": 2,
+      "step": 0.05,
+      "group": "shape",
+      "hint": "Roof rise must be at most 0.4 × footprint width. Widen the footprint or lower roof rise.",
+      "affects": [
+        "geometry"
+      ],
+      "targets": [
+        "cottage"
+      ],
+      "unit": "m",
+      "inputUnit": "m",
+      "displayUnit": "m",
+      "value": 1.4
+    },
+    {
+      "kind": "toggle",
+      "key": "chimney",
+      "label": "Chimney",
+      "default": true,
+      "group": "construction",
+      "hint": "Include chimney.",
+      "affects": [
+        "topology"
+      ],
+      "targets": [
+        "chimney"
+      ],
+      "unit": "none",
+      "inputUnit": "none",
+      "displayUnit": "none",
+      "value": true
+    },
+    {
+      "kind": "choice",
+      "key": "beamWeight",
+      "label": "Beam section",
+      "default": "stout",
+      "options": [
+        {
+          "value": "light",
+          "label": "Light"
+        },
+        {
+          "value": "stout",
+          "label": "Stout"
+        }
+      ],
+      "group": "construction",
+      "hint": "Select beam section.",
+      "affects": [
+        "geometry",
+        "topology"
+      ],
+      "targets": [
+        "beamWeight"
+      ],
+      "unit": "none",
+      "inputUnit": "none",
+      "displayUnit": "none",
+      "value": "stout"
+    },
+    {
+      "kind": "range",
+      "key": "eaveOverhang",
+      "label": "Eave overhang",
+      "default": 0.4,
+      "min": 0.25,
+      "max": 0.55,
+      "step": 0.01,
+      "group": "construction",
+      "hint": "Eave overhang adjusts connected construction.",
+      "affects": [
+        "geometry"
+      ],
+      "targets": [
+        "eaveOverhang"
+      ],
+      "unit": "m",
+      "inputUnit": "m",
+      "displayUnit": "m",
+      "value": 0.4
+    },
+    {
+      "kind": "choice",
+      "key": "workBay",
+      "label": "Work bay",
+      "default": "right",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "group": "construction",
+      "hint": "Select work bay.",
+      "affects": [
+        "geometry",
+        "topology"
+      ],
+      "targets": [
+        "workBay"
+      ],
+      "unit": "none",
+      "inputUnit": "none",
+      "displayUnit": "none",
+      "value": "right"
+    },
+    {
+      "kind": "toggle",
+      "key": "shutters",
+      "label": "Window shutters",
+      "default": true,
+      "group": "construction",
+      "hint": "Include window shutters.",
+      "affects": [
+        "topology"
+      ],
+      "targets": [
+        "shutters"
+      ],
+      "unit": "none",
+      "inputUnit": "none",
+      "displayUnit": "none",
+      "value": true
+    },
+    {
+      "kind": "range",
+      "key": "roofCharacter",
+      "label": "Roof profile",
+      "default": 0.45,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "group": "construction",
+      "hint": "Roof profile adjusts connected construction.",
+      "affects": [
+        "geometry"
+      ],
+      "targets": [
+        "roofCharacter"
+      ],
+      "ratioBasis": "normalized",
+      "unit": "ratio",
+      "inputUnit": "dimensionless",
+      "displayUnit": "ratio",
+      "value": 0.6
+    },
+    {
+      "kind": "choice",
+      "key": "detail",
+      "label": "Detail",
+      "default": "inspection",
+      "options": [
+        {
+          "value": "scene",
+          "label": "Scene"
+        },
+        {
+          "value": "inspection",
+          "label": "Inspection"
+        }
+      ],
+      "group": "construction",
+      "hint": "Select detail.",
+      "affects": [
+        "geometry",
+        "topology"
+      ],
+      "targets": [
+        "detail"
+      ],
+      "unit": "none",
+      "inputUnit": "none",
+      "displayUnit": "none",
+      "value": "inspection"
+    },
+    {
+      "key": "roofCover",
+      "label": "Roof covering",
+      "kind": "choice",
+      "default": "thatch",
+      "options": [
+        {
+          "value": "thatch",
+          "label": "Thatch"
+        },
+        {
+          "value": "shingle",
+          "label": "Shingle"
+        }
+      ],
+      "group": "construction",
+      "hint": "Roof covering reshapes connected construction.",
+      "affects": [
+        "geometry",
+        "topology"
+      ],
+      "targets": [
+        "cottage"
+      ],
+      "unit": "none",
+      "inputUnit": "none",
+      "displayUnit": "none",
+      "value": "thatch"
+    },
+    {
+      "key": "roofThickness",
+      "label": "Roof thickness",
+      "kind": "range",
+      "default": 0.24,
+      "min": 0.14,
+      "max": 0.38,
+      "step": 0.01,
+      "group": "construction",
+      "hint": "Roof thickness reshapes connected construction.",
+      "affects": [
+        "geometry",
+        "topology"
+      ],
+      "targets": [
+        "cottage"
+      ],
+      "unit": "m",
+      "inputUnit": "m",
+      "displayUnit": "m",
+      "value": 0.28
+    },
+    {
+      "key": "framingStyle",
+      "label": "Facade framing",
+      "kind": "choice",
+      "default": "diagonal",
+      "options": [
+        {
+          "value": "diagonal",
+          "label": "Diagonal"
+        },
+        {
+          "value": "upright",
+          "label": "Upright"
+        }
+      ],
+      "group": "construction",
+      "hint": "Facade framing reshapes connected construction.",
+      "affects": [
+        "geometry",
+        "topology"
+      ],
+      "targets": [
+        "cottage"
+      ],
+      "unit": "none",
+      "inputUnit": "none",
+      "displayUnit": "none",
+      "value": "diagonal"
+    },
+    {
+      "key": "windowLayout",
+      "label": "Window grouping",
+      "kind": "choice",
+      "default": "paired",
+      "options": [
+        {
+          "value": "paired",
+          "label": "Paired"
+        },
+        {
+          "value": "workshop",
+          "label": "Workshop"
+        },
+        {
+          "value": "sparse",
+          "label": "Sparse"
+        }
+      ],
+      "group": "construction",
+      "hint": "Window grouping reshapes connected construction.",
+      "affects": [
+        "geometry",
+        "topology"
+      ],
+      "targets": [
+        "cottage"
+      ],
+      "unit": "none",
+      "inputUnit": "none",
+      "displayUnit": "none",
+      "value": "paired"
+    },
+    {
+      "key": "bayDepth",
+      "label": "Work bay depth",
+      "kind": "range",
+      "default": 1.65,
+      "min": 1.1,
+      "max": 2.3,
+      "step": 0.05,
+      "group": "construction",
+      "hint": "Work bay depth reshapes connected construction.",
+      "affects": [
+        "geometry",
+        "topology"
+      ],
+      "targets": [
+        "cottage"
+      ],
+      "unit": "m",
+      "inputUnit": "m",
+      "displayUnit": "m",
+      "value": 1.65
+    },
+    {
+      "kind": "range",
+      "key": "weathering",
+      "label": "Timber weathering",
+      "default": 0.3,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "group": "construction",
+      "hint": "Timber weathering adjusts connected construction.",
+      "affects": [
+        "geometry",
+        "material"
+      ],
+      "targets": [
+        "cottage"
+      ],
+      "ratioBasis": "normalized",
+      "unit": "ratio",
+      "inputUnit": "dimensionless",
+      "displayUnit": "ratio",
+      "value": 0.55
+    },
+    {
+      "kind": "range",
+      "key": "timberTone",
+      "label": "Timber tone",
+      "default": 0.35,
+      "min": 0,
+      "max": 1,
+      "step": 0.05,
+      "group": "construction",
+      "hint": "Timber tone adjusts connected construction.",
+      "affects": [
+        "material"
+      ],
+      "targets": [
+        "cottage"
+      ],
+      "ratioBasis": "normalized",
+      "unit": "ratio",
+      "inputUnit": "dimensionless",
+      "displayUnit": "ratio",
+      "value": 0.3
+    },
+    {
+      "kind": "range",
+      "key": "toneVariation",
+      "label": "Timber tone variation",
+      "default": 0.06,
+      "min": 0,
+      "max": 0.12,
+      "step": 0.05,
+      "group": "construction",
+      "hint": "Timber tone variation adjusts connected construction.",
+      "affects": [
+        "material"
+      ],
+      "targets": [
+        "cottage"
+      ],
+      "ratioBasis": "normalized",
+      "unit": "ratio",
+      "inputUnit": "dimensionless",
+      "displayUnit": "ratio",
+      "value": 0.06
+    },
+    {
+      "kind": "range",
+      "key": "beamSection",
+      "label": "Beam section multiplier",
+      "default": 1,
+      "min": 0.7,
+      "max": 1.4,
+      "step": 0.05,
+      "group": "construction",
+      "hint": "Beam section multiplier adjusts connected construction.",
+      "affects": [
+        "geometry"
+      ],
+      "targets": [
+        "cottage"
+      ],
+      "ratioBasis": "normalized",
+      "unit": "ratio",
+      "inputUnit": "dimensionless",
+      "displayUnit": "ratio",
+      "value": 1.15
+    },
+    {
+      "kind": "range",
+      "key": "ridgeSag",
+      "label": "Ridge sag multiplier",
+      "default": 1,
+      "min": 0.25,
+      "max": 1.15,
+      "step": 0.05,
+      "group": "construction",
+      "hint": "Ridge sag multiplier adjusts connected construction.",
+      "affects": [
+        "geometry"
+      ],
+      "targets": [
+        "cottage"
+      ],
+      "ratioBasis": "normalized",
+      "unit": "ratio",
+      "inputUnit": "dimensionless",
+      "displayUnit": "ratio",
+      "value": 1.1
+    },
+    {
+      "kind": "choice",
+      "key": "colorway",
+      "label": "Colorway",
+      "default": "forest",
+      "options": [
+        {
+          "value": "forest",
+          "label": "Forest"
+        },
+        {
+          "value": "harbor",
+          "label": "Harbor"
+        },
+        {
+          "value": "ember",
+          "label": "Ember"
+        }
+      ],
+      "group": "colors",
+      "hint": "Select colorway.",
+      "affects": [
+        "material"
+      ],
+      "targets": [
+        "colorway"
+      ],
+      "unit": "none",
+      "inputUnit": "none",
+      "displayUnit": "none",
+      "value": "forest"
+    },
+    {
+      "kind": "color",
+      "key": "color.plaster",
+      "label": "plaster",
+      "role": "plaster",
+      "default": "#e2d6b8",
+      "group": "colors",
+      "hint": "Changes only plaster color.",
+      "affects": [
+        "material"
+      ],
+      "targets": [
+        "plaster"
+      ],
+      "unit": "color",
+      "inputUnit": "color",
+      "displayUnit": "color",
+      "value": "#e2d6b8"
+    },
+    {
+      "kind": "color",
+      "key": "color.roof",
+      "label": "roof",
+      "role": "roof",
+      "default": "#b7a16b",
+      "group": "colors",
+      "hint": "Changes only roof color.",
+      "affects": [
+        "material"
+      ],
+      "targets": [
+        "roof"
+      ],
+      "unit": "color",
+      "inputUnit": "color",
+      "displayUnit": "color",
+      "value": "#b7a16b"
+    },
+    {
+      "kind": "color",
+      "key": "color.timber",
+      "label": "timber",
+      "role": "timber",
+      "default": "#49382c",
+      "group": "colors",
+      "hint": "Changes only timber color.",
+      "affects": [
+        "material"
+      ],
+      "targets": [
+        "timber"
+      ],
+      "unit": "color",
+      "inputUnit": "color",
+      "displayUnit": "color",
+      "value": "#49382c"
+    },
+    {
+      "kind": "color",
+      "key": "color.wood",
+      "label": "wood",
+      "role": "wood",
+      "default": "#966c48",
+      "group": "colors",
+      "hint": "Changes only wood color.",
+      "affects": [
+        "material"
+      ],
+      "targets": [
+        "wood"
+      ],
+      "unit": "color",
+      "inputUnit": "color",
+      "displayUnit": "color",
+      "value": "#966c48"
+    },
+    {
+      "kind": "color",
+      "key": "color.recess",
+      "label": "recess",
+      "role": "recess",
+      "default": "#34433e",
+      "group": "colors",
+      "hint": "Changes only recess color.",
+      "affects": [
+        "material"
+      ],
+      "targets": [
+        "recess"
+      ],
+      "unit": "color",
+      "inputUnit": "color",
+      "displayUnit": "color",
+      "value": "#34433e"
+    },
+    {
+      "kind": "color",
+      "key": "color.stone",
+      "label": "stone",
+      "role": "stone",
+      "default": "#7d8279",
+      "group": "colors",
+      "hint": "Changes only stone color.",
+      "affects": [
+        "material"
+      ],
+      "targets": [
+        "stone"
+      ],
+      "unit": "color",
+      "inputUnit": "color",
+      "displayUnit": "color",
+      "value": "#7d8279"
+    },
+    {
+      "kind": "color",
+      "key": "color.hardware",
+      "label": "hardware",
+      "role": "hardware",
+      "default": "#b99247",
+      "group": "colors",
+      "hint": "Changes only hardware color.",
+      "affects": [
+        "material"
+      ],
+      "targets": [
+        "hardware"
+      ],
+      "unit": "color",
+      "inputUnit": "color",
+      "displayUnit": "color",
+      "value": "#b99247"
+    }
+  ],
+  "applied": {
+    "width": 5,
+    "depth": 4,
+    "wallHeight": 2.8,
+    "roofRise": 1.4,
+    "chimney": true,
+    "beamWeight": "stout",
+    "eaveOverhang": 0.4,
+    "workBay": "right",
+    "shutters": true,
+    "roofCharacter": 0.6,
+    "detail": "inspection",
+    "roofCover": "thatch",
+    "roofThickness": 0.28,
+    "framingStyle": "diagonal",
+    "windowLayout": "paired",
+    "bayDepth": 1.65,
+    "weathering": 0.55,
+    "timberTone": 0.3,
+    "toneVariation": 0.06,
+    "beamSection": 1.15,
+    "ridgeSag": 1.1,
+    "colorway": "forest",
+    "color.plaster": "#e2d6b8",
+    "color.roof": "#b7a16b",
+    "color.timber": "#49382c",
+    "color.wood": "#966c48",
+    "color.recess": "#34433e",
+    "color.stone": "#7d8279",
+    "color.hardware": "#b99247"
+  },
+  "appearance": null,
+  "presets": [
+    {
+      "id": "workshop",
+      "name": "Weathered thatch workshop",
+      "description": "Weathered thatch workshop proportions",
+      "parameters": {
+        "roofCover": "thatch",
+        "roofThickness": 0.28,
+        "ridgeSag": 1.1,
+        "roofCharacter": 0.6,
+        "beamSection": 1.15,
+        "weathering": 0.55,
+        "timberTone": 0.3
+      }
+    },
+    {
+      "id": "compact",
+      "name": "Clean shingle cottage",
+      "description": "Clean shingle cottage proportions",
+      "parameters": {
+        "width": 3.6,
+        "depth": 3.2,
+        "wallHeight": 2.5,
+        "roofRise": 1.15,
+        "roofCover": "shingle",
+        "roofThickness": 0.16,
+        "windowLayout": "workshop",
+        "framingStyle": "upright",
+        "workBay": "none",
+        "roofCharacter": 0.1,
+        "ridgeSag": 0.4,
+        "beamSection": 0.85,
+        "weathering": 0.1,
+        "timberTone": 0.5
+      }
+    },
+    {
+      "id": "longhouse",
+      "name": "Deep sheltered longhouse",
+      "description": "Deep sheltered longhouse proportions",
+      "parameters": {
+        "width": 7.2,
+        "depth": 4.6,
+        "wallHeight": 2.8,
+        "roofRise": 1.65,
+        "roofCover": "thatch",
+        "roofThickness": 0.34,
+        "windowLayout": "sparse",
+        "framingStyle": "diagonal",
+        "workBay": "none",
+        "roofCharacter": 0.7,
+        "ridgeSag": 1.1,
+        "beamSection": 1.25,
+        "weathering": 0.7,
+        "timberTone": 0.25
+      }
+    }
+  ],
+  "palettes": [
+    {
+      "id": "forest",
+      "label": "Forest",
+      "colors": [
+        "#e2d6b8",
+        "#b7a16b",
+        "#49382c"
+      ]
+    },
+    {
+      "id": "harbor",
+      "label": "Harbor",
+      "colors": [
+        "#e4dfcb",
+        "#b0a078",
+        "#49382c"
+      ]
+    },
+    {
+      "id": "ember",
+      "label": "Ember",
+      "colors": [
+        "#dfc69a",
+        "#b79558",
+        "#49382c"
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "stone",
+      "baseColor": [
+        0.20507873637973145,
+        0.22322795730611386,
+        0.1912016827303171,
+        1
+      ],
+      "hex": "#7d8279",
+      "metallic": 0,
+      "roughness": 0.9
+    },
+    {
+      "name": "timber",
+      "baseColor": [
+        0.06910589791675059,
+        0.04345148960500534,
+        0.029847895761733523,
+        1
+      ],
+      "hex": "#4a3b30",
+      "metallic": 0,
+      "roughness": 0.9
+    },
+    {
+      "name": "plaster",
+      "baseColor": [
+        0.76052450467022,
+        0.6724431569510133,
+        0.4793201830913402,
+        1
+      ],
+      "hex": "#e2d6b8",
+      "metallic": 0,
+      "roughness": 0.9
+    },
+    {
+      "name": "wood",
+      "baseColor": [
+        0.3130472153524485,
+        0.16617930645411338,
+        0.0855048550054105,
+        1
+      ],
+      "hex": "#987153",
+      "metallic": 0,
+      "roughness": 0.9
+    },
+    {
+      "name": "recess",
+      "baseColor": [
+        0.0343398068028541,
+        0.05612849004241121,
+        0.04817182422013895,
+        1
+      ],
+      "hex": "#34433e",
+      "metallic": 0,
+      "roughness": 0.9
+    },
+    {
+      "name": "hardware",
+      "baseColor": [
+        0.48514994004665124,
+        0.2874408377161099,
+        0.06301001764564068,
+        1
+      ],
+      "hex": "#b99247",
+      "metallic": 0,
+      "roughness": 0.66
+    },
+    {
+      "name": "roof",
+      "baseColor": [
+        0.4735314961384573,
+        0.35640014413537763,
+        0.14702726648767014,
+        1
+      ],
+      "hex": "#b7a16b",
+      "metallic": 0,
+      "roughness": 0.9
+    }
+  ],
+  "bounds": {
+    "min": [
+      -3.017296314239502,
+      0,
+      -2.4800000190734863
+    ],
+    "max": [
+      3.7699999809265137,
+      4.950000003576278,
+      2.5299999940395357
+    ],
+    "dimensions": [
+      6.787296295166016,
+      4.950000003576278,
+      5.010000013113022
+    ]
+  },
+  "formats": [
+    "glb",
+    "obj",
+    "fbx",
+    "usdz"
+  ],
+  "note": "Change parameters in the Polyspoon editor or with the agent toolkit, then export again; downloaded meshes are static snapshots."
+}

@@ -1,0 +1,41 @@
+{
+  "query": "bunker",
+  "dataset": "Sandflow/sand3d-objaverse",
+  "scanned_shards": 2,
+  "total_shards": 13,
+  "matches": [
+    {
+      "id": "objaverse-455a7f8be265420f97ad0a3443ee9183",
+      "entry": "ruin",
+      "family": "building",
+      "license": "CC-BY-4.0",
+      "attribution": "\"WW2 Bunker\" by stal98, https://sketchfab.com/3d-models/455a7f8be265420f97ad0a3443ee9183, CC-BY-4.0; modified: rewritten as a sand3d program",
+      "usda_path": "usda/0000/objaverse-455a7f8be265420f97ad0a3443ee9183.usda",
+      "choice": 1,
+      "dataset": "Sandflow/sand3d-objaverse",
+      "parquet_url": "https://huggingface.co/datasets/Sandflow/sand3d-objaverse/resolve/refs%2Fconvert%2Fparquet/default/train/0000.parquet"
+    },
+    {
+      "id": "objaverse-00a13d0b9b524448ba042d8e72e9f4fb",
+      "entry": "bunker",
+      "family": "home appliance",
+      "license": "CC-BY-4.0",
+      "attribution": "\"New Model\" by kenny3ss608, https://sketchfab.com/3d-models/00a13d0b9b524448ba042d8e72e9f4fb, CC-BY-4.0; modified: rewritten as a sand3d program",
+      "usda_path": "usda/0001/objaverse-00a13d0b9b524448ba042d8e72e9f4fb.usda",
+      "choice": 2,
+      "dataset": "Sandflow/sand3d-objaverse",
+      "parquet_url": "https://huggingface.co/datasets/Sandflow/sand3d-objaverse/resolve/refs%2Fconvert%2Fparquet/default/train/0001.parquet"
+    },
+    {
+      "id": "objaverse-078dfe6b2e4f47dca2eedf0b7752726a",
+      "entry": "housing",
+      "family": "building",
+      "license": "CC-BY-4.0",
+      "attribution": "\"German WWII Bunker Regelbau M178\" by ustoopia, https://sketchfab.com/3d-models/078dfe6b2e4f47dca2eedf0b7752726a, CC-BY-4.0; modified: rewritten as a sand3d program",
+      "usda_path": "usda/0001/objaverse-078dfe6b2e4f47dca2eedf0b7752726a.usda",
+      "choice": 3,
+      "dataset": "Sandflow/sand3d-objaverse",
+      "parquet_url": "https://huggingface.co/datasets/Sandflow/sand3d-objaverse/resolve/refs%2Fconvert%2Fparquet/default/train/0001.parquet"
+    }
+  ]
+}

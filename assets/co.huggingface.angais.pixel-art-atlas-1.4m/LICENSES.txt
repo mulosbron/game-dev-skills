@@ -1,0 +1,39 @@
+================================================================================
+PIXEL ART ATLAS 1.4M (ANGAIS) COMMERCIAL CLEARANCE & ATTRIBUTION LEDGER
+================================================================================
+
+Dataset Identifier: co.huggingface.angais.pixel-art-atlas-1.4m
+Repository: https://huggingface.co/datasets/Angais/pixel-art-atlas-1.4m
+Author / Curator: Angais (https://huggingface.co/Angais)
+Support / Buy Me a Coffee: https://buymeacoffee.com/angaisb_
+Release License: CC0 1.0 Universal (Public Domain Dedication)
+Full Legal Code: https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+--------------------------------------------------------------------------------
+ASSET OVERVIEW:
+--------------------------------------------------------------------------------
+- Total Sprites: 1,409,404 individual 16x16 RGBA pixel art sprites
+- Training Sprites: 1,405,308
+- Validation Sprites: 4,096
+- Unique Subject Categories: 6,194
+- Format: Native 16x16 with indexed palette and transparent background (index 0)
+- Generation: Synthetic text-to-sprite generated with Krea 2 Turbo + Pixel Art LoRA
+
+--------------------------------------------------------------------------------
+RIGHTS & PROVENANCE:
+--------------------------------------------------------------------------------
+Angais releases the sprites, captions, and collection under CC0 1.0 to the extent
+of the rights Angais can waive. This dedication does not grant rights in
+third-party material, trademarks, or Krea's models.
+
+All sprites are AI-generated outputs. No model weights or LoRA parameters are
+distributed here. Krea claims no ownership of generated outputs under section 5.3
+of the Krea 2 Community License (https://www.krea.ai/krea-2-licensing).
+This release does not override that agreement, its commercial-use provisions (§2.3),
+or the Krea Acceptable Use Policy (https://www.krea.ai/krea-2-use-policy).
+This is an independent dataset, not an official or endorsed Krea release.
+
+Commercial Use Clearance:
+- GameMaker, Godot, Unity, Unreal, Web, Mobile: 100% Cleared for commercial games
+- Spritesheets, strips, procedural mutations, dynamic normal maps: Cleared
+================================================================================

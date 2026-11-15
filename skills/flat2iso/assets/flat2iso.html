@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flat2Iso Studio</title>
+<style>
+  :root{
+    --bg:#15171c; --panel:#1d2027; --panel2:#242830; --line:#2f343e;
+    --text:#e6e8ee; --muted:#9aa3b2; --accent:#7cc4ff; --accent2:#ffcf6b; --danger:#ff7b7b;
+    --ok:#7bdc9a; --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+  header h1{font-size:17px;margin:0;letter-spacing:.3px}
+  header h1 span{color:var(--accent)}
+  header .sub{color:var(--muted);font-size:12px}
+  nav{display:flex;gap:4px;padding:8px 18px 0;background:var(--panel);border-bottom:1px solid var(--line)}
+  nav button{background:transparent;border:1px solid transparent;border-bottom:none;color:var(--muted);padding:8px 14px;border-radius:8px 8px 0 0;cursor:pointer;font-size:13px}
+  nav button.active{background:var(--bg);color:var(--text);border-color:var(--line)}
+  main{padding:16px 18px 40px;max-width:1500px;margin:0 auto}
+  .tab{display:none}.tab.active{display:block}
+  .layout{display:grid;grid-template-columns:330px 1fr;gap:16px}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:14px}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:0 0 10px}
+  label{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px}
+  input[type=number],select,input[type=text],input[type=color]{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 9px;border-radius:7px;font-size:13px}
+  input[type=color]{height:34px;padding:2px}
+  input[type=range]{width:100%}
+  .row{display:flex;gap:8px}.row>*{flex:1}
+  .check{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:13px;color:var(--text)}
+  .check input{width:auto}
+  button.btn{background:var(--accent);color:#06131f;border:none;padding:9px 12px;border-radius:7px;cursor:pointer;font-weight:600;font-size:13px}
+  button.btn.sec{background:var(--panel2);color:var(--text);border:1px solid var(--line);font-weight:500}
+  button.btn:disabled{opacity:.4;cursor:not-allowed}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .drop{border:2px dashed var(--line);border-radius:var(--radius);padding:16px;text-align:center;color:var(--muted);cursor:pointer;transition:.15s}
+  .drop.over{border-color:var(--accent);color:var(--accent);background:#1a2430}
+  .drop strong{color:var(--text)}
+  .drop input{display:none}
+  .previews{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:700px){.previews{grid-template-columns:1fr}}
+  .view{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:10px;min-height:260px}
+  .view h3{font-size:12px;color:var(--muted);margin:0 0 8px;display:flex;justify-content:space-between}
+  .view h3 span{color:var(--text);font-weight:400}
+  .stage{overflow:auto;background:
+      linear-gradient(45deg,#2a2e36 25%,transparent 25%,transparent 75%,#2a2e36 75%),
+      linear-gradient(45deg,#2a2e36 25%,transparent 25%,transparent 75%,#2a2e36 75%);
+      background-size:16px 16px;background-position:0 0,8px 8px;background-color:#20242b;
+      border-radius:6px;padding:12px;max-height:70vh}
+  canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+  .small{font-size:12px;color:var(--muted)}
+  .warn{color:var(--accent2);font-size:12px;margin-top:6px}
+  .err{color:var(--danger);font-size:12px;margin-top:6px}
+  .faces{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .face{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px;cursor:pointer;text-align:center;min-height:86px}
+  .face.over{border-color:var(--accent)}
+  .face .t{font-size:11px;color:var(--muted);margin-bottom:4px}
+  .face canvas{margin:0 auto;max-width:100%;max-height:54px;width:auto;height:auto}
+  .face .dim{font-size:11px;color:var(--ok)}
+  .face.opt .t::after{content:" (isteğe bağlı)";color:#6b7382}
+  .face input{display:none}
+  .notes h3{color:var(--accent);font-size:14px;margin:18px 0 6px}
+  .notes p,.notes li{color:var(--text);max-width:900px}
+  .notes code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:12px}
+  kbd{background:var(--panel2);border:1px solid var(--line);padding:0 5px;border-radius:4px;font-size:11px}
+  .pill{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:1px 8px;font-size:11px;color:var(--muted);margin-left:6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Flat<span>2</span>Iso Studio</h1>
+  <div class="sub">Düz (ortografik) pixel art → 2:1 isometric (dimetric) dönüştürücü · sütun kaydırma, kutu oluşturucu, 4 yön</div>
+</header>
+<nav>
+  <button class="active" data-tab="shift">1 · Sütun Kaydırma (Lotovik / Flat2Iso)</button>
+  <button data-tab="box">2 · Kutu Oluşturucu (Ön + Yan + Üst)</button>
+  <button data-tab="notes">Teknik Notlar</button>
+</nav>
+<main>
+
+<!-- ============ TAB 1: COLUMN SHIFT ============ -->
+<section class="tab active" id="tab-shift">
+<div class="layout">
+  <div>
+    <div class="card">
+      <h2>Kaynak</h2>
+      <div class="drop" id="dropShift">
+        <input type="file" accept="image/*" id="fileShift">
+        <strong>Görsel sürükle</strong> veya tıkla<br><span class="small">PNG önerilir · <kbd>Ctrl</kbd>+<kbd>V</kbd> ile yapıştırabilirsin</span>
+      </div>
+      <div class="row">
+        <div><label>Piksel ölçeği (büyütülmüş kaynak için)</label><input type="number" id="shiftScale" min="1" max="64" value="1"></div>
+        <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button class="btn sec" id="shiftAuto" title="Kaynağın kaç kat büyütülmüş olduğunu tespit et">Otomatik</button></div>
+      </div>
+      <div class="btns"><button class="btn sec" id="shiftDemo">Demo sprite yükle</button></div>
+      <div class="small" id="shiftInfo" style="margin-top:8px">Görsel yok.</div>
+    </div>
+
+    <div class="card">
+      <h2>Dönüşüm</h2>
+      <label>Steps (aynı yükseklikte kalan sütun sayısı) <span class="pill">2 = klasik 2:1</span></label>
+      <select id="steps">
+        <option value="1">1 — 1:1 (45°)</option>
+        <option value="2" selected>2 — 2:1 (26.57°, standart)</option>
+        <option value="3">3 — 3:1</option>
+        <option value="4">4 — 4:1</option>
+      </select>
+      <label>Yön (Direction)</label>
+      <select id="direction">
+        <option value="right">Right — sağ taraf yükselir</option>
+        <option value="left">Left — sol taraf yükselir</option>
+        <option value="split">Split — merkezden iki yöne</option>
+      </select>
+      <div id="splitBox" style="display:none">
+        <label>Split merkezi (sütun indeksi, 0 tabanlı)</label>
+        <input type="number" id="splitCenter" min="0" value="0">
+        <input type="range" id="splitRange" min="0" value="0">
+        <div class="small">Merkezin solu sola doğru, sağı sağa doğru yükselir (köşe en alçakta). Tersle: köşe en yüksekte.</div>
+      </div>
+      <div class="check"><input type="checkbox" id="invert"> <span>Tersle (yükselmek yerine alçal)</span></div>
+      <div class="check"><input type="checkbox" id="shiftOutline"> <span>Siluet çevresine 1 px dış çizgi ekle</span></div>
+      <div class="row" id="shiftOutlineRow" style="display:none"><div><label>Dış çizgi rengi</label><input type="color" id="shiftOutlineColor" value="#1a1326"></div></div>
+      <div class="small" id="shiftParity" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <h2>Dışa Aktar</h2>
+      <div class="row">
+        <div><label>Önizleme zoom</label><input type="range" id="shiftZoom" min="1" max="16" value="6"></div>
+        <div><label>Export ölçeği</label><input type="number" id="shiftExport" min="1" max="32" value="1"></div>
+      </div>
+      <div class="btns">
+        <button class="btn" id="shiftDownload" disabled>PNG indir</button>
+        <button class="btn sec" id="shiftCopy" disabled>Panoya kopyala</button>
+        <button class="btn sec" id="shiftToBox" disabled>Sonucu Kutu'ya gönder →</button>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="previews">
+      <div class="view"><h3>Orijinal (flat) <span id="shiftDimA"></span></h3><div class="stage"><canvas id="cvShiftA"></canvas></div></div>
+      <div class="view"><h3>Isometric <span id="shiftDimB"></span></h3><div class="stage"><canvas id="cvShiftB"></canvas></div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ============ TAB 2: BOX BUILDER ============ -->
+<section class="tab" id="tab-box">
+<div class="layout">
+  <div>
+    <div class="card">
+      <h2>Yüzler (ortografik görünümler)</h2>
+      <div class="faces">
+        <div class="face" data-face="front"><input type="file" accept="image/*"><div class="t">Ön (Front)</div><canvas></canvas><div class="dim">—</div></div>
+        <div class="face" data-face="side"><input type="file" accept="image/*"><div class="t">Sağ Yan (Side)</div><canvas></canvas><div class="dim">—</div></div>
+        <div class="face" data-face="top"><input type="file" accept="image/*"><div class="t">Üst (Top)</div><canvas></canvas><div class="dim">—</div></div>
+        <div class="face opt" data-face="back"><input type="file" accept="image/*"><div class="t">Arka</div><canvas></canvas><div class="dim">—</div></div>
+        <div class="face opt" data-face="left"><input type="file" accept="image/*"><div class="t">Sol Yan</div><canvas></canvas><div class="dim">—</div></div>
+        <div class="face" style="cursor:default;display:flex;flex-direction:column;justify-content:center;gap:6px">
+          <button class="btn sec" id="boxDemo">Demo kutu yükle</button>
+          <button class="btn sec" id="boxClear">Temizle</button>
+        </div>
+      </div>
+      <div class="small" style="margin-top:8px">Kural: Ön genişliği = Üst genişliği (W), Yan genişliği = Üst yüksekliği (D), Ön yüksekliği = Yan yüksekliği (H). Üst görünümde <b>alt kenar = ön</b>, <b>sağ kenar = sağ yan</b>. Arka/Sol yoksa Ön/Sağ aynalanır.</div>
+      <div class="row" style="margin-top:8px">
+        <div><label>Piksel ölçeği</label><input type="number" id="boxScale" min="1" max="64" value="1"></div>
+        <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button class="btn sec" id="boxAuto">Otomatik</button></div>
+      </div>
+      <div class="err" id="boxErr"></div>
+    </div>
+
+    <div class="card">
+      <h2>Işık ve Çizgi</h2>
+      <label>Işık ön ayarı</label>
+      <select id="lightPreset">
+        <option value="std">Klasik: üst en açık, sol orta, sağ en koyu</option>
+        <option value="rev">Ters: üst en açık, sağ orta, sol en koyu</option>
+        <option value="none">Işık yok (renkler aynen)</option>
+        <option value="custom">Özel</option>
+      </select>
+      <div class="row">
+        <div><label>Üst ×</label><input type="number" id="lTop" step="0.05" min="0" max="2" value="1"></div>
+        <div><label>Sol ×</label><input type="number" id="lLeft" step="0.05" min="0" max="2" value="0.82"></div>
+        <div><label>Sağ ×</label><input type="number" id="lRight" step="0.05" min="0" max="2" value="0.62"></div>
+      </div>
+      <div class="check"><input type="checkbox" id="keepOutline" checked> <span>Dış çizgi renklerini ışıktan koru (en koyu renk)</span></div>
+      <div class="check"><input type="checkbox" id="boxOutline"> <span>Siluet çevresine 1 px dış çizgi ekle</span></div>
+      <div class="check"><input type="checkbox" id="boxSeams"> <span>Yüz birleşim kenarlarını koyulaştır (depth-aware)</span></div>
+      <div class="row">
+        <div><label>Dış çizgi rengi</label><input type="color" id="boxOutlineColor" value="#1a1326"></div>
+        <div><label>Kenar koyuluk ×</label><input type="number" id="seamDark" step="0.05" min="0" max="1" value="0.7"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Yön ve Dışa Aktar</h2>
+      <label>Görünüm yönü (nesneyi döndür)</label>
+      <select id="rotation">
+        <option value="0">0° — Ön sol yüzde, Sağ Yan sağ yüzde</option>
+        <option value="1">90° — Sol Yan sol yüzde, Ön sağ yüzde</option>
+        <option value="2">180° — Arka sol yüzde, Sol Yan sağ yüzde</option>
+        <option value="3">270° — Sağ Yan sol yüzde, Arka sağ yüzde</option>
+      </select>
+      <div class="row">
+        <div><label>Önizleme zoom</label><input type="range" id="boxZoom" min="1" max="16" value="6"></div>
+        <div><label>Export ölçeği</label><input type="number" id="boxExport" min="1" max="32" value="1"></div>
+      </div>
+      <div class="btns">
+        <button class="btn" id="boxDownload" disabled>PNG indir</button>
+        <button class="btn sec" id="boxCopy" disabled>Panoya kopyala</button>
+        <button class="btn sec" id="boxSheet" disabled>4 yönlü sprite sheet indir</button>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="previews">
+      <div class="view"><h3>Flat görünümler <span id="boxDimA"></span></h3><div class="stage"><canvas id="cvBoxA"></canvas></div></div>
+      <div class="view"><h3>Isometric <span id="boxDimB"></span></h3><div class="stage"><canvas id="cvBoxB"></canvas></div></div>
+    </div>
+    <div class="view" style="margin-top:14px"><h3>4 yön (0° · 90° · 180° · 270°)</h3><div class="stage"><canvas id="cvBox4"></canvas></div></div>
+  </div>
+</div>
+</section>
+
+<!-- ============ TAB 3: NOTES ============ -->
+<section class="tab notes" id="tab-notes">
+  <div class="card">
+    <h3>1. Sütun kaydırma (Lotovik "2-pixel selection" hilesi)</h3>
+    <p>Düz çizim <code>steps</code> piksel genişliğinde dikey sütunlara bölünür; her sonraki sütun bir öncekine göre 1 piksel yukarı kayar. <code>steps = 2</code> ile tam olarak 2:1 (≈26.57°) eğim çıkar. Dikey hatlar hiç bozulmaz, yatay hatlar temiz 2:1 merdivene döner. Araç hiçbir piksel karıştırmaz: her kaynak pikseli tam olarak bir hedef piksele taşınır, anti-aliasing yoktur.</p>
+    <h3>2. Incursio Flat2Iso mantığı</h3>
+    <ul>
+      <li><b>Steps</b>: aynı yükseklikte kalan sütun sayısı (1 = 45°, 2 = 2:1, 3 = 3:1…).</li>
+      <li><b>Direction</b>: Right (sağ yükselir), Left (sol yükselir), Split (merkezden iki yöne). Split'te merkez sütunu sen seçersin.</li>
+      <li><b>Parite kuralı</b>: çift genişlikli nesnede çift steps, tek genişlikte tek steps tercih edilir; araç uyarır.</li>
+    </ul>
+    <h3>3. Kutu oluşturucu (PixZels yaklaşımının hafif hali)</h3>
+    <p>Ön + Sağ Yan + Üst görünümleri alınır. Ön yüz sol yüze (köşeden uzaklaştıkça 2 sütunda 1 px yükselir), Yan yüz sağ yüze aynı kuralla yerleştirilir. Üst yüz, her hedef piksel için ters eşleme ile (dest → kaynak) 2:1 elmas üzerine projekte edilir; böylece delik ya da üst üste binme oluşmaz ve elmasın kenarı yan yüzlerin üst merdiveniyle piksel piksel çakışır. Işık klasik üç yüz sistemine göre uygulanır; dış çizgi rengi (yüzdeki en koyu renk) istenirse ışıktan korunur.</p>
+    <p>4 yön: Arka ve Sol Yan verilmezse Ön ve Sağ aynalanarak üretilir; Üst görünüm 90° adımlarla döndürülür.</p>
+    <h3>Kurallar</h3>
+    <ul>
+      <li>Yatay-eğimli tüm hatlar 2:1 (steps = 2 ile garanti edilir).</li>
+      <li>Dikey hatlar tamamen düz kalır.</li>
+      <li>Hiçbir yerde anti-aliasing / blur yok; tüm örnekleme en yakın komşu.</li>
+      <li>Büyütülmüş (ör. 8×) kaynaklar için "Piksel ölçeği → Otomatik" ile gerçek piksel boyutuna indirilir, sonra "Export ölçeği" ile tekrar büyütülür.</li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+
+/* ---------------- Pix helpers ---------------- */
+// Pix = {w, h, d: Uint8ClampedArray (RGBA)}
+const newPix = (w, h) => ({ w, h, d: new Uint8ClampedArray(w * h * 4) });
+const get = (p, x, y) => { const i = (y * p.w + x) * 4; return [p.d[i], p.d[i+1], p.d[i+2], p.d[i+3]]; };
+const set = (p, x, y, c) => { if (x<0||y<0||x>=p.w||y>=p.h) return; const i = (y * p.w + x) * 4; p.d[i]=c[0]; p.d[i+1]=c[1]; p.d[i+2]=c[2]; p.d[i+3]=c[3]; };
+const alpha = (p, x, y) => (x<0||y<0||x>=p.w||y>=p.h) ? 0 : p.d[(y*p.w+x)*4+3];
+
+function pixFromImage(img, scale) {
+  const c = document.createElement('canvas'); c.width = img.naturalWidth || img.width; c.height = img.naturalHeight || img.height;
+  const g = c.getContext('2d'); g.imageSmoothingEnabled = false; g.drawImage(img, 0, 0);
+  const full = g.getImageData(0, 0, c.width, c.height);
+  const src = { w: c.width, h: c.height, d: full.data };
+  if (scale <= 1) return src;
+  const w = Math.floor(src.w / scale), h = Math.floor(src.h / scale);
+  const out = newPix(w, h); const off = Math.floor(scale / 2);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) set(out, x, y, get(src, x*scale+off, y*scale+off));
+  return out;
+}
+function detectScale(p) {
+  const gcd = (a, b) => b ? gcd(b, a % b) : a;
+  let g = 0;
+  const key = (x, y) => { const i=(y*p.w+x)*4; return p.d[i]+','+p.d[i+1]+','+p.d[i+2]+','+p.d[i+3]; };
+  for (let y = 0; y < p.h; y++) { let run = 1; for (let x = 1; x <= p.w; x++) { if (x < p.w && key(x,y) === key(x-1,y)) run++; else { g = gcd(g, run); run = 1; } } }
+  for (let x = 0; x < p.w; x++) { let run = 1; for (let y = 1; y <= p.h; y++) { if (y < p.h && key(x,y) === key(x,y-1)) run++; else { g = gcd(g, run); run = 1; } } }
+  return Math.max(1, Math.min(64, g || 1));
+}
+function trim(p) {
+  let x0=p.w, y0=p.h, x1=-1, y1=-1;
+  for (let y=0;y<p.h;y++) for (let x=0;x<p.w;x++) if (alpha(p,x,y)) { if(x<x0)x0=x; if(y<y0)y0=y; if(x>x1)x1=x; if(y>y1)y1=y; }
+  if (x1 < 0) return newPix(1,1);
+  const out = newPix(x1-x0+1, y1-y0+1);
+  for (let y=y0;y<=y1;y++) for (let x=x0;x<=x1;x++) set(out, x-x0, y-y0, get(p,x,y));
+  return out;
+}
+function addOutline(p, color) {
+  const out = newPix(p.w+2, p.h+2);
+  for (let y=0;y<p.h;y++) for (let x=0;x<p.w;x++) set(out, x+1, y+1, get(p,x,y));
+  const src = { w: out.w, h: out.h, d: out.d.slice() };
+  for (let y=0;y<out.h;y++) for (let x=0;x<out.w;x++) {
+    if (alpha(src,x,y)) continue;
+    if (alpha(src,x-1,y)||alpha(src,x+1,y)||alpha(src,x,y-1)||alpha(src,x,y+1)) set(out,x,y,color);
+  }
+  return out;
+}
+function mirrorX(p) { const o = newPix(p.w,p.h); for (let y=0;y<p.h;y++) for (let x=0;x<p.w;x++) set(o, p.w-1-x, y, get(p,x,y)); return o; }
+function rot90(p, times) { // clockwise
+  let cur = p; times = ((times % 4) + 4) % 4;
+  for (let t=0;t<times;t++) { const o = newPix(cur.h, cur.w); for (let y=0;y<cur.h;y++) for (let x=0;x<cur.w;x++) set(o, cur.h-1-y, x, get(cur,x,y)); cur = o; }
+  return cur;
+}
+function hexToRgba(h) { return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16), 255]; }
+function darkestColor(p) { let best=null, bl=1e9; for (let i=0;i<p.d.length;i+=4){ if(p.d[i+3]<128) continue; const l=p.d[i]*0.299+p.d[i+1]*0.587+p.d[i+2]*0.114; if(l<bl){bl=l;best=[p.d[i],p.d[i+1],p.d[i+2],p.d[i+3]];} } return best; }
+function shade(c, f) { return [Math.min(255,Math.round(c[0]*f)), Math.min(255,Math.round(c[1]*f)), Math.min(255,Math.round(c[2]*f)), c[3]]; }
+const sameColor = (a,b) => a && b && a[0]===b[0]&&a[1]===b[1]&&a[2]===b[2];
+
+/* ---------------- Rendering ---------------- */
+function drawPix(canvas, p, zoom) {
+  canvas.width = p.w; canvas.height = p.h;
+  const g = canvas.getContext('2d'); g.putImageData(new ImageData(new Uint8ClampedArray(p.d), p.w, p.h), 0, 0);
+  canvas.style.width = (p.w*zoom)+'px'; canvas.style.height = (p.h*zoom)+'px';
+}
+function pixToBlob(p, scale) {
+  const c = document.createElement('canvas'); c.width = p.w*scale; c.height = p.h*scale;
+  const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+  const tmp = document.createElement('canvas'); tmp.width=p.w; tmp.height=p.h; tmp.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(p.d), p.w, p.h),0,0);
+  g.drawImage(tmp, 0, 0, c.width, c.height);
+  return new Promise(res => c.toBlob(res, 'image/png'));
+}
+async function download(p, scale, name) { const b = await pixToBlob(p, scale); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000); }
+async function copyPix(p, scale) { try { const b = await pixToBlob(p, scale); await navigator.clipboard.write([new ClipboardItem({'image/png': b})]); return true; } catch(e) { console.warn(e); return false; } }
+function loadFileToImage(file) { return new Promise((res, rej) => { const img = new Image(); img.onload = () => res(img); img.onerror = rej; img.src = URL.createObjectURL(file); }); }
+
+/* ---------------- Column shift ---------------- */
+function columnShift(p, { steps, direction, center, invert }) {
+  steps = Math.max(1, steps|0);
+  const sh = x => {
+    if (direction === 'right') return Math.floor(x / steps);
+    if (direction === 'left')  return Math.floor((p.w - 1 - x) / steps);
+    return x >= center ? Math.floor((x - center) / steps) : Math.floor((center - 1 - x) / steps);
+  };
+  let max = 0; for (let x=0;x<p.w;x++) max = Math.max(max, sh(x));
+  const out = newPix(p.w, p.h + max);
+  for (let x=0;x<p.w;x++) { const s = sh(x); const dy = invert ? s : (max - s); for (let y=0;y<p.h;y++) set(out, x, y+dy, get(p,x,y)); }
+  return trim(out);
+}
+
+/* ---------------- Box builder ---------------- */
+// Standard 2:1. Faces: left (W x H), right (D x H), top (W x D).
+// Screen coords: corner seam between column -1 (left face) and 0 (right face); row -1 = bottom of corner.
+function buildBox(left, right, top, opt) {
+  const W = left.w, D = right.w, H = left.h;
+  const extra = Math.ceil((W + D) / 2) + 3;
+  const ox = W, oy = H + extra;
+  const out = newPix(W + D, H + extra);
+  const outlineL = opt.keepOutline ? darkestColor(left) : null;
+  const outlineR = opt.keepOutline ? darkestColor(right) : null;
+  const outlineT = opt.keepOutline ? darkestColor(top) : null;
+  const lit = (c, f, keep) => (keep && sameColor(c, keep)) ? c : shade(c, f);
+  // left face
+  for (let u=0;u<W;u++) { const shift = Math.floor((W-1-u)/2); for (let v=0;v<H;v++) { const c = get(left,u,v); if (!c[3]) continue; set(out, ox + (u - W), oy + (v - H) - shift, lit(c, opt.lLeft, outlineL)); } }
+  // right face
+  for (let u=0;u<D;u++) { const shift = Math.floor(u/2); for (let v=0;v<H;v++) { const c = get(right,u,v); if (!c[3]) continue; set(out, ox + u, oy + (v - H) - shift, lit(c, opt.lRight, outlineR)); } }
+  // top face: columns are grouped in pairs p = floor(sx/2) (same grouping as the face staircases),
+  // region bounded by four 2:1 staircases, each dest pixel inverse-mapped to one top-image pixel.
+  const pL = Math.floor(-W / 2), pR = Math.floor((D - 1) / 2);
+  for (let sx = -W; sx < D; sx++) {
+    const p = Math.floor(sx / 2), j = sx - 2*p;
+    const tMin = p >= 0 ? p : -1 - p;
+    const tMax = Math.min(p - 2*pL - 1, 2*pR - p);
+    for (let t = tMin; t <= tMax; t++) {
+      let X, Z;
+      if (sx < 0) { X = t - p - j; Z = t + p + 1; } else { X = t - p; Z = t + p + j; }
+      X = Math.max(0, Math.min(W - 1, X)); Z = Math.max(0, Math.min(D - 1, Z));
+      const c = get(top, W-1-X, D-1-Z); if (!c[3]) continue;
+      set(out, ox + sx, oy + (-H - 1 - t), lit(c, opt.lTop, outlineT));
+    }
+  }
+  // seams: darken the two corner columns and the top-face front edges
+  if (opt.seams) {
+    const f = opt.seamDark;
+    const dk = (x,y) => { const c = get(out,x,y); if (c[3]) set(out,x,y,shade(c,f)); };
+    for (let v=0; v<H; v++) { dk(ox-1, oy+(v-H)); }                     // vertical corner edge
+    for (let u=0;u<W;u++) { dk(ox+(u-W), oy - H - 1 - Math.floor((W-1-u)/2)); } // top/left edge
+    for (let u=0;u<D;u++) { dk(ox+u, oy - H - 1 - Math.floor(u/2)); }           // top/right edge
+  }
+  let res = trim(out);
+  if (opt.outline) res = addOutline(res, opt.outlineColor);
+  return res;
+}
+function facesForRotation(F, rot) { // returns {left, right, top}
+  const front = F.front, side = F.side, top = F.top;
+  const back = F.back || mirrorX(front), leftS = F.left || mirrorX(side);
+  switch (rot) {
+    case 1: return { left: leftS, right: front, top: rot90(top, 3) };
+    case 2: return { left: back, right: leftS, top: rot90(top, 2) };
+    case 3: return { left: side, right: back, top: rot90(top, 1) };
+    default: return { left: front, right: side, top };
+  }
+}
+
+/* ---------------- Demo sprites ---------------- */
+function demoFront() { // 16 x 14 wooden crate-ish door
+  const P = { o:[42,30,54,255], w1:[182,120,70,255], w2:[156,98,56,255], w3:[122,74,42,255], m:[220,206,170,255], k:[240,200,80,255] };
+  const p = newPix(16, 14);
+  for (let y=0;y<14;y++) for (let x=0;x<16;x++) {
+    let c = (y % 4 === 0) ? P.w3 : ((x + Math.floor(y/4)*3) % 7 === 0 ? P.w2 : P.w1);
+    if (x===0||y===0||x===15||y===13) c = P.o;
+    set(p,x,y,c);
+  }
+  for (let x=4;x<12;x++){ set(p,x,4,P.o); set(p,x,10,P.o);} for (let y=4;y<=10;y++){ set(p,4,y,P.o); set(p,11,y,P.o);}
+  for (let y=5;y<10;y++) for (let x=5;x<11;x++) set(p,x,y,P.m);
+  set(p,9,7,P.k); set(p,9,8,P.o);
+  return p;
+}
+function demoSide() {
+  const P = { o:[42,30,54,255], w1:[182,120,70,255], w2:[156,98,56,255], w3:[122,74,42,255] };
+  const p = newPix(10, 14);
+  for (let y=0;y<14;y++) for (let x=0;x<10;x++) { let c = (y%4===0)?P.w3:((x+y)%5===0?P.w2:P.w1); if (x===0||y===0||x===9||y===13) c=P.o; set(p,x,y,c); }
+  return p;
+}
+function demoTop() {
+  const P = { o:[42,30,54,255], w1:[182,120,70,255], w2:[156,98,56,255], w3:[122,74,42,255] };
+  const p = newPix(16, 10);
+  for (let y=0;y<10;y++) for (let x=0;x<16;x++) { let c = (x%4===0)?P.w3:((x+y)%6===0?P.w2:P.w1); if (x===0||y===0||x===15||y===9) c=P.o; set(p,x,y,c); }
+  return p;
+}
+
+/* ---------------- Tabs ---------------- */
+document.querySelectorAll('nav button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + b.dataset.tab));
+}));
+
+/* ---------------- Tab 1 wiring ---------------- */
+let shiftSrcImg = null, shiftSrc = null, shiftOut = null;
+function shiftLoadImage(img) { shiftSrcImg = img; $('shiftScale').value = 1; shiftRefreshSource(); }
+function shiftSetPix(p) { shiftSrcImg = null; shiftSrc = p; $('shiftScale').value = 1; shiftAfterSource(); }
+function shiftRefreshSource() { if (!shiftSrcImg) return; shiftSrc = pixFromImage(shiftSrcImg, parseInt($('shiftScale').value)||1); shiftAfterSource(); }
+function shiftAfterSource() {
+  $('shiftInfo').textContent = `Kaynak: ${shiftSrc.w} × ${shiftSrc.h} px`;
+  $('splitCenter').max = shiftSrc.w - 1; $('splitRange').max = shiftSrc.w - 1;
+  if (parseInt($('splitCenter').value) > shiftSrc.w-1 || parseInt($('splitCenter').value) === 0) { $('splitCenter').value = Math.floor(shiftSrc.w/2); $('splitRange').value = $('splitCenter').value; }
+  shiftRender();
+}
+function shiftRender() {
+  if (!shiftSrc) return;
+  const steps = parseInt($('steps').value), direction = $('direction').value, center = parseInt($('splitCenter').value)||0, invert = $('invert').checked;
+  let out = columnShift(shiftSrc, { steps, direction, center, invert });
+  if ($('shiftOutline').checked) out = addOutline(out, hexToRgba($('shiftOutlineColor').value));
+  shiftOut = out;
+  const z = parseInt($('shiftZoom').value);
+  drawPix($('cvShiftA'), shiftSrc, z); drawPix($('cvShiftB'), out, z);
+  $('shiftDimA').textContent = `${shiftSrc.w}×${shiftSrc.h}`; $('shiftDimB').textContent = `${out.w}×${out.h}`;
+  const evenW = shiftSrc.w % 2 === 0, evenS = steps % 2 === 0;
+  $('shiftParity').textContent = (evenW === evenS) ? `✓ Parite uyumlu: genişlik ${shiftSrc.w} (${evenW?'çift':'tek'}), steps ${steps} (${evenS?'çift':'tek'}).` : `⚠ Parite: genişlik ${shiftSrc.w} (${evenW?'çift':'tek'}) ama steps ${steps} (${evenS?'çift':'tek'}). Çift genişlikte çift steps, tek genişlikte tek steps daha temiz kenar verir.`;
+  ['shiftDownload','shiftCopy','shiftToBox'].forEach(id => $(id).disabled = false);
+}
+['steps','direction','splitCenter','invert','shiftOutline','shiftOutlineColor','shiftZoom'].forEach(id => $(id).addEventListener('input', () => {
+  $('splitBox').style.display = $('direction').value === 'split' ? '' : 'none';
+  $('shiftOutlineRow').style.display = $('shiftOutline').checked ? '' : 'none';
+  if (id === 'splitCenter') $('splitRange').value = $('splitCenter').value;
+  shiftRender();
+}));
+$('splitRange').addEventListener('input', () => { $('splitCenter').value = $('splitRange').value; shiftRender(); });
+$('shiftScale').addEventListener('input', shiftRefreshSource);
+$('shiftAuto').addEventListener('click', () => { if (!shiftSrcImg) return; const full = pixFromImage(shiftSrcImg, 1); $('shiftScale').value = detectScale(full); shiftRefreshSource(); });
+$('shiftDemo').addEventListener('click', () => shiftSetPix(demoFront()));
+$('shiftDownload').addEventListener('click', () => download(shiftOut, parseInt($('shiftExport').value)||1, `iso_${$('direction').value}_s${$('steps').value}.png`));
+$('shiftCopy').addEventListener('click', async () => { const ok = await copyPix(shiftOut, parseInt($('shiftExport').value)||1); $('shiftCopy').textContent = ok ? 'Kopyalandı ✓' : 'Kopyalanamadı'; setTimeout(()=>$('shiftCopy').textContent='Panoya kopyala', 1500); });
+$('shiftToBox').addEventListener('click', () => { if (!shiftSrc) return; boxSetFace('front', shiftSrc); document.querySelector('nav button[data-tab="box"]').click(); });
+
+function wireDrop(el, input, onFile) {
+  el.addEventListener('click', () => input.click());
+  input.addEventListener('change', () => { if (input.files[0]) onFile(input.files[0]); input.value = ''; });
+  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('over'); });
+  el.addEventListener('dragleave', () => el.classList.remove('over'));
+  el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('over'); const f = [...e.dataTransfer.files].find(f => f.type.startsWith('image/')); if (f) onFile(f); });
+}
+wireDrop($('dropShift'), $('fileShift'), async f => shiftLoadImage(await loadFileToImage(f)));
+document.addEventListener('paste', async e => {
+  const item = [...(e.clipboardData?.items||[])].find(i => i.type.startsWith('image/')); if (!item) return;
+  const img = await loadFileToImage(item.getAsFile());
+  if ($('tab-box').classList.contains('active')) { const target = boxPasteTarget || 'front'; boxFaceImgs[target] = img; boxFaces[target] = pixFromImage(img, parseInt($('boxScale').value)||1); boxRefreshThumbs(); boxRender(); }
+  else shiftLoadImage(img);
+});
+
+/* ---------------- Tab 2 wiring ---------------- */
+const boxFaces = { front:null, side:null, top:null, back:null, left:null };
+const boxFaceImgs = { front:null, side:null, top:null, back:null, left:null };
+let boxPasteTarget = null, boxOut = null, boxViews = null;
+function boxSetFace(name, pix) { boxFaces[name] = pix; boxFaceImgs[name] = null; boxRefreshThumbs(); boxRender(); }
+document.querySelectorAll('.face[data-face]').forEach(el => {
+  const name = el.dataset.face, input = el.querySelector('input');
+  el.addEventListener('mouseenter', () => boxPasteTarget = name);
+  wireDrop(el, input, async f => { const img = await loadFileToImage(f); boxFaceImgs[name] = img; boxFaces[name] = pixFromImage(img, parseInt($('boxScale').value)||1); boxRefreshThumbs(); boxRender(); });
+});
+function boxRefreshThumbs() {
+  document.querySelectorAll('.face[data-face]').forEach(el => {
+    const p = boxFaces[el.dataset.face]; const c = el.querySelector('canvas'), d = el.querySelector('.dim');
+    if (!p) { c.width = c.height = 0; d.textContent = '—'; return; }
+    c.width = p.w; c.height = p.h; c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(p.d), p.w, p.h), 0, 0);
+    const z = Math.max(1, Math.floor(54 / p.h)); c.style.width = (p.w*z)+'px'; c.style.height = (p.h*z)+'px';
+    d.textContent = `${p.w}×${p.h}`;
+  });
+}
+function boxRescale() { const s = parseInt($('boxScale').value)||1; for (const k in boxFaceImgs) if (boxFaceImgs[k]) boxFaces[k] = pixFromImage(boxFaceImgs[k], s); boxRefreshThumbs(); boxRender(); }
+$('boxScale').addEventListener('input', boxRescale);
+$('boxAuto').addEventListener('click', () => { const img = boxFaceImgs.front || boxFaceImgs.side || boxFaceImgs.top; if (!img) return; $('boxScale').value = detectScale(pixFromImage(img, 1)); boxRescale(); });
+$('boxDemo').addEventListener('click', () => { boxFaces.front = demoFront(); boxFaces.side = demoSide(); boxFaces.top = demoTop(); boxFaces.back = null; boxFaces.left = null; for (const k in boxFaceImgs) boxFaceImgs[k] = null; boxRefreshThumbs(); boxRender(); });
+$('boxClear').addEventListener('click', () => { for (const k in boxFaces) { boxFaces[k] = null; boxFaceImgs[k] = null; } boxRefreshThumbs(); boxRender(); });
+$('lightPreset').addEventListener('change', () => {
+  const v = $('lightPreset').value;
+  if (v === 'std') { $('lTop').value = 1; $('lLeft').value = 0.82; $('lRight').value = 0.62; }
+  if (v === 'rev') { $('lTop').value = 1; $('lLeft').value = 0.62; $('lRight').value = 0.82; }
+  if (v === 'none') { $('lTop').value = 1; $('lLeft').value = 1; $('lRight').value = 1; }
+  boxRender();
+});
+['lTop','lLeft','lRight'].forEach(id => $(id).addEventListener('input', () => { $('lightPreset').value = 'custom'; boxRender(); }));
+['keepOutline','boxOutline','boxSeams','boxOutlineColor','seamDark','rotation','boxZoom'].forEach(id => $(id).addEventListener('input', boxRender));
+
+function boxValidate() {
+  const F = boxFaces; const errs = [];
+  if (!F.front || !F.side || !F.top) return 'Ön, Sağ Yan ve Üst görünümleri gerekli.';
+  if (F.front.w !== F.top.w) errs.push(`Ön genişliği (${F.front.w}) ≠ Üst genişliği (${F.top.w})`);
+  if (F.side.w !== F.top.h) errs.push(`Yan genişliği (${F.side.w}) ≠ Üst yüksekliği (${F.top.h})`);
+  if (F.front.h !== F.side.h) errs.push(`Ön yüksekliği (${F.front.h}) ≠ Yan yüksekliği (${F.side.h})`);
+  if (F.back && (F.back.w !== F.front.w || F.back.h !== F.front.h)) errs.push('Arka boyutu Ön ile aynı olmalı');
+  if (F.left && (F.left.w !== F.side.w || F.left.h !== F.side.h)) errs.push('Sol Yan boyutu Sağ Yan ile aynı olmalı');
+  return errs.join(' · ');
+}
+function boxOpts() {
+  return { lTop: parseFloat($('lTop').value), lLeft: parseFloat($('lLeft').value), lRight: parseFloat($('lRight').value),
+    keepOutline: $('keepOutline').checked, outline: $('boxOutline').checked, outlineColor: hexToRgba($('boxOutlineColor').value),
+    seams: $('boxSeams').checked, seamDark: parseFloat($('seamDark').value) };
+}
+function boxRender() {
+  const err = boxValidate(); $('boxErr').textContent = err;
+  const z = parseInt($('boxZoom').value);
+  if (err) { ['boxDownload','boxCopy','boxSheet'].forEach(id => $(id).disabled = true); drawFlatViews(z); return; }
+  const opt = boxOpts();
+  boxViews = [0,1,2,3].map(r => { const f = facesForRotation(boxFaces, r); return buildBox(f.left, f.right, f.top, opt); });
+  boxOut = boxViews[parseInt($('rotation').value)];
+  drawFlatViews(z);
+  drawPix($('cvBoxB'), boxOut, z); $('cvBoxB').title = '';
+  $('boxDimB').textContent = `${boxOut.w}×${boxOut.h}`;
+  // 4-view sheet
+  const gap = 2, sheetH = Math.max(...boxViews.map(v => v.h)), sheetW = boxViews.reduce((a,v)=>a+v.w, 0) + gap*3;
+  const sheet = newPix(sheetW, sheetH); let x = 0;
+  for (const v of boxViews) { for (let yy=0;yy<v.h;yy++) for (let xx=0;xx<v.w;xx++) set(sheet, x+xx, sheetH - v.h + yy, get(v,xx,yy)); x += v.w + gap; }
+  boxSheetPix = sheet; drawPix($('cvBox4'), sheet, Math.max(1, Math.min(z, 6)));
+  ['boxDownload','boxCopy','boxSheet'].forEach(id => $(id).disabled = false);
+}
+let boxSheetPix = null;
+function drawFlatViews(z) {
+  const F = boxFaces; const list = [F.front, F.side, F.top].filter(Boolean);
+  if (!list.length) { $('cvBoxA').width = $('cvBoxA').height = 0; $('boxDimA').textContent=''; return; }
+  const gap = 2, w = list.reduce((a,p)=>a+p.w,0) + gap*(list.length-1), h = Math.max(...list.map(p=>p.h));
+  const c = newPix(w, h); let x = 0; for (const p of list) { for (let yy=0;yy<p.h;yy++) for (let xx=0;xx<p.w;xx++) set(c, x+xx, yy, get(p,xx,yy)); x += p.w + gap; }
+  drawPix($('cvBoxA'), c, z); $('boxDimA').textContent = `Ön · Yan · Üst`;
+}
+$('boxDownload').addEventListener('click', () => download(boxOut, parseInt($('boxExport').value)||1, `iso_box_rot${$('rotation').value}.png`));
+$('boxCopy').addEventListener('click', async () => { const ok = await copyPix(boxOut, parseInt($('boxExport').value)||1); $('boxCopy').textContent = ok ? 'Kopyalandı ✓' : 'Kopyalanamadı'; setTimeout(()=>$('boxCopy').textContent='Panoya kopyala', 1500); });
+$('boxSheet').addEventListener('click', () => download(boxSheetPix, parseInt($('boxExport').value)||1, 'iso_box_4dir_sheet.png'));
+
+// expose for testing
+window.F2I = { columnShift, buildBox, newPix, set, get, demoFront, demoSide, demoTop, detectScale, trim };
+})();
+</script>
+</body>
+</html>

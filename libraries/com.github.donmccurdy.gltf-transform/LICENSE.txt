@@ -1,0 +1,29 @@
+================================================================================
+GLB FORGE / GLTF-TRANSFORM RUNTIME — OPEN SOURCE LICENSE LEDGER
+Canonical Reverse-DNS: com.github.donmccurdy.gltf-transform
+Commercial Use: 100% ALLOWED (Zero NC, Zero SA — Strict MIT & Apache-2.0 Stack)
+================================================================================
+
+1. @gltf-transform/core, @gltf-transform/extensions, @gltf-transform/functions
+   Author: Don McCurdy (https://github.com/donmccurdy/glTF-Transform)
+   License: MIT License
+
+2. meshoptimizer
+   Author: Arseny Kapoulkine / zeux (https://github.com/zeux/meshoptimizer)
+   License: MIT License
+
+3. draco3dgltf
+   Author: Google Inc. (https://github.com/google/draco)
+   License: Apache License 2.0
+
+4. gltf-validator
+   Author: The Khronos Group Inc. (https://github.com/KhronosGroup/glTF-Validator)
+   License: Apache License 2.0
+
+5. sharp
+   Author: Lovell Fuller (https://github.com/lovell/sharp)
+   License: Apache License 2.0
+
+6. ktx-parse
+   Author: Don McCurdy (https://github.com/donmccurdy/KTX-Parse)
+   License: MIT License

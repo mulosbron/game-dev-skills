@@ -1,0 +1,34 @@
+{
+  "id": "dungeon_ruins_01",
+  "authored_by": "human_pieces + declarative_rules",
+  "seed": 7,
+  "sequence": [
+    "start_hall",
+    "secret_alcove",
+    "ladder_shaft",
+    "spike_corridor",
+    "exit_shrine"
+  ],
+  "constraints_applied": {
+    "must_include": [
+      "spike_corridor",
+      "secret_alcove",
+      "ladder_shaft"
+    ],
+    "never_adjacent": [
+      [
+        "spike_corridor",
+        "secret_alcove"
+      ]
+    ]
+  },
+  "tiles": [
+    "##################################################",
+    "#........##...?..H.##..H.....##..H.....##........#",
+    "#..S.....######..H.##..H..#..##..H..K..##.....D..#",
+    "#................H.....H..#......H............#..#",
+    "#..H......................#.........^^^.......E..#",
+    "#..H.....##........##.....H..##..^^^.####........#",
+    "##################################################"
+  ]
+}

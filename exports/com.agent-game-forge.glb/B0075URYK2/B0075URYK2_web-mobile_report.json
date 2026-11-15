@@ -1,0 +1,184 @@
+{
+  "ok": true,
+  "inputPath": "D:\\GameMaker\\assets\\com.amazon.berkeley.abo\\models\\B0075URYK2.glb",
+  "outputPath": "D:\\GameMaker\\exports\\com.agent-game-forge.glb\\B0075URYK2\\B0075URYK2_web-mobile.glb",
+  "preset": "web-mobile",
+  "savedBytes": 856288,
+  "savedKB": 836.22,
+  "savedPercent": 75.6,
+  "triangleReductionPercent": 25.01,
+  "before": {
+    "fileBytes": 1132628,
+    "fileKB": 1106.08,
+    "fileMB": 1.08,
+    "meshCount": 1,
+    "nodeCount": 3,
+    "drawCalls": 1,
+    "materialCount": 1,
+    "textureCount": 3,
+    "animationCount": 0,
+    "skinCount": 0,
+    "totalVertices": 17106,
+    "totalTriangles": 26850,
+    "totalTextureBytes": 973782,
+    "totalTextureKB": 950.96,
+    "estimatedVRAM_MB": 63.84,
+    "bounds": {
+      "min": [
+        -0.7038,
+        -1,
+        -0.373
+      ],
+      "max": [
+        0.7038,
+        1,
+        0.373
+      ],
+      "dimensionsMeters": [
+        1.4076,
+        2,
+        0.7459
+      ],
+      "groundedAtZeroY": false
+    },
+    "extensionsUsed": [
+      "EXT_meshopt_compression",
+      "EXT_texture_webp",
+      "KHR_mesh_quantization"
+    ],
+    "meshes": [
+      {
+        "name": "B0075URYK2",
+        "primitives": 1,
+        "vertices": 17106,
+        "triangles": 26850
+      }
+    ],
+    "textures": [
+      {
+        "name": "tex_0",
+        "mimeType": "image/webp",
+        "width": 2048,
+        "height": 2048,
+        "byteLength": 752728,
+        "byteKB": 735.09,
+        "estimatedVRAM_MB": 21.28
+      },
+      {
+        "name": "tex_1",
+        "mimeType": "image/webp",
+        "width": 2048,
+        "height": 2048,
+        "byteLength": 108238,
+        "byteKB": 105.7,
+        "estimatedVRAM_MB": 21.28
+      },
+      {
+        "name": "tex_2",
+        "mimeType": "image/webp",
+        "width": 2048,
+        "height": 2048,
+        "byteLength": 112816,
+        "byteKB": 110.17,
+        "estimatedVRAM_MB": 21.28
+      }
+    ]
+  },
+  "after": {
+    "fileBytes": 276340,
+    "fileKB": 269.86,
+    "fileMB": 0.264,
+    "meshCount": 1,
+    "nodeCount": 3,
+    "drawCalls": 1,
+    "materialCount": 1,
+    "textureCount": 3,
+    "animationCount": 0,
+    "skinCount": 0,
+    "totalVertices": 13530,
+    "totalTriangles": 20136,
+    "totalTextureBytes": 144988,
+    "totalTextureKB": 141.59,
+    "estimatedVRAM_MB": 15.96,
+    "bounds": {
+      "min": [
+        -0.7038,
+        -1,
+        -0.373
+      ],
+      "max": [
+        0.7038,
+        1,
+        0.373
+      ],
+      "dimensionsMeters": [
+        1.4076,
+        2,
+        0.7459
+      ],
+      "groundedAtZeroY": false
+    },
+    "extensionsUsed": [
+      "EXT_meshopt_compression",
+      "EXT_texture_webp",
+      "KHR_mesh_quantization"
+    ],
+    "meshes": [
+      {
+        "name": "B0075URYK2",
+        "primitives": 1,
+        "vertices": 13530,
+        "triangles": 20136
+      }
+    ],
+    "textures": [
+      {
+        "name": "tex_0",
+        "mimeType": "image/webp",
+        "width": 1024,
+        "height": 1024,
+        "byteLength": 107720,
+        "byteKB": 105.2,
+        "estimatedVRAM_MB": 5.32
+      },
+      {
+        "name": "tex_1",
+        "mimeType": "image/webp",
+        "width": 1024,
+        "height": 1024,
+        "byteLength": 32116,
+        "byteKB": 31.36,
+        "estimatedVRAM_MB": 5.32
+      },
+      {
+        "name": "tex_2",
+        "mimeType": "image/webp",
+        "width": 1024,
+        "height": 1024,
+        "byteLength": 5152,
+        "byteKB": 5.03,
+        "estimatedVRAM_MB": 5.32
+      }
+    ]
+  },
+  "validationAfter": {
+    "valid": true,
+    "numErrors": 0,
+    "numWarnings": 1,
+    "numInfos": 1,
+    "messages": [
+      {
+        "code": "UNSUPPORTED_EXTENSION",
+        "severity": "info",
+        "message": "Cannot validate an extension as it is not supported by the validator: 'EXT_meshopt_compression'.",
+        "pointer": "/extensionsUsed/0"
+      },
+      {
+        "code": "MESH_PRIMITIVE_GENERATED_TANGENT_SPACE",
+        "severity": "warning",
+        "message": "Material requires a tangent space but the mesh primitive does not provide it. Runtime-generated tangent space may be non-portable across implementations.",
+        "pointer": "/meshes/0/primitives/0/material"
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+    "name":  "game-dev-skills",
+    "version":  "1.0.0",
+    "description":  "Unified Game Dev & Asset Forge hub (68 top-level skills + 157 studio/engine sub-skills, 24 Reverse-DNS libraries, 5 asset collections, 40 Python CLI tools) covering Godot 4, C++ engines (The Forge, Jolt, Ozz, Recast, Effekseer), multiplayer (Colyseus), 3D/Blender/PBR (MCP, Kiln, Polyspoon, TripoSR, MeshSplatting, Material Maker), 2D pixel art & VFX.",
+    "skills":  "./skills/"
+}

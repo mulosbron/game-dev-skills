@@ -1,0 +1,54 @@
+# User excluded archives folder
+x/
+
+# Exclude large binary 3D assets & downloaded model packs
+assets/**/models/
+assets/**/thumbs/
+assets/**/collision/
+assets/**/cad/
+assets/**/simready/
+assets/**/articraft/
+assets/**/*.png
+assets/**/*.jpg
+assets/**/*.webp
+
+# Large dataset binary formats
+*.npy
+*.parquet
+assets/**/data/
+assets/**/captions.json
+assets/**/objects.json
+
+# Binary 3D mesh files & archives
+*.glb
+!exports/**/*.glb
+*.gltf
+*.blend
+!exports/**/*.blend
+*.blend1
+*.bin
+*.fbx
+*.obj
+*.zip
+*.rar
+*.7z
+*.tar*
+
+# Build artifacts, environments & caches
+node_modules/
+**/node_modules/
+bin/
+obj/
+reports/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.venv/
+env/
+.vs/
+.vscode/
+.idea/
+*.tmp
+.DS_Store
+Thumbs.db

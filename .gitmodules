@@ -1,0 +1,57 @@
+[submodule "libraries/com.github.0x0funky.agent-sprite-forge"]
+	path = libraries/com.github.0x0funky.agent-sprite-forge
+	url = https://github.com/0x0funky/agent-sprite-forge.git
+[submodule "libraries/com.github.aldegad.sprite-gen"]
+	path = libraries/com.github.aldegad.sprite-gen
+	url = https://github.com/aldegad/sprite-gen.git
+[submodule "libraries/com.github.bluecarrot16.lpctools"]
+	path = libraries/com.github.bluecarrot16.lpctools
+	url = https://github.com/bluecarrot16/lpctools.git
+[submodule "libraries/com.github.coding-solo.godot-mcp"]
+	path = libraries/com.github.coding-solo.godot-mcp
+	url = https://github.com/Coding-Solo/godot-mcp.git
+[submodule "libraries/com.github.deepnight.ldtk"]
+	path = libraries/com.github.deepnight.ldtk
+	url = https://github.com/deepnight/ldtk.git
+[submodule "libraries/com.github.elithril.blender-kiln"]
+	path = libraries/com.github.elithril.blender-kiln
+	url = https://github.com/elithril/blender-kiln.git
+[submodule "libraries/com.github.elizawy.lpc"]
+	path = libraries/com.github.elizawy.lpc
+	url = https://github.com/ElizaWy/LPC.git
+[submodule "libraries/com.github.hugo-dz.spritefusion-pixel-snapper"]
+	path = libraries/com.github.hugo-dz.spritefusion-pixel-snapper
+	url = https://github.com/Hugo-Dz/spritefusion-pixel-snapper.git
+[submodule "libraries/com.github.huu-yuu.pixelsrpg-forge"]
+	path = libraries/com.github.huu-yuu.pixelsrpg-forge
+	url = https://github.com/Huu-Yuu/PixelSRPG-Forge.git
+[submodule "libraries/com.github.idlerunner00.procedural-pixel-creatures"]
+	path = libraries/com.github.idlerunner00.procedural-pixel-creatures
+	url = https://github.com/idlerunner00/procedural-pixel-creatures.git
+[submodule "libraries/com.github.liberatedpixelcup.rpg_maker_mz_lpc_starter_kit"]
+	path = libraries/com.github.liberatedpixelcup.rpg_maker_mz_lpc_starter_kit
+	url = https://github.com/LiberatedPixelCup/RPG_Maker_MZ_LPC_Starter_Kit.git
+[submodule "libraries/com.github.liberatedpixelcup.universal-lpc-spritesheet-character-generator"]
+	path = libraries/com.github.liberatedpixelcup.universal-lpc-spritesheet-character-generator
+	url = https://github.com/LiberatedPixelCup/Universal-LPC-Spritesheet-Character-Generator.git
+[submodule "libraries/com.github.nadermx.backgroundremover"]
+	path = libraries/com.github.nadermx.backgroundremover
+	url = https://github.com/nadermx/backgroundremover.git
+[submodule "libraries/com.github.orama-interactive.pixelorama"]
+	path = libraries/com.github.orama-interactive.pixelorama
+	url = https://github.com/Orama-Interactive/Pixelorama.git
+[submodule "libraries/com.github.patch-gg.pixelfx"]
+	path = libraries/com.github.patch-gg.pixelfx
+	url = https://github.com/patch-gg/pixelfx.git
+[submodule "libraries/com.github.sandflow-ai.sand3d"]
+	path = libraries/com.github.sandflow-ai.sand3d
+	url = https://github.com/Sandflow-ai/sand3d.git
+[submodule "libraries/com.github.tembo.voxl"]
+	path = libraries/com.github.tembo.voxl
+	url = https://github.com/tembo/voxl.git
+[submodule "libraries/com.github.tezumie.image-to-pixel"]
+	path = libraries/com.github.tezumie.image-to-pixel
+	url = https://github.com/Tezumie/Image-to-Pixel.git
+[submodule "libraries/org.opengameart.liberatedpixelcup"]
+	path = libraries/org.opengameart.liberatedpixelcup
+	url = https://github.com/OpenGameArt/LiberatedPixelCup.git

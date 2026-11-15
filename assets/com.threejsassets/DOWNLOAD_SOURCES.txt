@@ -1,0 +1,23 @@
+================================================================================
+THREEJS ASSETS - 1,041 FREE 3D MODELS DOWNLOAD SOURCES
+================================================================================
+
+ThreeJS Assets hosts 1,041 web-ready low-poly 3D models with embedded PBR textures,
+cleared for commercial games, apps, and websites under Free Commercial Asset License v1.
+
+Due to binary size, .glb models and thumbnails are kept locally and excluded
+from Git.
+
+Download Source:
+- Official Portal: https://threejsassets.com/
+
+Download Commands:
+1. Search offline catalog:
+   python tools/threejsassets_manager.py search "<keyword>" --limit 20
+
+2. Download models:
+   python tools/threejsassets_manager.py download --limit 50
+
+Commercial Attribution Ledger:
+See `LICENSES.txt` in this directory.
+================================================================================

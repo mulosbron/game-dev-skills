@@ -1,0 +1,124 @@
+{
+  "ok": true,
+  "inputPath": "D:\\GameMaker\\assets\\com.threejsassets\\models\\apartment-block-01.glb",
+  "outputPath": "D:\\GameMaker\\exports\\com.agent-game-forge.glb\\apartment-block-01\\apartment-block-01_draco-ultra.glb",
+  "preset": "draco-ultra",
+  "savedBytes": 21456,
+  "savedKB": 20.95,
+  "savedPercent": 17.63,
+  "triangleReductionPercent": 24.48,
+  "before": {
+    "fileBytes": 121696,
+    "fileKB": 118.84,
+    "fileMB": 0.116,
+    "meshCount": 1,
+    "nodeCount": 1,
+    "drawCalls": 1,
+    "materialCount": 1,
+    "textureCount": 0,
+    "animationCount": 0,
+    "skinCount": 0,
+    "totalVertices": 69040,
+    "totalTriangles": 34738,
+    "totalTextureBytes": 0,
+    "totalTextureKB": 0,
+    "estimatedVRAM_MB": 0,
+    "bounds": {
+      "min": [
+        -4.0546,
+        -0.01,
+        -3.28
+      ],
+      "max": [
+        3.5749,
+        13.4,
+        3.5097
+      ],
+      "dimensionsMeters": [
+        7.6295,
+        13.41,
+        6.7897
+      ],
+      "groundedAtZeroY": true
+    },
+    "extensionsUsed": [
+      "KHR_draco_mesh_compression"
+    ],
+    "meshes": [
+      {
+        "name": "apartment_block_01",
+        "primitives": 1,
+        "vertices": 69040,
+        "triangles": 34738
+      }
+    ],
+    "textures": []
+  },
+  "after": {
+    "fileBytes": 100240,
+    "fileKB": 97.89,
+    "fileMB": 0.096,
+    "meshCount": 1,
+    "nodeCount": 1,
+    "drawCalls": 1,
+    "materialCount": 1,
+    "textureCount": 0,
+    "animationCount": 0,
+    "skinCount": 0,
+    "totalVertices": 59406,
+    "totalTriangles": 26234,
+    "totalTextureBytes": 0,
+    "totalTextureKB": 0,
+    "estimatedVRAM_MB": 0,
+    "bounds": {
+      "min": [
+        -4.053,
+        -0.01,
+        -3.28
+      ],
+      "max": [
+        3.5747,
+        13.26,
+        3.5093
+      ],
+      "dimensionsMeters": [
+        7.6277,
+        13.27,
+        6.7893
+      ],
+      "groundedAtZeroY": true
+    },
+    "extensionsUsed": [
+      "KHR_draco_mesh_compression"
+    ],
+    "meshes": [
+      {
+        "name": "apartment_block_01",
+        "primitives": 1,
+        "vertices": 59406,
+        "triangles": 26234
+      }
+    ],
+    "textures": []
+  },
+  "validationAfter": {
+    "valid": true,
+    "numErrors": 0,
+    "numWarnings": 0,
+    "numInfos": 2,
+    "messages": [
+      {
+        "code": "UNSUPPORTED_EXTENSION",
+        "severity": "info",
+        "message": "Cannot validate an extension as it is not supported by the validator: 'KHR_draco_mesh_compression'.",
+        "pointer": "/extensionsUsed/0"
+      },
+      {
+        "code": "UNUSED_OBJECT",
+        "severity": "info",
+        "message": "This object may be unused.",
+        "pointer": "/bufferViews/0"
+      }
+    ]
+  }
+}

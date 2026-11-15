@@ -1,0 +1,42 @@
+{
+  "level_id": "dungeon_ruins_01",
+  "total_deaths": 18,
+  "completions": 1,
+  "avg_completion_sec": 5.7,
+  "death_hotspots_rc": [
+    {
+      "row": 4,
+      "col": 36,
+      "deaths": 3
+    },
+    {
+      "row": 4,
+      "col": 37,
+      "deaths": 3
+    },
+    {
+      "row": 4,
+      "col": 38,
+      "deaths": 3
+    },
+    {
+      "row": 5,
+      "col": 33,
+      "deaths": 3
+    },
+    {
+      "row": 5,
+      "col": 34,
+      "deaths": 3
+    }
+  ],
+  "secrets_total": 1,
+  "secrets_found": 0,
+  "missed_secrets_rc": [
+    {
+      "row": 1,
+      "col": 14
+    }
+  ],
+  "heatmap_png": "D:\\GameMaker\\exports\\com.agent-game-forge.levels\\dungeon_ruins_01_playtest_heatmap.png"
+}

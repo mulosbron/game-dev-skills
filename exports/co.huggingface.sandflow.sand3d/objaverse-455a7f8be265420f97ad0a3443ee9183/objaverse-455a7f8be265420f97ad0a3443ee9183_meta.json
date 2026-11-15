@@ -1,0 +1,11 @@
+{
+  "id": "objaverse-455a7f8be265420f97ad0a3443ee9183",
+  "entry": "ruin",
+  "family": "building",
+  "license": "CC-BY-4.0",
+  "attribution": "\"WW2 Bunker\" by stal98, https://sketchfab.com/3d-models/455a7f8be265420f97ad0a3443ee9183, CC-BY-4.0; modified: rewritten as a sand3d program",
+  "dataset": "Sandflow/sand3d-objaverse",
+  "glb_path": "exports\\sand3d\\objaverse-455a7f8be265420f97ad0a3443ee9183\\objaverse-455a7f8be265420f97ad0a3443ee9183.glb",
+  "blend_path": "exports\\sand3d\\objaverse-455a7f8be265420f97ad0a3443ee9183\\objaverse-455a7f8be265420f97ad0a3443ee9183.blend",
+  "usda_preview": "https://huggingface.co/datasets/Sandflow/sand3d-objaverse/blob/main/usda/0000/objaverse-455a7f8be265420f97ad0a3443ee9183.usda"
+}

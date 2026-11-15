@@ -1,0 +1,25 @@
+================================================================================
+AMAZON BERKELEY OBJECTS (ABO) - DOWNLOAD SOURCES & LEDGER
+================================================================================
+
+ABO dataset hosts 7,953 real-world 3D models with WebP PBR textures and
+convex collision hulls, licensed under Creative Commons Attribution 4.0 (CC-BY-4.0).
+
+Due to file size (tens of gigabytes), .glb models and thumbnails are excluded
+from Git version control.
+
+Download Sources:
+- Official Amazon AWS Bucket: https://amazon-berkeley-objects.s3.amazonaws.com/index.html
+- Hugging Face Dataset: https://huggingface.co/datasets/codepawl/abo-glb
+- Research Paper: "Amazon Berkeley Objects: A Dataset of 3D Models for Computer Vision"
+
+Download Commands:
+1. Search offline catalog (7,953 products indexed in catalog.jsonl):
+   python tools/abo_manager.py search "<keyword>" --limit 20
+
+2. Download models:
+   python tools/abo_manager.py download --limit 50
+
+Commercial Attribution Ledger:
+See `LICENSES.txt` in this directory.
+================================================================================

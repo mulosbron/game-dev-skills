@@ -1,0 +1,38 @@
+{
+  "ok": true,
+  "inputPath": "D:\\GameMaker\\assets\\com.threejsassets\\models\\apartment-block-01.glb",
+  "before": {
+    "fileKB": 118.84,
+    "triangles": 34738,
+    "vertices": 69040
+  },
+  "lods": [
+    {
+      "level": "LOD0",
+      "targetRatio": 1,
+      "outputPath": "D:\\GameMaker\\exports\\com.agent-game-forge.glb\\apartment-block-01\\apartment-block-01_LOD0.glb",
+      "fileKB": 122.24,
+      "triangles": 34738,
+      "vertices": 67799,
+      "textureKB": 0
+    },
+    {
+      "level": "LOD1",
+      "targetRatio": 0.5,
+      "outputPath": "D:\\GameMaker\\exports\\com.agent-game-forge.glb\\apartment-block-01\\apartment-block-01_LOD1.glb",
+      "fileKB": 97.44,
+      "triangles": 26196,
+      "vertices": 59256,
+      "textureKB": 0
+    },
+    {
+      "level": "LOD2",
+      "targetRatio": 0.2,
+      "outputPath": "D:\\GameMaker\\exports\\com.agent-game-forge.glb\\apartment-block-01\\apartment-block-01_LOD2.glb",
+      "fileKB": 97.44,
+      "triangles": 26196,
+      "vertices": 59256,
+      "textureKB": 0
+    }
+  ]
+}

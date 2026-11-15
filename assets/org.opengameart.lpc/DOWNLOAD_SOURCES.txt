@@ -1,0 +1,23 @@
+================================================================================
+LIBERATED PIXEL CUP (LPC) - MASTER ECOSYSTEM SOURCES
+================================================================================
+
+The Liberated Pixel Cup (LPC) is a master collaborative pixel art ecosystem
+providing 16x16 / 32x32 / 64x64 spritesheets, tilesets, and modular characters.
+
+Official Sources & Repositories:
+- OpenGameArt LPC Master: https://opengameart.org/content/lpc-collection
+- Universal LPC Character Generator (89,000+ pieces):
+  https://github.com/universal-lpc-spritesheet-character-generator/universal-lpc-spritesheet-character-generator
+- LPC Revised 4-Seasons Terrain & Biomes:
+  https://github.com/ElizaWy/LPC
+- LPC Tools (Slicing & Recoloring):
+  https://github.com/bluecarrot16/lpctools
+
+Assembly Commands:
+Use `python tools/lpc_character_builder.py` to assemble modular characters and
+generate horizontal GameMaker `_stripN.png` animations with legal credits.
+
+Master Legal Ledger & Attribution:
+See `LICENSES.txt` in this directory.
+================================================================================

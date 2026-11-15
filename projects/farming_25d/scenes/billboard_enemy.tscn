@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://d1p5k8v3m2n9"]
+
+[ext_resource type="Script" path="res://scripts/enemy_billboard_ai.gd" id="1_enemy_script"]
+[ext_resource type="Texture2D" path="res://sprites_2d/enemies_billboard/goblins/archer_goblin/goblin_archer_idle_front_strip4.png" id="2_enemy_tex"]
+[ext_resource type="Shader" path="res://shaders/pixel_billboard_lit.gdshader" id="3_shader"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_enemy"]
+radius = 0.35
+height = 1.2
+
+[node name="BillboardEnemy" type="CharacterBody3D" groups=["enemies"]]
+collision_layer = 4
+collision_mask = 7
+script = ExtResource("1_enemy_script")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("CylinderShape3D_enemy")
+
+[node name="Sprite3D" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+billboard = 2
+texture_filter = 0
+pixel_size = 0.035
+texture = ExtResource("2_enemy_tex")
+hframes = 4
+offset = Vector2(0, 16)

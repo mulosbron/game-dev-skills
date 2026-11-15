@@ -1,0 +1,18 @@
+{
+  "id": "dungeon_ruins_01",
+  "pieces_dir": "pieces",
+  "num_rooms": 5,
+  "start_piece": "start_hall",
+  "end_piece": "exit_shrine",
+  "must_include": [
+    "spike_corridor",
+    "secret_alcove",
+    "ladder_shaft"
+  ],
+  "never_adjacent": [
+    [
+      "spike_corridor",
+      "secret_alcove"
+    ]
+  ]
+}
