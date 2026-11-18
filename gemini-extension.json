@@ -1,5 +1,6 @@
 {
-    "name":  "game-dev-skills",
-    "version":  "1.0.0",
-    "contextFileName":  "AGENTS.md"
+    "name": "game-dev-skills",
+    "version": "1.0.0",
+    "description": "Unified Game Dev & Asset Forge hub (69 top-level skills + 157 studio/engine sub-skills, 18 hierarchical agent specs, 8 offline JSON catalogs, 24 Reverse-DNS libraries, 5 asset collections, 35 Python CLI tools) covering Godot 4, C++ engines (The Forge, Jolt, Ozz, Recast, Effekseer), multiplayer (Colyseus), 3D/Blender/PBR (MCP, Kiln, Polyspoon, TripoSR, MeshSplatting, Material Maker, Asset Harmonizer), 2D/2.5D pixel art & VFX.",
+    "contextFileName": "AGENTS.md"
 }

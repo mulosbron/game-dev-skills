@@ -23,7 +23,7 @@ game-dev-skills/
 │   ├── com.threejsassets/                           # 1,041 web-ready low-poly .glb
 │   └── org.opengameart.lpc/                         # Liberated Pixel Cup ledger
 ├── libraries/                 # 24 Reverse-DNS external repos/packages
-├── catalogs/                  # Cached JSON indexes (`assets_index.json`, `polyspoon_catalog.json`, ...)
+├── catalogs/                  # 8 offline JSON indexes (`assets_index.json`, `lpc_catalog.json`, `abo_catalog.json`, `pixelfx_catalog.json`, `pixel_art_atlas_index.json`, `polyspoon_catalog.json`, `sand3d_index.json`, `threejsassets_catalog.json`)
 ├── tools/                     # 35 Python asset, 3D, VFX, level & audio CLIs
 ├── exports/                   # Generated strips, normal maps, GLBs, levels & shaders
 ├── docs/                      # Reference guides (`godot-pixel-texture-rehberi.md`)
@@ -38,9 +38,9 @@ All four major agent ecosystems are pre-configured at the root of `game-dev-skil
 
 | Client | Config File | How to Use |
 |---|---|---|
-| **Antigravity IDE / CLI** | `plugin.json` | Installed under `~/.agents/game-dev-skills/` — automatically discovered; reference `@game-dev-skills` or open the folder as a workspace. |
-| **Claude Code** | `.claude-plugin/plugin.json` + `CLAUDE.md` | Install/load plugin directory (`claude --plugin-dir ~/.agents/game-dev-skills` or copy into project). `CLAUDE.md` imports `@AGENTS.md`. |
-| **Codex** | `.codex-plugin/plugin.json` (`"skills": "./skills/"`) | Register plugin/workspace directory so Codex indexes all 68 skills in `./skills/` plus `./AGENTS.md`. |
+| **Antigravity IDE / CLI** | `plugin.json` + `.agents/skills.json` | Installed under `~/.agents/game-dev-skills/` or opened as a workspace — `.agents/skills.json` auto-discovers all 69 skills in `skills/`; reference `@game-dev-skills`. |
+| **Claude Code** | `.claude-plugin/plugin.json` + `CLAUDE.md` | Install/load plugin directory (`claude --plugin-dir ~/.agents/game-dev-skills` or copy into project). `CLAUDE.md` imports `@AGENTS.md` and `.claude-plugin/plugin.json` exposes `./skills/` and `./agents/`. |
+| **Codex** | `.codex-plugin/plugin.json` (`"skills": "./skills/"`, `"agents": "./agents/"`) | Register plugin/workspace directory so Codex indexes all 69 skills in `./skills/`, 18 agents in `./agents/`, plus `./AGENTS.md`. |
 | **Gemini CLI** | `gemini-extension.json` (`"contextFileName": "AGENTS.md"`) | Link or install as an extension (`gemini extensions link ~/.agents/game-dev-skills`). |
 | **Cursor / Windsurf** | `AGENTS.md` | Add `@AGENTS.md` or copy `AGENTS.md` + needed `skills/` into your project root. |
 
