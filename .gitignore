@@ -110,3 +110,6 @@ exports/**/verify_*
 *.swp
 *.swo
 *~
+
+# Local game projects (never pushed)
+projects/farming_25d/
