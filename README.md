@@ -1,14 +1,15 @@
 # PlayForge & Agent Game Forge (`game-dev-skills`)
 
-Unified game development workspace, asset/library forge, CLI toolkit, and skill collection (**68 top-level skills**, **79 `awesome-gamedev` sub-skills**, **78 `claude-code-game-studios` studio sub-skills**, **24 Reverse-DNS libraries**, **5 commercial-cleared asset collections**, and **40 Python CLI tools**). Compatible with Antigravity, Claude Code, Codex, Gemini CLI, Cursor, and Windsurf.
+Unified game development workspace, asset/library forge, CLI toolkit, hierarchical agent tree, and skill collection (**69 top-level skills**, **79 `awesome-gamedev` sub-skills**, **78 `claude-code-game-studios` studio sub-skills**, **24 Reverse-DNS libraries**, **5 commercial-cleared asset collections**, **35 Python CLI tools**, and **18 agent specs** in `agents/`). Compatible with Antigravity, Claude Code, Codex, Gemini CLI, Cursor, and Windsurf.
 
 ## Directory Layout
 
 ```text
 game-dev-skills/
-├── AGENTS.md                  # Binding agent guidelines, rules & full skill index
+├── AGENTS.md                  # Concise Master Summary, rules & agent tree router
 ├── CLAUDE.md                  # @AGENTS.md entrypoint
 ├── README.md                  # Human quick-start & architecture overview
+├── agents/                    # Hierarchical agent tree & end-to-end pipelines (18 docs; see agents/README.md)
 ├── plugin.json                # Antigravity plugin manifest
 ├── .claude-plugin/plugin.json # Claude Code plugin manifest
 ├── .codex-plugin/plugin.json  # Codex plugin manifest
@@ -23,11 +24,11 @@ game-dev-skills/
 │   └── org.opengameart.lpc/                         # Liberated Pixel Cup ledger
 ├── libraries/                 # 24 Reverse-DNS external repos/packages
 ├── catalogs/                  # Cached JSON indexes (`assets_index.json`, `polyspoon_catalog.json`, ...)
-├── tools/                     # 40 Python asset, 3D, VFX, level & audio CLIs
+├── tools/                     # 35 Python asset, 3D, VFX, level & audio CLIs
 ├── exports/                   # Generated strips, normal maps, GLBs, levels & shaders
 ├── docs/                      # Reference guides (`godot-pixel-texture-rehberi.md`)
-├── projects/                  # Active engine projects (`farming_25d/`, etc.)
-└── skills/                    # 68 top-level skill directories (every skill listed in AGENTS.md)
+├── projects/                  # Local game projects (gitignored; never pushed)
+└── skills/                    # 69 top-level skill directories (indexed in AGENTS.md & agents/README.md)
 ```
 
 ## Step-by-Step User & Plugin Guide
@@ -65,29 +66,37 @@ All four major agent ecosystems are pre-configured at the root of `game-dev-skil
 - **C++ Rendering, Physics, Animation, Navigation & VFX (5):** `the-forge`, `jolt-physics`, `ozz-animation`, `recastnavigation`, `effekseer`.
 - **Multiplayer, Web 3D & JS Game AI (5):** `colyseus` (v0.18 + `references/`), `three-quarks`, `yuka`, `build-67js-scene`, `render-67js-media`.
 - **2D Pixel Art, AI Sprites, VFX, Maps & Testing (29):** `generate2dmedia`, `generate2dsprite`, `generate2dmap`, `wang-tiles`, `water-shorelines`, `see-through`, `atmospheric-perspective`, `shadowcasting`, `sprite-stacking`, `pixel-perfect`, `loot-window`, `video2dsprite`, `sprite-gen`, `codeart2d`, `backgroundremover`, `pixel-snapper`, `spritefusion-pixel-snapper`, `spritefusion-sprite-normals`, `image-to-pixel`, `flat2iso`, `pixelorama`, `ldtk`, `lpc-character-generator`, `creature-gen`, `pixelfx`, `vfx-forge`, `pixel-art-atlas`, `pixel-asset-manager`, `voxl`.
-- **3D Authoring, Reconstruction, Blender MCP & PBR Materials (8):** `blender-kiln`, `mcp-for-blender` (+ `references/`), `glb-forge`, `asset-harmonizer`, `polyspoon`, `material-maker`, `mesh-splatting`, `triposr`, `sand3d-to-roblox`.
+- **3D Authoring, Reconstruction, Blender MCP & PBR Materials (9):** `blender-kiln`, `mcp-for-blender` (+ `references/`), `glb-forge`, `asset-harmonizer`, `polyspoon`, `material-maker`, `mesh-splatting`, `triposr`, `sand3d-to-roblox`.
+
+## Hierarchical Agent Tree (`agents/`)
+
+See [`agents/README.md`](agents/README.md) for the full visual orchestration tree, 69-skill coverage ledger, and 35-tool routing matrix:
+- **Root Pipeline Entrypoints (`agents/`):** `asset-scout.md`, `pixel-2d-pipeline.md`, `3d-forge-pipeline.md`, `game-feel-qa.md`, `asset-harmonizer-agent.md`
+- **Orchestrator & Specialist Branches:** `00-orchestrator/` → `01-2d-games/` · `02-25d-isometric/` · `03-2d-asset-vfx-forge/` · `04-3d-worlds-pipeline/` · `05-web-multiplayer-qa/`
 
 ## CLI Quick Reference (`tools/`)
 
 ```powershell
-# Search indexed 2D assets without flooding context
-python tools/asset_search.py search "idle" --limit 10
+# Unified search across all 8 asset catalogs (or filter with --source 2d / 3d / libraries,atlas) with JSON output
+python tools/asset_search.py search "sword" --source all --limit 20 --json
+python tools/asset_search.py sources --json
+python tools/asset_search.py inspect cottage --source polyspoon --json
 
 # Search & build procedural low-poly 3D models (Polyspoon)
-python tools/polyspoon_tool.py search "tree"
+python tools/polyspoon_tool.py search "tree" --json
 
 # Search 1.4M CC0 sprites & export GameMaker _stripN.png
-python tools/pixel_atlas_manager.py search "dragon"
+python tools/pixel_atlas_manager.py search "dragon" --subjects-only --json
 python tools/pixel_atlas_manager.py strip --subject "baby dragon" --count 6 --scale 2
 
 # Snap AI pixel art to integer grid & generate 2D normal maps
-python tools/pixel_snapper.py "path/to/sprite.png" --palette pico8
+python tools/pixel_snapper.py "path/to/sprite.png" --palette pico8 --json
 python tools/normal_map_gen.py "path/to/sprite.png" --preview
 
 # Search Sand3D / ABO / ThreeJS 3D asset catalogs & optimize GLBs
-python tools/sand3d_manager.py search "chest"
-python tools/abo_manager.py search "chair" --category chair
-python tools/threejsassets_manager.py search "crate"
+python tools/sand3d_manager.py search "chest" --json
+python tools/abo_manager.py search "chair" --category chair --json
+python tools/threejsassets_manager.py search "chair" --limit 5 --json
 ```
 
 ## Commercial Clearance & Provenance

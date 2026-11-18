@@ -1,167 +1,109 @@
-# Agent Game Forge & PlayForge (`game-dev-skills`) — Master Agent Guidelines
+# Agent Game Forge & PlayForge (`game-dev-skills`) — Master Summary & Agent Tree Router
 
-Unified hub combining **PlayForge**, **Agent Game Forge (`GameMaker`)**, and curated engine/graphics/asset/AI game-development skills (**69 top-level skills**, **79 `awesome-gamedev` sub-skills**, **78 `claude-code-game-studios` studio sub-skills**, **24 Reverse-DNS libraries**, **5 asset collections**, and **41 Python CLI tools**).
+Unified game development hub combining **PlayForge**, **Agent Game Forge (`GameMaker`)**, and curated multi-engine skills (**69 top-level skills**, **79 `awesome-gamedev` sub-skills**, **78 `claude-code-game-studios` sub-skills**, **24 Reverse-DNS libraries**, **5 commercial-cleared asset collections**, **35 Python CLI tools**, and **18 hierarchical agent specs** in [`agents/`](agents/README.md)).
 
-## Workspace Architecture
+> **Anti-Chaos Rule:** Never load unrelated 2D, 2.5D, and 3D skills at once. Classify the request (`Mode A / B / C`), detect the engine and perspective, and **route directly into the matching specialist in [`agents/`](agents/README.md)** for full step-by-step pipelines and CLI chains.
+
+---
+
+## 1. Workspace Architecture
 
 ```text
 game-dev-skills/
-├── AGENTS.md                  # Binding instructions & full skill/tool index
-├── README.md                  # Human guide, CLI cheat sheet, license ledgers
-├── plugin.json                # Antigravity plugin manifest
-├── .claude-plugin/plugin.json # Claude Code plugin manifest
-├── .codex-plugin/plugin.json  # Codex plugin manifest
-├── gemini-extension.json      # Gemini CLI extension config (points to AGENTS.md)
-├── package.json               # 67js & Workspace JS dependencies
-├── .polyspoon/                # Polyspoon local procedural runtime & receipts
-├── .agents/skills/polyspoon/  # Kept for .polyspoon SHA-256 verification
-├── assets/                    # Commercial-cleared datasets (Reverse-DNS)
-│   ├── co.huggingface.angais.pixel-art-atlas-1.4m/  # 1,409,404 sprites (CC0)
-│   ├── co.huggingface.sandflow.sand3d/              # 100k+ open 3D objects
-│   ├── com.amazon.berkeley.abo/                     # 7,953 .glb + convex hulls (CC-BY-4.0)
-│   ├── com.threejsassets/                           # 1,041 web-ready low-poly .glb
-│   └── org.opengameart.lpc/                         # Liberated Pixel Cup ledger
-├── libraries/                 # 24 Reverse-DNS packages (`com.github.*`, `org.opengameart.*`, etc.)
-├── catalogs/                  # Offline token-free JSON catalogs (4,200+ 2D assets, 6,194 atlas subjects, 3D/Polyspoon)
-├── tools/                     # 41 Python CLI pipelines (`asset_search.py`, `glb_forge.py`, `vfx_forge.py`, `wang_tiles.py`, `water_shorelines.py`, `see_through.py`, `atmospheric_perspective.py`, `shadowcasting.py`, `camera_follow_2d.py`, `platformer_forgiveness.py`, `sprite_stacker.py`, `hit_feedback.py`, `pixel_perfect.py`, `loot_window.py`, ...)
+├── AGENTS.md                  # Concise Master Summary, Binding Rules & Agent Tree Router (this file)
+├── README.md                  # Human quick-start, plugin setup & CLI cheat sheet
+├── agents/                    # Hierarchical Agent Tree & Multi-Tool Pipelines (18 agent specs + README.md)
+│   ├── asset-scout.md         # Multi-catalog search across catalogs/*.json + libraries/ + assets/ with licenses
+│   ├── pixel-2d-pipeline.md   # pixel_snapper -> flat2iso -> normal_map_gen -> sprite_slicer -> vfx -> godot_pixel_tool
+│   ├── 3d-forge-pipeline.md   # abo/threejs/polyspoon/sand3d -> blender_kiln -> glb_forge -> asset_harmonizer
+│   ├── game-feel-qa.md        # hit_feedback + forgiveness + camera + pixel_perfect + level_pipeline + voxl Audit
+│   ├── asset-harmonizer-agent.md # Root compatibility entrypoint for 6-stage 3D asset harmonization
+│   ├── 00-orchestrator/       # Root Mode A/B/C & Engine Router (game-director-router.md)
+│   ├── 01-2d-games/           # 2d-platformer-specialist.md · 2d-topdown-rpg-roguelike-specialist.md
+│   ├── 02-25d-isometric/      # 25d-isometric-flat2iso-specialist.md · 25d-fake3d-hd2d-specialist.md
+│   ├── 03-2d-asset-vfx-forge/ # pixel-character-creature-forge.md · pixel-cleanup-normals-pipeline.md · vfx-shaders-juice-specialist.md
+│   ├── 04-3d-worlds-pipeline/ # 3d-model-material-forge.md · 3d-world-physics-engine-specialist.md · asset-harmonizer-specialist.md
+│   └── 05-web-multiplayer-qa/ # web-multiplayer-specialist.md · level-qa-playtest-specialist.md
+├── assets/                    # Commercial-cleared datasets (Pixel Atlas 1.4M, Sand3D 100k+, ABO 7,953, ThreeJS 1,041, LPC)
+├── catalogs/                  # Offline JSON indexes (zero-token asset lookup)
+├── libraries/                 # 24 Reverse-DNS external repos/packages
+├── tools/                     # 35 Python CLI pipelines (see Branch Index below)
 ├── exports/                   # Generated strips, normal maps, GLBs, heatmaps & shaders
-├── docs/                      # Master guides (incl. `godot-pixel-texture-rehberi.md`)
-├── projects/                  # Active engine projects (`farming_25d/`, etc.)
-└── skills/                    # 69 standardized skills + sub-skill routers
+├── docs/                      # Master guides (incl. godot-pixel-texture-rehberi.md)
+├── projects/                  # Local game projects (gitignored; never pushed)
+└── skills/                    # 69 standardized skills + awesome-gamedev & claude-code-game-studios routers
 ```
 
-## Interactive Discovery & Q&A Protocol (Three Modes)
+---
 
-Always classify the request into Mode A, B, or C before editing project files or writing game code (`Discover → Report/GDD → Approve → Build`):
+## 2. Interactive Discovery & Q&A Gate (Modes A, B, C)
 
-### Mode A — New Game from Scratch (Markdown GDD Gate)
-1. **Request or Co-Author a Markdown GDD (`GDD.md`) First:**
-   - Ask the user for their **Markdown Game Design Document (`GDD.md`)** (or paste its sections).
-   - **If they already have a `GDD.md`:** Read and validate it for gaps; ask only for missing technical choices (`Engine & Target Platform`, `Asset Pipeline`, `v1 Exclusions`) using `(Recommended)` defaults.
-   - **If they do NOT have a `GDD.md` yet:** Run 1 concise Q&A round (with `(Recommended)` defaults so `"you choose"` works) covering: **Genre & Sub-genre**, **Art Style & Palette**, **30-Second Core Loop & Camera**, **Engine & Platform** (`godot`, `web-2d-games`/`three-quarks`, `GameMaker`, `awesome-gamedev`, C++ `the-forge`/`jolt-physics`), and **Explicit v1 Exclusions** (e.g., no menu/save/multiplayer yet) — then generate a clean Markdown `GDD.md` (use `claude-code-game-studios/subskills/quick-design` or `game-docs` templates when helpful) and wait for approval.
-2. **Skill Routing & 60-Second Prototype First:** Once `GDD.md` is approved, list the exact skills/tools to apply and build a single-scene 60-second runnable prototype first, then layer `game-feel`, VFX/SFX, and QA checks (`level-pipeline` / `voxl`).
+Classify every request before editing project files or writing game code (`Discover → Report/GDD → Approve → Build`):
 
-### Mode B — Existing Game Project (Context → Audit → Action Report Gate)
-1. **Understand the Game First (Before Auditing or Changing Code):**
-   - Scan the project root (`project.godot`, `package.json`, `*.yyp`, `Assets/ProjectSettings/`, `*.uproject`, `CMakeLists.txt`) via `skills/awesome-gamedev/router/SKILL.md` (`Step 1 Engine Detection`), AND ask/confirm with the user:
-     - **Game Genre & Sub-type:** e.g., roguelike action, cozy farming sim, turn-based RPG, platformer.
-     - **Art Style & Technical Look:** e.g., top-down 16x16 pixel art, HD-2D, low-poly 3D, hand-drawn 2D.
-     - **Target Improvement Scope:** What the user wants improved — **UI/UX, VFX, SFX/Audio, Game Feel, Core Loop/Progression, Camera, AI, or Physics** (or a full audit).
-2. **Detect Problems & Prepare an Action Report (Do NOT edit yet):**
-   - Audit the codebase against the matching skills (`game-engineering`, `game-feel`, `platformer-forgiveness`, `godot-pixel-pipeline`, `vfx-forge`, `limboai`, `phantom-camera`, implicit-state-machine rule, etc.) and present a structured **Diagnostic & Action Report**:
-     - **Detected Issues:** Concrete file paths, missing feedback/UX/VFX/SFX/loop gaps, or architectural bottlenecks.
-     - **Why It Hurts & Proposed Fix:** Exact plan per area (UI/UX, VFX, SFX, gameplay, scripts/shaders/tools to add or edit) and expected player-feel impact.
-3. **Wait for Approval, Then Execute Incrementally:** Present options if multiple fixes exist, obtain user approval, and apply changes without breaking existing architecture.
+1. **Mode A — New Game from Scratch (`GDD.md` Gate):**
+   - Ask for a Markdown `GDD.md`; if absent, run 1 concise Q&A round with `(Recommended)` defaults covering **Genre & Sub-genre**, **Art Style & Palette**, **30-Second Core Loop & Camera**, **Engine & Platform**, and **v1 Exclusions** (`claude-code-game-studios/subskills/quick-design`).
+   - Wait for `GDD.md` approval, then build a **single-scene 60-second playable prototype** first before layering `game-feel`, VFX/SFX, and QA.
+2. **Mode B — Existing Game Project (Context → Audit → Action Report Gate):**
+   - Fingerprint engine (`project.godot`, `package.json`, `*.yyp`, `*.uproject`, `CMakeLists.txt`) via `skills/awesome-gamedev/router/SKILL.md` and confirm **Genre/Sub-type**, **Art Style**, and **Target Improvement Scope** (UI/UX, VFX, SFX, Game Feel, Loop, Camera, AI, Physics).
+   - **Do NOT edit yet:** Run `agents/game-feel-qa.md` + matching branch checks and present a file/line **Diagnostic & Action Report** (`Detected Issues → Why It Hurts → Proposed Fix`). Wait for approval before editing.
+3. **Mode C — Standalone Asset, VFX, Audio, or Tool Production (Asset-Only):**
+   - Never force a `GDD.md` or full audit. Confirm only **Target Engine Format** (`_stripN.png`, `.tres`, `.glb`), **Art Style/Palette**, and **Resolution/Frames**, then execute via `agents/asset-scout.md`, `agents/pixel-2d-pipeline.md`, or `agents/3d-forge-pipeline.md`.
 
-### Mode C — Standalone Asset, VFX, Audio, or Tool Production (Asset-Only)
-1. Use this mode when the user only wants **sprites, tilesets, 3D models, PBR materials, normal maps, VFX strips, or SFX/music**—never force a `GDD.md` or full-game audit here.
-2. Confirm only missing export specs: **Target Engine/Format** (`_stripN.png` for GameMaker, `.tres`/Nearest imports for Godot, `.glb`/Draco/Meshopt for Three.js/Roblox), **Art Style / Palette**, and **Resolution / Frame Count**.
-3. Execute directly via `tools/*.py` (`asset_search.py`, `pixel_atlas_manager.py`, `lpc_character_builder.py`, `creature_gen.py`, `pixelfx_tool.py`, `vfx_forge.py`, `normal_map_gen.py`, `flat2iso.py`, `polyspoon_tool.py`, `glb_forge.py`, `blender_kiln.py`, `sand3d_builder.py`) or the matching asset skill (`generate2dsprite`, `video2dsprite`, `flat2iso`, `spritefusion-sprite-normals`, `triposr`, `material-maker`, `mcp-for-blender`).
+---
 
-## Critical Working Rules (Always Enforced)
+## 3. Critical Working Rules (Always Enforced)
 
-1. **Prototype & Core Loop First:** Build a 60-second playable prototype before menus, polish, or extra systems. Before adding any mechanic ask: can the player finish the game without opening it?
+1. **Prototype & Core Loop First:** Build a 60-second playable prototype before menus or polish. Ask: *can the player finish the game without opening this mechanic?*
 2. **NEVER run recursive directory listings (`dir /s`, `ls -R`, `Get-ChildItem -Recurse`) across `libraries/`, `assets/`, or `node_modules/`!** They hold 150,000+ files and will flood context.
-3. **ALWAYS discover & inspect assets via CLI:**
-   - `python tools/asset_search.py search "<keyword>" --limit 20`
-   - `python tools/asset_search.py inspect "<file_path>"`
-4. **Reverse-DNS & License Provenance:** Track external sources via canonical reverse-DNS names (`com.github.*`, `org.opengameart.*`, `co.huggingface.*`, `com.amazon.*`, `com.threejsassets`) and preserve `LICENSES.txt` / `CREDITS.csv` attributions.
-5. **2D / GameMaker Import Conventions:** Export horizontal strips as `_stripN.png` (`tools/sprite_slicer.py --gamemaker-strip`), use Bottom-Center origins and `depth = -bbox_bottom;` for top-down sorting, clean AI pixel art (`tools/pixel_snapper.py` / `spritefusion-pixel-snapper`), convert flat orthographic pixel art to 2:1 isometric (`tools/flat2iso.py` with `--scale auto`, `--sheet-mode strip4`, `--json`), and generate 2D normals (`tools/normal_map_gen.py` / `spritefusion-sprite-normals`) before lit shaders.
+3. **ALWAYS discover & inspect assets via CLI:** `python tools/asset_search.py search "<kw>" --source all --limit 20 --json` and `python tools/asset_search.py inspect "<path>"` (or dispatch `agents/asset-scout.md`).
+4. **Reverse-DNS & License Provenance:** Track external sources via canonical reverse-DNS names (`com.github.*`, `org.opengameart.*`, `co.huggingface.*`, `com.amazon.*`, `com.threejsassets`) and preserve `LICENSES.txt` / `CREDITS.csv`.
+5. **2D / 2.5D Pixel Import Conventions:** Export horizontal strips as `*_stripN.png` (`tools/sprite_slicer.py --gamemaker-strip`), use **Bottom-Center** origins and `depth = -bbox_bottom;` / `y_sort_enabled`, clean AI pixel art (`pixel_snapper.py`), convert flat orthographic art to 2:1 isometric via `tools/flat2iso.py` (`--scale auto`, `--sheet-mode strip4`, `--json`) or `skills/flat2iso/assets/flat2iso.html`, and generate 2D normals (`normal_map_gen.py`) *after* final projection.
 6. **Human-First Level Authority Boundary:** Never auto-generate or overwrite handcrafted level/puzzle layouts unless given explicit coordinates. Use `tools/level_pipeline.py` only for plumbing (`scaffold`, BFS `validate`, `assemble`, `playtest-report`).
-7. **No Implicit State Machines (Steve Ruiz Rule):** Replace entangled boolean flag combinations (`isJumping && !isClimbing && !isDead`) with explicit finite-state enums.
+7. **No Implicit State Machines (Steve Ruiz Rule):** Replace entangled boolean flag combinations (`isJumping && !isClimbing && !isDead`) with explicit finite-state enums or `LimboHSM`.
 8. **Cross-Pack Boundary:** Classroom/educational gamification belongs in `~/.agents/gamification-skills/`.
+9. **STRICT `tools/` Boundary (General-Purpose Tools ONLY):** NEVER create or place project-specific, game-specific, or character/boss/lore-specific scripts inside `tools/`! `tools/` is strictly reserved for the 35 reusable, project-agnostic CLI pipelines. Any game-specific generator, harvester, or build script MUST be placed inside `projects/<project_name>/` (gitignored).
 
-## Skills Index (69 Top-Level Skills)
+---
 
-### Game Design, Feel, Architecture & Routers (11)
-| Skill | Use when |
+## 4. Hierarchical Agent Tree & Routing Table (`agents/`)
+
+Full details, multi-step task chains, and exact PowerShell commands live inside each agent file (see [`agents/README.md`](agents/README.md) for the complete 69-skill & 35-tool ledger).
+
+### Fast-Path Cross-Tool Pipeline Agents (Root `agents/`)
+
+| Agent File | What It Orchestrates |
 |---|---|
-| `skills/game-feel/SKILL.md` | A mechanic works but feels dead; adding visual, audio, camera, and temporal juice. |
-| `skills/hit-feedback/SKILL.md` | Making 2D hits feel heavy from one call (5/9-tick hitstop, white shader flash, 12px knockback, pixel-rounded shake, sparks, slash trail, 46-tick numbers, `tools/hit_feedback.py`). |
-| `skills/platformer-forgiveness/SKILL.md` | Tuning tight 2D/2.5D platformer controls (0.1s fixed-tick coyote time, jump buffer, 4px dual ledge/ceiling corner correction via `tools/platformer_forgiveness.py`). |
-| `skills/camera-follow-2d/SKILL.md` | Choosing and tuning 8 2D camera modes (locked, smooth, dead zone, rooms, look-ahead, POIs, aim, two targets) for Godot 4 `Camera2D` & Unity Cinemachine 3 (`tools/camera_follow_2d.py`). |
-| `skills/game-engineering/SKILL.md` | Diagnosing boring loops, player churn, progression curves, and motivation/reward design. |
-| `skills/crafting-systems/SKILL.md` | Designing crafting, inventory, and resource economies integrated into the core loop. |
-| `skills/sustainable-indie-dev/SKILL.md` | Scoping projects, planning milestones, marketing hooks, Steam/itch positioning, avoiding burnout. |
-| `skills/web-2d-games/SKILL.md` | Building 2D top-down/tilemap web games (Phaser 3.8+ + React + Zustand + Vite), Godot→Web ports. |
-| `skills/level-pipeline/SKILL.md` | No-engine plain-JS 2D micro-engine, BFS reachability validation, piece assembly, heatmaps. |
-| `skills/claude-code-game-studios/SKILL.md` | Multi-agent studio router (`78` slash subskills in `subskills/`, `49` agents, engine/genre playbooks, QA gates). |
-| `skills/awesome-gamedev/SKILL.md` | Engine/genre/publishing dispatcher (`router/SKILL.md` across `79` sub-skills for Unity, Unreal, Godot, Bevy, Ebitengine, Defold, LÖVE, pygame, Phaser, PixiJS, three.js, Roblox). |
+| [`agents/asset-scout.md`](agents/asset-scout.md) | One-pass search across all `catalogs/*.json` + `libraries/` + `assets/` with CC0/CC-BY/LPC license & format report |
+| [`agents/pixel-2d-pipeline.md`](agents/pixel-2d-pipeline.md) | `pixel_snapper` / `image_to_pixel` → `flat2iso` → `normal_map_gen` → `sprite_slicer` → `pixelfx_tool` / `vfx_forge` → `godot_pixel_tool` / `pixel_perfect` |
+| [`agents/3d-forge-pipeline.md`](agents/3d-forge-pipeline.md) | `abo_manager` / `threejsassets_manager` / `polyspoon_tool` / `sand3d_builder` → `blender_kiln` → `glb_forge` → `asset_harmonizer` |
+| [`agents/game-feel-qa.md`](agents/game-feel-qa.md) | Existing-project Mode B audit & polish via `hit_feedback`, `platformer_forgiveness`, `camera_follow_2d`, `pixel_perfect`, `level_pipeline`, `voxl_client` |
+| [`agents/asset-harmonizer-agent.md`](agents/asset-harmonizer-agent.md) | Compatibility entrypoint for the 6-stage mixed-source 3D harmonizer (links to `04-3d-worlds-pipeline/asset-harmonizer-specialist.md`) |
 
-### Godot 4 Engine & Addons (10)
-| Skill | Use when |
-|---|---|
-| `skills/godot/SKILL.md` | Writing Godot 4 / GDScript (`playbook.md` house style, state machines, pooling, Godot 3→4 migration). |
-| `skills/godot-fake-3d-character/SKILL.md` | Building 2.5D top-down puppet characters in Godot 4 with 2D nodes, `RemoteTransform2D`, Y-scale rigs. |
-| `skills/godot-jolt/SKILL.md` | Integrating Jolt Physics GDExtension (`JoltPhysicsServer3D`, joints, settings, source builds) in Godot 4. |
-| `skills/godot-voxel/SKILL.md` | Building blocky/smooth Transvoxel destructible worlds (`VoxelTerrain`, `VoxelLodTerrain`, `VoxelGeneratorGraph`). |
-| `skills/terrain3d/SKILL.md` | Large clipmap 3D terrains (`Terrain3D`, 32-texture blending, heightmaps, `Terrain3DInstancer`). |
-| `skills/limboai/SKILL.md` | Godot 4 C++ Behavior Trees (`BTPlayer`), HSM (`LimboHSM`), and `Blackboard` game AI. |
-| `skills/phantom-camera/SKILL.md` | Dynamic 2D/3D virtual cameras (`PhantomCameraHost`, priority switching, follow/look-at, tweens, noise). |
-| `skills/dialogic/SKILL.md` | Dialogic 2 narrative/RPG/visual novel timelines (`.dtl`), characters (`.dch`), portraits, variables, saves. |
-| `skills/godot-mcp/SKILL.md` | Driving Godot headlessly from AI agents via MCP (`libraries/com.github.coding-solo.godot-mcp`). |
-| `skills/godot-pixel-pipeline/SKILL.md` | Lossless pixel textures, Nearest filtering, PSX/Bayer dither shaders & audits (`tools/godot_pixel_tool.py`). |
+### Game Type & Discipline Specialist Branches
 
-### C++ Rendering, Physics, Animation, Navigation & VFX (5)
-| Skill | Use when |
-|---|---|
-| `skills/the-forge/SKILL.md` | ConfettiFX cross-platform C/C++ rendering (`IGraphics.h`, FSL shaders, D3D12/Vulkan/Metal, Visibility Buffer). |
-| `skills/jolt-physics/SKILL.md` | Standalone C++17 3D physics (`JoltPhysics` v5.7.0, CMake `Build/CMakeLists.txt`, double precision, determinism). |
-| `skills/ozz-animation/SKILL.md` | C++17 SIMD skeletal animation (`Skeleton`, `SamplingJob`, `BlendingJob`, IK, root motion, `gltf2ozz`). |
-| `skills/recastnavigation/SKILL.md` | C++ navmesh baking (`Recast`), pathfinding (`Detour`), dynamic obstacles (`DetourTileCache`), `DetourCrowd`. |
-| `skills/effekseer/SKILL.md` | Cross-platform `.efkefc`/`.efk` 3D/2D particle VFX runtimes (C++ DX11/12/Vulkan/GL/Metal, LLGI, engines). |
+| Game Type / Need | Specialist Agent to Load First | Core Skills & Tools Owned |
+|---|---|---|
+| **Intake, Engine Detection, Studio Rigor** | [`agents/00-orchestrator/game-director-router.md`](agents/00-orchestrator/game-director-router.md) | `awesome-gamedev`, `claude-code-game-studios`, `game-engineering`, `sustainable-indie-dev`, `asset_search.py`, `unpack_libraries.py` |
+| **2D / 2.5D Platformer & Metroidvania** | [`agents/01-2d-games/2d-platformer-specialist.md`](agents/01-2d-games/2d-platformer-specialist.md) | `platformer-forgiveness`, `camera-follow-2d`, `hit-feedback`, `game-feel`, `atmospheric-perspective`, `pixel-perfect`, `godot`, `web-2d-games`, `level-pipeline`, `ldtk` (`platformer_forgiveness.py`, `camera_follow_2d.py`, `hit_feedback.py`, `atmospheric_perspective.py`, `pixel_perfect.py`, `level_pipeline.py`) |
+| **2D Top-Down RPG / Roguelike / Cozy Sim** | [`agents/01-2d-games/2d-topdown-rpg-roguelike-specialist.md`](agents/01-2d-games/2d-topdown-rpg-roguelike-specialist.md) | `wang-tiles`, `water-shorelines`, `shadowcasting`, `see-through`, `loot-window`, `crafting-systems`, `game-engineering`, `dialogic`, `limboai`, `yuka`, `ldtk`, `generate2dmap`, `camera-follow-2d`, `hit-feedback`, `game-feel`, `godot` (`wang_tiles.py`, `water_shorelines.py`, `shadowcasting.py`, `see_through.py`, `loot_window.py`) |
+| **2.5D 2:1 Isometric (`flat2iso`)** | [`agents/02-25d-isometric/25d-isometric-flat2iso-specialist.md`](agents/02-25d-isometric/25d-isometric-flat2iso-specialist.md) | `flat2iso` (`tools/flat2iso.py` + `skills/flat2iso/assets/flat2iso.html` Studio), `spritefusion-sprite-normals`, `pixel-snapper`, `pixel-perfect`, `see-through`, `shadowcasting`, `vfx-forge`, `generate2dmap`, `wang-tiles`, `water-shorelines` |
+| **2.5D Fake-3D Puppets, Stack, HD-2D, 2.5D FPS** | [`agents/02-25d-isometric/25d-fake3d-hd2d-specialist.md`](agents/02-25d-isometric/25d-fake3d-hd2d-specialist.md) | `godot-fake-3d-character`, `sprite-stacking` (`sprite_stacker.py`), `godot-pixel-pipeline` (`godot_pixel_tool.py`), `atmospheric-perspective`, `phantom-camera`, `see-through`, `spritefusion-sprite-normals`, `godot`, `pixel-perfect` |
+| **2D Characters, Atlas, LPC, Monsters, AI Sprites** | [`agents/03-2d-asset-vfx-forge/pixel-character-creature-forge.md`](agents/03-2d-asset-vfx-forge/pixel-character-creature-forge.md) | `pixel-art-atlas` (`pixel_atlas_manager.py`), `pixel-asset-manager`, `lpc-character-generator` (`lpc_character_builder.py`), `creature-gen` (`creature_gen.py`), `generate2dsprite`, `generate2dmedia`, `generate2dmap`, `video2dsprite`, `sprite-gen`, `codeart2d`, `sprite_slicer.py` |
+| **Pixel Cleanup, Palette, Normals & Imports** | [`agents/03-2d-asset-vfx-forge/pixel-cleanup-normals-pipeline.md`](agents/03-2d-asset-vfx-forge/pixel-cleanup-normals-pipeline.md) | `backgroundremover`, `pixel-snapper` (`pixel_snapper.py`), `spritefusion-pixel-snapper`, `image-to-pixel` (`image_to_pixel.py`), `spritefusion-sprite-normals` (`normal_map_gen.py`), `pixelorama`, `loot-window`, `pixel-perfect`, `godot-pixel-pipeline` |
+| **VFX, Combat Juice & Synthesized SFX** | [`agents/03-2d-asset-vfx-forge/vfx-shaders-juice-specialist.md`](agents/03-2d-asset-vfx-forge/vfx-shaders-juice-specialist.md) | `vfx-forge` (`vfx_forge.py`), `pixelfx` (`pixelfx_tool.py`), `hit-feedback`, `game-feel`, `effekseer`, `three-quarks`, `see-through`, `water-shorelines`, `atmospheric-perspective` |
+| **3D Models, Catalogs, Blender, PBR & GLBs** | [`agents/04-3d-worlds-pipeline/3d-model-material-forge.md`](agents/04-3d-worlds-pipeline/3d-model-material-forge.md) | `polyspoon` (`polyspoon_tool.py`), `blender-kiln` (`blender_kiln.py`), `mcp-for-blender`, `glb-forge` (`glb_forge.py`), `material-maker`, `triposr`, `mesh-splatting`, `sand3d-to-roblox` (`sand3d_manager.py`, `sand3d_builder.py`), `abo_manager.py`, `threejsassets_manager.py` |
+| **3D Worlds, Physics, AI & C++17 Engines** | [`agents/04-3d-worlds-pipeline/3d-world-physics-engine-specialist.md`](agents/04-3d-worlds-pipeline/3d-world-physics-engine-specialist.md) | Godot 3D (`godot`, `godot-jolt`, `godot-voxel`, `terrain3d`, `phantom-camera`, `limboai`) & C++17 (`the-forge`, `jolt-physics`, `ozz-animation`, `recastnavigation`, `effekseer`) |
+| **Mixed-Source 3D Unification (6-Stage)** | [`agents/04-3d-worlds-pipeline/asset-harmonizer-specialist.md`](agents/04-3d-worlds-pipeline/asset-harmonizer-specialist.md) | `asset-harmonizer` (`asset_harmonizer.py`), `glb-forge`, `blender-kiln`, `material-maker`, `image-to-pixel` |
+| **Web 2D/3D, 67js, Colyseus & Yuka AI** | [`agents/05-web-multiplayer-qa/web-multiplayer-specialist.md`](agents/05-web-multiplayer-qa/web-multiplayer-specialist.md) | `web-2d-games`, `colyseus`, `three-quarks`, `yuka`, `build-67js-scene`, `render-67js-media`, `awesome-gamedev` (`micro_engine.py`, `glb_forge.py`) |
+| **Level BFS, Voxl 60FPS QA & Release** | [`agents/05-web-multiplayer-qa/level-qa-playtest-specialist.md`](agents/05-web-multiplayer-qa/level-qa-playtest-specialist.md) | `level-pipeline` (`level_pipeline.py`), `voxl` (`voxl_client.py`), `pixel-perfect`, `godot-pixel-pipeline`, `godot-mcp`, `sustainable-indie-dev`, `claude-code-game-studios` |
 
-### Web Multiplayer, Web 3D & Game AI (5)
-| Skill | Use when |
-|---|---|
-| `skills/colyseus/SKILL.md` | Authoritative Node.js/TS multiplayer (`Server`, `Room`, `@colyseus/schema`, v0.18 prediction & `references/`). |
-| `skills/three-quarks/SKILL.md` | Batched GPU/CPU particle systems, trails, node graphs & WebGPU VFX in Three.js / React Three Fiber. |
-| `skills/yuka/SKILL.md` | Engine-agnostic JS Game AI (`EntityManager`, `Vehicle` steering, FSM, `Think` goals, `NavMesh`/A*, `Vision`). |
-| `skills/build-67js-scene/SKILL.md` | Interactive WebGL2 3D scenes, procedural nature/worlds, materials, camera & MSAA via `67js`. |
-| `skills/render-67js-media/SKILL.md` | Deterministic PNG/MP4 exports from `67js` scenes with bounded memory on GPU or CPU. |
+---
 
-### 2D Art, Sprites, Pixel Tooling, VFX, Maps & Testing (29)
-| Skill | Use when |
-|---|---|
-| `skills/generate2dmedia/SKILL.md` | Art-route layer (`route_media.py`) routing image/video calls to configured APIs or local Codex/Grok CLIs. |
-| `skills/generate2dsprite/SKILL.md` | Generating game-ready 2D character stills, props, FX/icon sheets, slicing, palette lock, and engine exports. |
-| `skills/generate2dmap/SKILL.md` | Building 2D top-down/side-scrolling maps, tilemaps, parallax & HD-2D plates with reachability checks. |
-| `skills/wang-tiles/SKILL.md` | Eliminating 2D terrain grid repetition with 16-tile edge-matched Wang sets, chunk edge hashing & image quilting (`tools/wang_tiles.py`). |
-| `skills/water-shorelines/SKILL.md` | Baking 2D distance-field water shorelines (depth bands, breathing foam, incoming waves, Godot/Unity shaders via `tools/water_shorelines.py`). |
-| `skills/see-through/SKILL.md` | Keeping 2D characters visible behind trees/fog/miasma/walls with Fade (A), Bayer Dither (B), Cutout (C), and Silhouette + stealth alarm-red (D) (`tools/see_through.py`). |
-| `skills/atmospheric-perspective/SKILL.md` | Adding sky-row atmospheric perspective & base mist to 2D parallax platformers and 2.5D Limbo-style depth cards (`tools/atmospheric_perspective.py`). |
-| `skills/shadowcasting/SKILL.md` | Computing 8-octant Bergstrom shadowcasting for wall-occluded torchlight, fog of war, and enemy LOS in top-down & platformer 2D games (`tools/shadowcasting.py`). |
-| `skills/sprite-stacking/SKILL.md` | Carving 4 orthographic views into ground-first slice strips (`slices_strip.png` + `preview.gif`) and rendering rotating fake-3D pixel stacks (`tools/sprite_stacker.py`). |
-| `skills/pixel-perfect/SKILL.md` | Enforcing 8 pixel-perfect rules (integer viewport scaling, GCD mixel detection, Nearest/Lossless/snap settings, Godot/Unity scene audits via `tools/pixel_perfect.py`). |
-| `skills/loot-window/SKILL.md` | Pixel art loot window (`222x172` @ 4x): tiled `96x96` (`16px` cut) 9-slice frame, code-drawn rarity slots, staggered chest shake/lid/glow shafts/sparkle reveal & Godot/Unity export (`tools/loot_window.py`). |
-| `skills/video2dsprite/SKILL.md` | Turning an approved master still into multi-action animated sprite clips with matte keying & loops. |
-| `skills/sprite-gen/SKILL.md` | Generating sprites, logos/typography, image-to-video motion loops & palette swaps via GPT/Grok. |
-| `skills/codeart2d/SKILL.md` | Explicit-only code-drawn PixelSpec/SVG/rigged 2D sprites, autotiles & JS FX runtime fallback. |
-| `skills/backgroundremover/SKILL.md` | Stripping backgrounds cleanly with U2-Net AI alpha mattes (`libraries/com.github.nadermx.backgroundremover`). |
-| `skills/pixel-snapper/SKILL.md` | Cleaning AI pixel art jitter to integer grids + Pico-8/DB16/GameBoy palettes (`tools/pixel_snapper.py`). |
-| `skills/spritefusion-pixel-snapper/SKILL.md` | Rust CLI & WASM grid snapping + custom hex palette quantization (`Hugo-Dz/spritefusion-pixel-snapper`). |
-| `skills/spritefusion-sprite-normals/SKILL.md` | Generating 2D pixel sprite tangent normal maps (`_n.png`) & height reliefs via Rust/WASM (`libraries/com.github.hugo-dz.spritefusion-sprite-normals`). |
-| `skills/image-to-pixel/SKILL.md` | Art-direction-locked dithering (16 algos), Lospec palettes, outlines & tilesets (`tools/image_to_pixel.py`). |
-| `skills/flat2iso/SKILL.md` | Lossless 2:1 isometric pixel art (`tools/flat2iso.py`: `inspect`/`shift`/`box`/`serve`, `--scale auto`, `_stripN.png` & 4-dir `_strip4.png`, `--json`). |
-| `skills/pixelorama/SKILL.md` | Godot-powered pixel art & animation editor workflows (`libraries/com.github.orama-interactive.pixelorama`). |
-| `skills/ldtk/SKILL.md` | Rule-based autotiling, entity layers & `.ldtk` JSON level maps (`libraries/com.github.deepnight.ldtk`). |
-| `skills/lpc-character-generator/SKILL.md` | Modular 64x64 LPC characters & automated `CREDITS.csv` ledgers (`tools/lpc_character_builder.py`). |
-| `skills/creature-gen/SKILL.md` | Zero-image 9-family procedural pixel monsters, genetics & `_stripN.png` (`tools/creature_gen.py`). |
-| `skills/pixelfx/SKILL.md` | 244+ code-driven combat/magic pixel VFX animations & recoloring (`tools/pixelfx_tool.py`). |
-| `skills/vfx-forge/SKILL.md` | 2D-native top-down 5-Family SDF VFX, Selective Glow & Menpai presets (`tools/vfx_forge.py`). |
-| `skills/pixel-art-atlas/SKILL.md` | O(1) mmap lookup across 1.4M CC0 sprites & strip exports (`tools/pixel_atlas_manager.py`). |
-| `skills/pixel-asset-manager/SKILL.md` | Searching/slicing 30k+ SRPG & Pixel packs (`tools/asset_search.py`, `tools/sprite_slicer.py`). |
-| `skills/voxl/SKILL.md` | 60 FPS remote game stream visual testing (`/screenshot`, `/record`, `tools/voxl_client.py`). |
+## 5. Quick Skill Index (`skills/<name>/SKILL.md` — 69 Skills)
 
-### 3D Models, Reconstruction, Blender & Procedural Materials (9)
-| Skill | Use when |
-|---|---|
-| `skills/blender-kiln/SKILL.md` | Headless Blender 5.2 3D forge, 6-view Colour/Clay review sheets, UV/print checks (`tools/blender_kiln.py`). |
-| `skills/mcp-for-blender/SKILL.md` | Connecting agents to live Blender 3.0+ sessions via MCP (`libraries/com.github.3d-gen-ai.mcp-for-blender` + `references/`). |
-| `skills/glb-forge/SKILL.md` | Inspecting/optimizing GLBs (Meshopt, Draco, WebP, LOD chains, TSL materials, `tools/glb_forge.py`). |
-| `skills/asset-harmonizer/SKILL.md` | Fitting mixed-source 3D assets into one visual language: 6-stage offline pipeline (inventory/triage, Blender normalize, texel density, palette remap/PBR/upscale, local AI retexture on 8 GB VRAM, engine LUT/master shader, QA gate) via `tools/asset_harmonizer.py` + `agents/asset-harmonizer-agent.md`. |
-| `skills/polyspoon/SKILL.md` | Editing/exporting 20 families of recipe-driven procedural low-poly 3D assets (`tools/polyspoon_tool.py`). |
-| `skills/material-maker/SKILL.md` | Authoring procedural PBR `.ptex` node/SDF materials & 3D paint exports to Godot/Unity/UE/Blender. |
-| `skills/mesh-splatting/SKILL.md` | Differentiable opaque triangle-mesh 3D reconstruction, SAM2 segmentation, and `.ply` export. |
-| `skills/triposr/SKILL.md` | Single-image feedforward 3D mesh reconstruction (`run.py`, `rembg`, UV texture baking to `.obj`/`.glb`). |
-| `skills/sand3d-to-roblox/SKILL.md` | Searching/rebuilding Sand3D 100k+ open 3D objects for Roblox & game engines (`tools/sand3d_manager.py`, `tools/sand3d_builder.py`). |
+- **Design, Routers & Production (11):** `awesome-gamedev` · `claude-code-game-studios` · `game-engineering` · `game-feel` · `hit-feedback` · `platformer-forgiveness` · `camera-follow-2d` · `crafting-systems` · `sustainable-indie-dev` · `web-2d-games` · `level-pipeline`
+- **Godot 4 Ecosystem (10):** `godot` · `godot-fake-3d-character` · `godot-jolt` · `godot-voxel` · `terrain3d` · `limboai` · `phantom-camera` · `dialogic` · `godot-mcp` · `godot-pixel-pipeline`
+- **C++ Rendering, Physics, Anim, Nav & VFX (5):** `the-forge` · `jolt-physics` · `ozz-animation` · `recastnavigation` · `effekseer`
+- **Web 3D, Multiplayer & JS AI (5):** `colyseus` · `three-quarks` · `yuka` · `build-67js-scene` · `render-67js-media`
+- **2D Art, Isometric, Cleanup, Maps, VFX & QA (29):** `generate2dmedia` · `generate2dsprite` · `generate2dmap` · `wang-tiles` · `water-shorelines` · `see-through` · `atmospheric-perspective` · `shadowcasting` · `sprite-stacking` · `pixel-perfect` · `loot-window` · `video2dsprite` · `sprite-gen` · `codeart2d` · `backgroundremover` · `pixel-snapper` · `spritefusion-pixel-snapper` · `spritefusion-sprite-normals` · `image-to-pixel` · `flat2iso` · `pixelorama` · `ldtk` · `lpc-character-generator` · `creature-gen` · `pixelfx` · `vfx-forge` · `pixel-art-atlas` · `pixel-asset-manager` · `voxl`
+- **3D Models, Blender, PBR & Harmonization (9):** `blender-kiln` · `mcp-for-blender` · `glb-forge` · `asset-harmonizer` · `polyspoon` · `material-maker` · `mesh-splatting` · `triposr` · `sand3d-to-roblox`

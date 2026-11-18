@@ -94,9 +94,11 @@
       <div class="row">
         <div><label>Pixel scale (for upscaled source)</label><input type="number" id="shiftScale" min="1" max="64" value="1"></div>
         <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button class="btn sec" id="shiftAuto" title="Detect how many times the source is upscaled">Auto</button></div>
+        <div><label>Strip frames <span class="pill">_stripN</span></label><input type="number" id="shiftFrames" min="1" max="128" value="1"></div>
       </div>
       <div class="btns"><button class="btn sec" id="shiftDemo">Load demo sprite</button></div>
       <div class="small" id="shiftInfo" style="margin-top:8px">No image.</div>
+      <div class="err" id="shiftErr"></div>
     </div>
 
     <div class="card">
@@ -206,6 +208,11 @@
         <option value="2">180° — Back on left face, Left Side on right face</option>
         <option value="3">270° — Right Side on left face, Back on right face</option>
       </select>
+      <label>4-dir sheet mode</label>
+      <select id="boxSheetMode">
+        <option value="strip4" selected>Uniform _strip4.png (GameMaker / Godot hframes=4)</option>
+        <option value="compact">Compact preview sheet (2px gap)</option>
+      </select>
       <div class="row">
         <div><label>Preview zoom</label><input type="range" id="boxZoom" min="1" max="16" value="6"></div>
         <div><label>Export scale</label><input type="number" id="boxExport" min="1" max="32" value="1"></div>
@@ -223,7 +230,7 @@
       <div class="view"><h3>Flat views <span id="boxDimA"></span></h3><div class="stage"><canvas id="cvBoxA"></canvas></div></div>
       <div class="view"><h3>Isometric <span id="boxDimB"></span></h3><div class="stage"><canvas id="cvBoxB"></canvas></div></div>
     </div>
-    <div class="view" style="margin-top:14px"><h3>4 directions (0° · 90° · 180° · 270°)</h3><div class="stage"><canvas id="cvBox4"></canvas></div></div>
+    <div class="view" style="margin-top:14px"><h3>4 directions (0° · 90° · 180° · 270°) <span id="boxDim4"></span></h3><div class="stage"><canvas id="cvBox4"></canvas></div></div>
   </div>
 </div>
 </section>
@@ -292,6 +299,42 @@ function trim(p) {
   for (let y=y0;y<=y1;y++) for (let x=x0;x<=x1;x++) set(out, x-x0, y-y0, get(p,x,y));
   return out;
 }
+function cropPix(p, sx, sy, w, h) {
+  const out = newPix(w, h);
+  for (let y=0;y<h;y++) for (let x=0;x<w;x++) set(out, x, y, get(p, sx+x, sy+y));
+  return out;
+}
+function downscalePix(src, scale) {
+  scale = Math.max(1, scale | 0);
+  if (scale <= 1) return src;
+  const w = Math.floor(src.w / scale), h = Math.floor(src.h / scale);
+  const out = newPix(w, h), off = Math.floor(scale / 2);
+  for (let y=0;y<h;y++) for (let x=0;x<w;x++) set(out, x, y, get(src, x*scale+off, y*scale+off));
+  return out;
+}
+function packUniformStrip(frames) {
+  const cellW = Math.max(...frames.map(f => f.w));
+  const cellH = Math.max(...frames.map(f => f.h));
+  const sheet = newPix(cellW * frames.length, cellH);
+  frames.forEach((f, idx) => {
+    const x0 = idx * cellW + Math.floor((cellW - f.w) / 2);
+    const y0 = cellH - f.h;
+    for (let y=0;y<f.h;y++) for (let x=0;x<f.w;x++) set(sheet, x0+x, y0+y, get(f,x,y));
+  });
+  return { sheet, cellW, cellH };
+}
+function inspectPix(p, steps = 2) {
+  const detectedScale = detectScale(p);
+  const native = downscalePix(p, detectedScale);
+  const trimmed = trim(native);
+  const evenW = (native.w % 2) === 0, evenS = (steps % 2) === 0;
+  return {
+    rawWidth: p.w, rawHeight: p.h, detectedScale,
+    nativeWidth: native.w, nativeHeight: native.h,
+    trimmedWidth: trimmed.w, trimmedHeight: trimmed.h,
+    steps, parityCompatible: evenW === evenS
+  };
+}
 function addOutline(p, color) {
   const out = newPix(p.w+2, p.h+2);
   for (let y=0;y<p.h;y++) for (let x=0;x<p.w;x++) set(out, x+1, y+1, get(p,x,y));
@@ -331,8 +374,11 @@ async function copyPix(p, scale) { try { const b = await pixToBlob(p, scale); aw
 function loadFileToImage(file) { return new Promise((res, rej) => { const img = new Image(); img.onload = () => res(img); img.onerror = rej; img.src = URL.createObjectURL(file); }); }
 
 /* ---------------- Column shift ---------------- */
-function columnShift(p, { steps, direction, center, invert }) {
-  steps = Math.max(1, steps|0);
+function columnShift(p, opts = {}) {
+  const steps = Math.max(1, (opts.steps ?? 2) | 0);
+  const direction = opts.direction || 'right';
+  const center = opts.center ?? Math.floor(p.w / 2);
+  const invert = !!opts.invert;
   const sh = x => {
     if (direction === 'right') return Math.floor(x / steps);
     if (direction === 'left')  return Math.floor((p.w - 1 - x) / steps);
@@ -343,11 +389,29 @@ function columnShift(p, { steps, direction, center, invert }) {
   for (let x=0;x<p.w;x++) { const s = sh(x); const dy = invert ? s : (max - s); for (let y=0;y<p.h;y++) set(out, x, y+dy, get(p,x,y)); }
   return trim(out);
 }
+function shiftStrip(p, framesCount = 1, opts = {}) {
+  const count = Math.max(1, framesCount | 0);
+  if (count > 1 && p.w % count !== 0) {
+    throw new Error(`Width ${p.w} is not divisible by ${count} strip frames.`);
+  }
+  const frameW = count > 1 ? Math.floor(p.w / count) : p.w;
+  const frames = [];
+  for (let i = 0; i < count; i++) {
+    const sub = count > 1 ? cropPix(p, i * frameW, 0, frameW, p.h) : p;
+    let res = columnShift(sub, opts);
+    if (opts.outline) res = addOutline(res, opts.outlineColor || [26, 19, 38, 255]);
+    frames.push(res);
+  }
+  if (count === 1) return { pix: frames[0], cellW: frames[0].w, cellH: frames[0].h, frames: 1, frameNativeW: frameW };
+  const { sheet, cellW, cellH } = packUniformStrip(frames);
+  return { pix: sheet, cellW, cellH, frames: count, frameNativeW: frameW };
+}
 
 /* ---------------- Box builder ---------------- */
 // Standard 2:1. Faces: left (W x H), right (D x H), top (W x D).
 // Screen coords: corner seam between column -1 (left face) and 0 (right face); row -1 = bottom of corner.
-function buildBox(left, right, top, opt) {
+function buildBox(left, right, top, opt = {}) {
+  opt = { lTop: 1, lLeft: 0.82, lRight: 0.62, keepOutline: true, outline: false, outlineColor: [26, 19, 38, 255], seams: false, seamDark: 0.7, ...opt };
   const W = left.w, D = right.w, H = left.h;
   const extra = Math.ceil((W + D) / 2) + 3;
   const ox = W, oy = H + extra;
@@ -397,6 +461,18 @@ function facesForRotation(F, rot) { // returns {left, right, top}
     default: return { left: front, right: side, top };
   }
 }
+function buildBox4Dir(faces, opt = {}) {
+  const o = { lTop: 1, lLeft: 0.82, lRight: 0.62, keepOutline: true, outline: false, outlineColor: [26, 19, 38, 255], seams: false, seamDark: 0.7, sheetMode: 'strip4', ...opt };
+  const views = [0,1,2,3].map(r => { const f = facesForRotation(faces, r); return buildBox(f.left, f.right, f.top, o); });
+  if (o.sheetMode === 'compact') {
+    const gap = 2, sheetH = Math.max(...views.map(v => v.h)), sheetW = views.reduce((a,v)=>a+v.w, 0) + gap*3;
+    const sheet = newPix(sheetW, sheetH); let x = 0;
+    for (const v of views) { for (let yy=0;yy<v.h;yy++) for (let xx=0;xx<v.w;xx++) set(sheet, x+xx, sheetH - v.h + yy, get(v,xx,yy)); x += v.w + gap; }
+    return { views, sheet, cellW: null, cellH: null, mode: 'compact' };
+  }
+  const { sheet, cellW, cellH } = packUniformStrip(views);
+  return { views, sheet, cellW, cellH, mode: 'strip4' };
+}
 
 /* ---------------- Demo sprites ---------------- */
 function demoFront() { // 16 x 14 wooden crate-ish door
@@ -433,39 +509,58 @@ document.querySelectorAll('nav button').forEach(b => b.addEventListener('click',
 
 /* ---------------- Tab 1 wiring ---------------- */
 let shiftSrcImg = null, shiftSrc = null, shiftOut = null;
-function shiftLoadImage(img) { shiftSrcImg = img; $('shiftScale').value = 1; shiftRefreshSource(); }
-function shiftSetPix(p) { shiftSrcImg = null; shiftSrc = p; $('shiftScale').value = 1; shiftAfterSource(); }
+function detectStripFromName(name) { const m = (name || '').match(/_strip(\d+)\.[a-z0-9]+$/i); return m ? Math.max(1, parseInt(m[1], 10)) : 1; }
+function shiftLoadImage(img, stripHint = 1) { shiftSrcImg = img; $('shiftScale').value = 1; $('shiftFrames').value = stripHint || 1; shiftRefreshSource(); }
+function shiftSetPix(p) { shiftSrcImg = null; shiftSrc = p; $('shiftScale').value = 1; $('shiftFrames').value = 1; shiftAfterSource(); }
 function shiftRefreshSource() { if (!shiftSrcImg) return; shiftSrc = pixFromImage(shiftSrcImg, parseInt($('shiftScale').value)||1); shiftAfterSource(); }
 function shiftAfterSource() {
-  $('shiftInfo').textContent = `Source: ${shiftSrc.w} × ${shiftSrc.h} px`;
-  $('splitCenter').max = shiftSrc.w - 1; $('splitRange').max = shiftSrc.w - 1;
-  if (parseInt($('splitCenter').value) > shiftSrc.w-1 || parseInt($('splitCenter').value) === 0) { $('splitCenter').value = Math.floor(shiftSrc.w/2); $('splitRange').value = $('splitCenter').value; }
+  const frames = Math.max(1, parseInt($('shiftFrames').value)||1);
+  $('shiftInfo').textContent = `Source: ${shiftSrc.w} × ${shiftSrc.h} px` + (frames > 1 ? ` (${frames} frames)` : '');
+  const frameW = (frames > 1 && shiftSrc.w % frames === 0) ? Math.floor(shiftSrc.w / frames) : shiftSrc.w;
+  $('splitCenter').max = Math.max(0, frameW - 1); $('splitRange').max = Math.max(0, frameW - 1);
+  if (parseInt($('splitCenter').value) > frameW-1 || parseInt($('splitCenter').value) === 0) { $('splitCenter').value = Math.floor(frameW/2); $('splitRange').value = $('splitCenter').value; }
   shiftRender();
 }
 function shiftRender() {
   if (!shiftSrc) return;
   const steps = parseInt($('steps').value), direction = $('direction').value, center = parseInt($('splitCenter').value)||0, invert = $('invert').checked;
-  let out = columnShift(shiftSrc, { steps, direction, center, invert });
-  if ($('shiftOutline').checked) out = addOutline(out, hexToRgba($('shiftOutlineColor').value));
-  shiftOut = out;
+  const frames = Math.max(1, parseInt($('shiftFrames').value)||1);
+  const outline = $('shiftOutline').checked, outlineColor = hexToRgba($('shiftOutlineColor').value);
   const z = parseInt($('shiftZoom').value);
-  drawPix($('cvShiftA'), shiftSrc, z); drawPix($('cvShiftB'), out, z);
-  $('shiftDimA').textContent = `${shiftSrc.w}×${shiftSrc.h}`; $('shiftDimB').textContent = `${out.w}×${out.h}`;
-  const evenW = shiftSrc.w % 2 === 0, evenS = steps % 2 === 0;
-  $('shiftParity').textContent = (evenW === evenS) ? `✓ Parity match: width ${shiftSrc.w} (${evenW?'even':'odd'}), steps ${steps} (${evenS?'even':'odd'}).` : `⚠ Parity: width ${shiftSrc.w} (${evenW?'even':'odd'}) but steps ${steps} (${evenS?'even':'odd'}). Even steps for even width and odd steps for odd width yield cleaner edges.`;
+  drawPix($('cvShiftA'), shiftSrc, z);
+  $('shiftDimA').textContent = `${shiftSrc.w}×${shiftSrc.h}`;
+  if (frames > 1 && shiftSrc.w % frames !== 0) {
+    $('shiftErr').textContent = `Source width (${shiftSrc.w}) is not divisible by ${frames} strip frames.`;
+    $('shiftParity').textContent = '';
+    $('shiftDimB').textContent = '—';
+    ['shiftDownload','shiftCopy','shiftToBox'].forEach(id => $(id).disabled = true);
+    return;
+  }
+  $('shiftErr').textContent = '';
+  const res = shiftStrip(shiftSrc, frames, { steps, direction, center, invert, outline, outlineColor });
+  shiftOut = res.pix;
+  drawPix($('cvShiftB'), res.pix, z);
+  $('shiftDimB').textContent = frames > 1 ? `${res.pix.w}×${res.pix.h} (${frames}×${res.cellW}×${res.cellH})` : `${res.pix.w}×${res.pix.h}`;
+  const evenW = res.frameNativeW % 2 === 0, evenS = steps % 2 === 0;
+  $('shiftParity').textContent = (evenW === evenS) ? `✓ Parity match: frame width ${res.frameNativeW} (${evenW?'even':'odd'}), steps ${steps} (${evenS?'even':'odd'}).` : `⚠ Parity: frame width ${res.frameNativeW} (${evenW?'even':'odd'}) but steps ${steps} (${evenS?'even':'odd'}). Even steps for even width and odd steps for odd width yield cleaner edges.`;
   ['shiftDownload','shiftCopy','shiftToBox'].forEach(id => $(id).disabled = false);
 }
-['steps','direction','splitCenter','invert','shiftOutline','shiftOutlineColor','shiftZoom'].forEach(id => $(id).addEventListener('input', () => {
+['steps','direction','splitCenter','invert','shiftOutline','shiftOutlineColor','shiftZoom','shiftFrames'].forEach(id => $(id).addEventListener('input', () => {
   $('splitBox').style.display = $('direction').value === 'split' ? '' : 'none';
   $('shiftOutlineRow').style.display = $('shiftOutline').checked ? '' : 'none';
   if (id === 'splitCenter') $('splitRange').value = $('splitCenter').value;
+  if (id === 'shiftFrames' && shiftSrc) { shiftAfterSource(); return; }
   shiftRender();
 }));
 $('splitRange').addEventListener('input', () => { $('splitCenter').value = $('splitRange').value; shiftRender(); });
 $('shiftScale').addEventListener('input', shiftRefreshSource);
 $('shiftAuto').addEventListener('click', () => { if (!shiftSrcImg) return; const full = pixFromImage(shiftSrcImg, 1); $('shiftScale').value = detectScale(full); shiftRefreshSource(); });
 $('shiftDemo').addEventListener('click', () => shiftSetPix(demoFront()));
-$('shiftDownload').addEventListener('click', () => download(shiftOut, parseInt($('shiftExport').value)||1, `iso_${$('direction').value}_s${$('steps').value}.png`));
+$('shiftDownload').addEventListener('click', () => {
+  const frames = Math.max(1, parseInt($('shiftFrames').value)||1);
+  const suffix = frames > 1 ? `_strip${frames}` : '';
+  download(shiftOut, parseInt($('shiftExport').value)||1, `iso_${$('direction').value}_s${$('steps').value}${suffix}.png`);
+});
 $('shiftCopy').addEventListener('click', async () => { const ok = await copyPix(shiftOut, parseInt($('shiftExport').value)||1); $('shiftCopy').textContent = ok ? 'Copied ✓' : 'Copy failed'; setTimeout(()=>$('shiftCopy').textContent='Copy to clipboard', 1500); });
 $('shiftToBox').addEventListener('click', () => { if (!shiftSrc) return; boxSetFace('front', shiftSrc); document.querySelector('nav button[data-tab="box"]').click(); });
 
@@ -476,12 +571,12 @@ function wireDrop(el, input, onFile) {
   el.addEventListener('dragleave', () => el.classList.remove('over'));
   el.addEventListener('drop', e => { e.preventDefault(); el.classList.remove('over'); const f = [...e.dataTransfer.files].find(f => f.type.startsWith('image/')); if (f) onFile(f); });
 }
-wireDrop($('dropShift'), $('fileShift'), async f => shiftLoadImage(await loadFileToImage(f)));
+wireDrop($('dropShift'), $('fileShift'), async f => shiftLoadImage(await loadFileToImage(f), detectStripFromName(f.name)));
 document.addEventListener('paste', async e => {
   const item = [...(e.clipboardData?.items||[])].find(i => i.type.startsWith('image/')); if (!item) return;
   const img = await loadFileToImage(item.getAsFile());
   if ($('tab-box').classList.contains('active')) { const target = boxPasteTarget || 'front'; boxFaceImgs[target] = img; boxFaces[target] = pixFromImage(img, parseInt($('boxScale').value)||1); boxRefreshThumbs(); boxRender(); }
-  else shiftLoadImage(img);
+  else shiftLoadImage(img, 1);
 });
 
 /* ---------------- Tab 2 wiring ---------------- */
@@ -516,7 +611,7 @@ $('lightPreset').addEventListener('change', () => {
   boxRender();
 });
 ['lTop','lLeft','lRight'].forEach(id => $(id).addEventListener('input', () => { $('lightPreset').value = 'custom'; boxRender(); }));
-['keepOutline','boxOutline','boxSeams','boxOutlineColor','seamDark','rotation','boxZoom'].forEach(id => $(id).addEventListener('input', boxRender));
+['keepOutline','boxOutline','boxSeams','boxOutlineColor','seamDark','rotation','boxZoom','boxSheetMode'].forEach(id => $(id).addEventListener('input', boxRender));
 
 function boxValidate() {
   const F = boxFaces; const errs = [];
@@ -531,23 +626,24 @@ function boxValidate() {
 function boxOpts() {
   return { lTop: parseFloat($('lTop').value), lLeft: parseFloat($('lLeft').value), lRight: parseFloat($('lRight').value),
     keepOutline: $('keepOutline').checked, outline: $('boxOutline').checked, outlineColor: hexToRgba($('boxOutlineColor').value),
-    seams: $('boxSeams').checked, seamDark: parseFloat($('seamDark').value) };
+    seams: $('boxSeams').checked, seamDark: parseFloat($('seamDark').value), sheetMode: $('boxSheetMode').value };
 }
 function boxRender() {
   const err = boxValidate(); $('boxErr').textContent = err;
   const z = parseInt($('boxZoom').value);
-  if (err) { ['boxDownload','boxCopy','boxSheet'].forEach(id => $(id).disabled = true); drawFlatViews(z); return; }
+  if (err) { ['boxDownload','boxCopy','boxSheet'].forEach(id => $(id).disabled = true); $('boxDim4').textContent = ''; drawFlatViews(z); return; }
   const opt = boxOpts();
-  boxViews = [0,1,2,3].map(r => { const f = facesForRotation(boxFaces, r); return buildBox(f.left, f.right, f.top, opt); });
+  const built = buildBox4Dir(boxFaces, opt);
+  boxViews = built.views;
   boxOut = boxViews[parseInt($('rotation').value)];
   drawFlatViews(z);
   drawPix($('cvBoxB'), boxOut, z); $('cvBoxB').title = '';
   $('boxDimB').textContent = `${boxOut.w}×${boxOut.h}`;
-  // 4-view sheet
-  const gap = 2, sheetH = Math.max(...boxViews.map(v => v.h)), sheetW = boxViews.reduce((a,v)=>a+v.w, 0) + gap*3;
-  const sheet = newPix(sheetW, sheetH); let x = 0;
-  for (const v of boxViews) { for (let yy=0;yy<v.h;yy++) for (let xx=0;xx<v.w;xx++) set(sheet, x+xx, sheetH - v.h + yy, get(v,xx,yy)); x += v.w + gap; }
-  boxSheetPix = sheet; drawPix($('cvBox4'), sheet, Math.max(1, Math.min(z, 6)));
+  boxSheetPix = built.sheet;
+  drawPix($('cvBox4'), built.sheet, Math.max(1, Math.min(z, 6)));
+  $('boxDim4').textContent = built.mode === 'strip4'
+    ? `${built.sheet.w}×${built.sheet.h} (cell ${built.cellW}×${built.cellH} · strip4)`
+    : `${built.sheet.w}×${built.sheet.h} (compact)`;
   ['boxDownload','boxCopy','boxSheet'].forEach(id => $(id).disabled = false);
 }
 let boxSheetPix = null;
@@ -560,10 +656,13 @@ function drawFlatViews(z) {
 }
 $('boxDownload').addEventListener('click', () => download(boxOut, parseInt($('boxExport').value)||1, `iso_box_rot${$('rotation').value}.png`));
 $('boxCopy').addEventListener('click', async () => { const ok = await copyPix(boxOut, parseInt($('boxExport').value)||1); $('boxCopy').textContent = ok ? 'Copied ✓' : 'Copy failed'; setTimeout(()=>$('boxCopy').textContent='Copy to clipboard', 1500); });
-$('boxSheet').addEventListener('click', () => download(boxSheetPix, parseInt($('boxExport').value)||1, 'iso_box_4dir_sheet.png'));
+$('boxSheet').addEventListener('click', () => {
+  const fname = $('boxSheetMode').value === 'strip4' ? 'iso_box_4dir_strip4.png' : 'iso_box_4dir_sheet.png';
+  download(boxSheetPix, parseInt($('boxExport').value)||1, fname);
+});
 
-// expose for testing
-window.F2I = { columnShift, buildBox, newPix, set, get, demoFront, demoSide, demoTop, detectScale, trim };
+// expose for testing & headless automation
+window.F2I = { columnShift, shiftStrip, packUniformStrip, buildBox, facesForRotation, buildBox4Dir, inspectPix, newPix, set, get, demoFront, demoSide, demoTop, detectScale, trim, addOutline, mirrorX, rot90 };
 })();
 </script>
 </body>

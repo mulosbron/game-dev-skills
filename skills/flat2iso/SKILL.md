@@ -59,8 +59,11 @@ python tools/flat2iso.py box --front front.png --side side.png --top top.png --b
 python tools/flat2iso.py box --demo --seams --sheet-only -o exports/flat2iso/demo_box_strip4.png --json
 ```
 
-### 4. Launch Offline Interactive HTML Studio (`serve`)
+### 4. Interactive & Scriptable HTML Studio (`serve` / `flat2iso.html`)
 ```powershell
 python tools/flat2iso.py serve --port 8765
 ```
-Or open `skills/flat2iso/assets/flat2iso.html` directly in any browser (100% offline, zero dependencies).
+Or open `skills/flat2iso/assets/flat2iso.html` directly in any browser (100% offline, zero dependencies). The HTML studio has full 1:1 parity with `tools/flat2iso.py`:
+- **Tab 1 — Column Shift:** Supports drag/drop/paste, `Auto` logical pixel-scale detection, `Strip frames` (`#shiftFrames`, auto-parsed from `*_stripN.png` filenames), parity check per frame, 1px silhouette outline, and `Send result to Box →`.
+- **Tab 2 — Box Builder:** Validates `Front`/`Right Side`/`Top` (plus optional `Back`/`Left Side`) dimensions, applies 3-face lighting with outline protection & depth-aware seams, and exports either `Uniform _strip4.png` (bottom-center anchored cells ready for GameMaker or Godot `hframes = 4`) or `Compact preview sheet (2px gap)`.
+- **Programmatic Browser API (`window.F2I`):** Exposes `{ columnShift, shiftStrip, packUniformStrip, buildBox, facesForRotation, buildBox4Dir, inspectPix, newPix, set, get, demoFront, demoSide, demoTop, detectScale, trim, addOutline, mirrorX, rot90 }` for Playwright/browser automation or unit verification.
