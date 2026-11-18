@@ -5,6 +5,7 @@ Allows slicing grid-based pixel sprite sheets into individual frames
 or reassembling them into GameMaker-friendly '_stripN.png' files.
 """
 
+import json
 import sys
 import argparse
 from pathlib import Path
@@ -14,7 +15,7 @@ except ImportError:
     print("Pillow is required. Run 'pip install Pillow'")
     sys.exit(1)
 
-def slice_spritesheet(sheet_path: Path, frame_w: int, frame_h: int, output_dir: Path, prefix: str = ""):
+def slice_spritesheet(sheet_path: Path, frame_w: int, frame_h: int, output_dir: Path, prefix: str = "", quiet: bool = False) -> dict:
     output_dir.mkdir(parents=True, exist_ok=True)
     with Image.open(sheet_path) as img:
         img_w, img_h = img.size
@@ -22,15 +23,17 @@ def slice_spritesheet(sheet_path: Path, frame_w: int, frame_h: int, output_dir: 
         rows = img_h // frame_h
         total_frames = cols * rows
 
-        print(f"Slicing {sheet_path.name} ({img_w}x{img_h}) -> {cols} cols x {rows} rows ({total_frames} frames of {frame_w}x{frame_h})")
+        if not quiet:
+            print(f"Slicing {sheet_path.name} ({img_w}x{img_h}) -> {cols} cols x {rows} rows ({total_frames} frames of {frame_w}x{frame_h})")
 
         frame_idx = 0
         pfx = prefix or sheet_path.stem
+        exported_files = []
         for r in range(rows):
             for c in range(cols):
                 box = (c * frame_w, r * frame_h, (c + 1) * frame_w, (r + 1) * frame_h)
                 frame = img.crop(box)
-                
+
                 # Check if frame is completely transparent
                 extrema = frame.getextrema()
                 if frame.mode in ("RGBA", "LA") and extrema[-1][1] == 0:
@@ -39,11 +42,27 @@ def slice_spritesheet(sheet_path: Path, frame_w: int, frame_h: int, output_dir: 
 
                 out_file = output_dir / f"{pfx}_{frame_idx:03d}.png"
                 frame.save(out_file)
+                exported_files.append(str(out_file))
                 frame_idx += 1
 
-        print(f"Exported {frame_idx} frames to {output_dir}")
+        if not quiet:
+            print(f"Exported {frame_idx} frames to {output_dir}")
+        return {
+            "mode": "slice",
+            "source": str(sheet_path),
+            "sheet_width": img_w,
+            "sheet_height": img_h,
+            "cols": cols,
+            "rows": rows,
+            "frame_width": frame_w,
+            "frame_height": frame_h,
+            "frame_count": frame_idx,
+            "output_dir": str(output_dir),
+            "files": exported_files,
+        }
 
-def make_gamemaker_strip(sheet_path: Path, frame_w: int, frame_h: int, output_path: Path):
+
+def make_gamemaker_strip(sheet_path: Path, frame_w: int, frame_h: int, output_path: Path, quiet: bool = False) -> dict:
     """
     GameMaker recognizes files ending with _stripN.png where N is the frame count.
     Arranges all valid frames horizontally into a single 1-row strip.
@@ -70,11 +89,26 @@ def make_gamemaker_strip(sheet_path: Path, frame_w: int, frame_h: int, output_pa
 
         clean_stem = sheet_path.stem.split("_strip")[0]
         final_filename = f"{clean_stem}_strip{total_frames}.png"
-        final_dest = output_path if output_path.is_file() else output_path / final_filename
+        if output_path.suffix.lower() == ".png":
+            final_dest = output_path
+        else:
+            final_dest = output_path / final_filename
 
         final_dest.parent.mkdir(parents=True, exist_ok=True)
         strip_img.save(final_dest)
-        print(f"Saved GameMaker strip: {final_dest} ({strip_w}x{strip_h}, {total_frames} frames)")
+        if not quiet:
+            print(f"Saved GameMaker strip: {final_dest} ({strip_w}x{strip_h}, {total_frames} frames)")
+        return {
+            "mode": "gamemaker-strip",
+            "source": str(sheet_path),
+            "output_file": str(final_dest),
+            "strip_width": strip_w,
+            "strip_height": strip_h,
+            "frame_width": frame_w,
+            "frame_height": frame_h,
+            "frame_count": total_frames,
+        }
+
 
 def main():
     parser = argparse.ArgumentParser(description="Sprite Slicer & GameMaker Strip Tool")
@@ -84,18 +118,25 @@ def main():
     parser.add_argument("--output", "-o", default="./output", help="Output directory or file path")
     parser.add_argument("--gamemaker-strip", "-g", action="store_true", help="Generate GameMaker _stripN.png horizontal strip")
     parser.add_argument("--prefix", "-p", default="", help="Prefix for frame names")
+    parser.add_argument("--json", action="store_true", help="Output JSON summary")
 
     args = parser.parse_args()
     img_path = Path(args.image)
     if not img_path.exists():
-        print(f"Error: {img_path} not found.")
+        if args.json:
+            print(json.dumps({"error": f"{img_path} not found."}))
+        else:
+            print(f"Error: {img_path} not found.")
         sys.exit(1)
 
     out_path = Path(args.output)
     if args.gamemaker_strip:
-        make_gamemaker_strip(img_path, args.width, args.height, out_path)
+        result = make_gamemaker_strip(img_path, args.width, args.height, out_path, quiet=args.json)
     else:
-        slice_spritesheet(img_path, args.width, args.height, out_path, prefix=args.prefix)
+        result = slice_spritesheet(img_path, args.width, args.height, out_path, prefix=args.prefix, quiet=args.json)
+
+    if args.json:
+        print(json.dumps(result, indent=2, ensure_ascii=False))
 
 if __name__ == "__main__":
     main()

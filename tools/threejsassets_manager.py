@@ -7,10 +7,12 @@ from https://threejsassets.com/ with complete provenance and Free Commercial Lic
 
 import sys
 import argparse
+import html
 import json
 import time
 import re
 from pathlib import Path
+from typing import Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 
@@ -57,7 +59,7 @@ def ensure_dirs():
     if not LICENSES_PATH.exists():
         LICENSES_PATH.write_text(LICENSE_TEXT, encoding="utf-8")
 
-def fetch_catalog(force: bool = False):
+def fetch_catalog(force: bool = False, quiet: bool = False):
     """
     Scrapes the full 1,040+ free model catalog from https://threejsassets.com/assets/free
     """
@@ -65,7 +67,8 @@ def fetch_catalog(force: bool = False):
     if CATALOG_PATH.exists() and not force:
         with open(CATALOG_PATH, "r", encoding="utf-8") as f:
             catalog = json.load(f)
-            print(f"Loaded existing catalog: {len(catalog)} items.")
+            if not quiet:
+                print(f"Loaded existing catalog: {len(catalog)} items.")
             return catalog
 
     print("Fetching free catalog from https://threejsassets.com/assets/free ...", flush=True)
@@ -203,15 +206,98 @@ def bulk_download(max_workers: int = 3, download_thumbs: bool = True):
     print(f"\nBulk download complete in {total_time:.1f}s!")
     print(f"Total downloaded: {success_count}, Cached: {cached_count}, Failed: {fail_count}")
 
-def search_catalog(query: str, limit: int = 20):
-    catalog = fetch_catalog()
-    q = query.lower()
-    matches = [item for item in catalog if q in item["name"].lower() or q in item["slug"].lower()]
+def _parse_item_category_and_title(item: dict) -> tuple[str, str]:
+    raw_name = html.unescape(item.get("name", "") or "")
+    if " 3D model: " in raw_name:
+        cat, title = raw_name.split(" 3D model: ", 1)
+        return cat.strip() or "other", title.strip() or item.get("slug", "")
+    return "other", raw_name or item.get("slug", "")
+
+
+def search_catalog(query: str = "", category: Optional[str] = None, limit: int = 20, as_json: bool = False):
+    catalog = fetch_catalog(quiet=as_json)
+    tokens = query.lower().split() if query else []
+    cat_filter = category.strip().lower() if category else None
+    matches = []
+
+    for item in catalog:
+        cat, title = _parse_item_category_and_title(item)
+        if cat_filter and cat_filter not in cat.lower() and cat.lower() != cat_filter:
+            continue
+        slug = item.get("slug", "")
+        hay = f"{slug} {title} {cat} {item.get('name', '')}".lower()
+        if all(t in hay for t in tokens):
+            score = 0
+            if tokens:
+                q = query.strip().lower()
+                t_low = title.lower()
+                s_low = slug.lower()
+                if s_low == q or t_low == q:
+                    score = 100
+                elif t_low.startswith(q) or s_low.startswith(q):
+                    score = 60
+                elif all(t in t_low for t in tokens):
+                    score = 30
+                else:
+                    score = 10
+            matches.append((score, len(title), title.lower(), item, cat, title))
+
+    if tokens:
+        matches.sort(key=lambda x: (-x[0], x[1], x[2]))
+
+    selected = matches[:limit]
+    if as_json:
+        results = []
+        for _, _, _, m, cat, title in selected:
+            local_file = MODELS_DIR / f"{m['slug']}.glb"
+            results.append({
+                "slug": m["slug"],
+                "name": m["name"],
+                "title": title,
+                "category": cat,
+                "file_name": m["file_name"],
+                "installed": local_file.exists(),
+                "path": f"assets/com.threejsassets/models/{m['file_name']}",
+                "license": m.get("license", "Free Commercial License"),
+                "model_url": m.get("model_url"),
+                "page_url": m.get("page_url"),
+            })
+        print(json.dumps({
+            "query": query,
+            "category": category,
+            "total_matches": len(matches),
+            "count": len(results),
+            "results": results,
+        }, indent=2, ensure_ascii=False))
+        return
+
     print(f"Found {len(matches)} matching models for '{query}':")
-    for m in matches[:limit]:
+    for _, _, _, m, cat, _ in selected:
         local_file = MODELS_DIR / f"{m['slug']}.glb"
         status = "INSTALLED" if local_file.exists() else "AVAILABLE"
-        print(f"- [{status}] {m['name']} ({m['slug']}.glb)")
+        print(f"- [{status}] [{cat}] {m['name']} ({m['slug']}.glb)")
+
+
+def list_categories(as_json: bool = False):
+    catalog = fetch_catalog(quiet=as_json)
+    counts: dict[str, int] = {}
+    for item in catalog:
+        cat, _ = _parse_item_category_and_title(item)
+        counts[cat] = counts.get(cat, 0) + 1
+    sorted_counts = dict(sorted(counts.items(), key=lambda x: (-x[1], x[0].lower())))
+
+    if as_json:
+        print(json.dumps({
+            "total_models": len(catalog),
+            "total_categories": len(sorted_counts),
+            "categories": sorted_counts,
+        }, indent=2, ensure_ascii=False))
+        return
+
+    print(f"ThreeJS Assets Categories ({len(catalog)} models, {len(sorted_counts)} categories):")
+    for cat, cnt in sorted_counts.items():
+        print(f"  {cat:28s}: {cnt} models")
+
 
 def main():
     parser = argparse.ArgumentParser(description="ThreeJS Assets Manager & Bulk Downloader")
@@ -227,8 +313,14 @@ def main():
 
     # Search command
     s_p = subparsers.add_parser("search", help="Search free 3D models by keyword")
-    s_p.add_argument("query", help="Keyword to search")
-    s_p.add_argument("--limit", "-l", type=int, default=20, help="Max results")
+    s_p.add_argument("query", nargs="?", default="", help="Keyword to search")
+    s_p.add_argument("--category", "-c", default=None, help="Filter by category (e.g. Interiors, Nature, Props)")
+    s_p.add_argument("--limit", "-l", "-n", type=int, default=20, help="Max results")
+    s_p.add_argument("--json", action="store_true", help="Output JSON results")
+
+    # Categories command
+    cat_p = subparsers.add_parser("categories", help="List available 3D model categories")
+    cat_p.add_argument("--json", action="store_true", help="Output JSON categories")
 
     args = parser.parse_args()
 
@@ -237,7 +329,9 @@ def main():
     elif args.command == "download":
         bulk_download(max_workers=args.workers, download_thumbs=not args.no_thumbs)
     elif args.command == "search":
-        search_catalog(args.query, limit=args.limit)
+        search_catalog(args.query, category=args.category, limit=args.limit, as_json=args.json)
+    elif args.command == "categories":
+        list_categories(as_json=args.json)
     else:
         parser.print_help()
 

@@ -111,5 +111,14 @@ exports/**/verify_*
 *.swo
 *~
 
-# Local game projects (never pushed)
-projects/farming_25d/
+# Local game projects & personal project-specific scripts (never pushed)
+projects/
+tools/enemy_boss_gen/
+tools/generate_aestra_vfx.py
+tools/generate_characters.py
+tools/generate_enemies_and_bosses.py
+tools/generate_pets.py
+tools/harvest_master_asset_forge.py
+tools/synthesize_nos_audio.py
+tools/*aestra*
+tools/*_nos_*

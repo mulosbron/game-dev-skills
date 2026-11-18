@@ -344,39 +344,83 @@ class SpriteAtlas:
 
 def cmd_search(args):
     """Search subjects or captions."""
-    query = args.query.lower()
+    query = (args.query or "").strip().lower()
+    tokens = query.split() if query else []
     limit = args.limit
+    as_json = getattr(args, "json", False)
 
-    # First check catalog if query matches subject
+    subject_matches = []
     if CATALOG_PATH.exists():
         with open(CATALOG_PATH, "r", encoding="utf-8") as f:
             cat = json.load(f)
-        matches = [k for k in cat["categories"] if query in k.lower()]
-        if matches:
-            print(f"Found {len(matches)} matching subjects in catalog:")
-            shown = 0
-            for k in matches[:limit]:
-                info = cat["categories"][k]
-                print(f"  • Subject: '{k}' ({info['count']} sprites) - Sample IDs: {info['sample_ids'][:5]}")
-                shown += 1
-            if len(matches) > limit:
-                print(f"  ... and {len(matches) - limit} more subjects.")
-            print()
+        for k, info in cat.get("categories", {}).items():
+            kl = k.lower()
+            if all(t in kl for t in tokens):
+                if not tokens:
+                    rank = 0
+                elif kl == query:
+                    rank = 100
+                elif kl.startswith(query):
+                    rank = 60
+                elif all(t in kl.split() for t in tokens):
+                    rank = 40
+                else:
+                    rank = 10
+                subject_matches.append((rank, len(k), kl, k, info))
 
-    # Search captions if requested or needed
-    if not args.subjects_only:
+        if tokens:
+            subject_matches.sort(key=lambda x: (-x[0], x[1], x[2]))
+
+    captions_available = (ASSETS_DIR / "captions.json").exists() and (ASSETS_DIR / "objects.json").exists()
+    caption_hits = []
+    if not args.subjects_only and captions_available:
         atlas = SpriteAtlas()
-        print(f"Searching captions for '{query}'...")
-        hits = []
+        if not as_json:
+            print(f"Searching captions for '{query}'...")
         for idx, cap in enumerate(atlas.captions):
-            if query in cap.lower():
-                hits.append((idx, atlas.objects[idx], cap))
-                if len(hits) >= limit:
+            cap_low = cap.lower()
+            if all(t in cap_low for t in tokens):
+                caption_hits.append((idx, atlas.objects[idx], cap))
+                if len(caption_hits) >= limit:
                     break
 
-        print(f"Captions matching '{query}' (up to {limit}):")
-        for idx, obj, cap in hits:
-            print(f"  [ID {idx:7d}] [{obj}] {cap}")
+    if as_json:
+        subj_out = [
+            {
+                "subject": k,
+                "count": info.get("count", 0) if isinstance(info, dict) else 0,
+                "sample_ids": info.get("sample_ids", [])[:5] if isinstance(info, dict) else [],
+            }
+            for _, _, _, k, info in subject_matches[:limit]
+        ]
+        cap_out = [
+            {"id": idx, "subject": obj, "caption": cap}
+            for idx, obj, cap in caption_hits
+        ]
+        print(json.dumps({
+            "query": args.query,
+            "total_matching_subjects": len(subject_matches),
+            "subjects": subj_out,
+            "captions_searched": (not args.subjects_only) and captions_available,
+            "captions": cap_out,
+        }, indent=2, ensure_ascii=False))
+        return 0
+
+    if subject_matches:
+        print(f"Found {len(subject_matches)} matching subjects in catalog:")
+        for _, _, _, k, info in subject_matches[:limit]:
+            print(f"  • Subject: '{k}' ({info['count']} sprites) - Sample IDs: {info['sample_ids'][:5]}")
+        if len(subject_matches) > limit:
+            print(f"  ... and {len(subject_matches) - limit} more subjects.")
+        print()
+
+    if not args.subjects_only:
+        if captions_available:
+            print(f"Captions matching '{query}' (up to {limit}):")
+            for idx, obj, cap in caption_hits:
+                print(f"  [ID {idx:7d}] [{obj}] {cap}")
+        else:
+            print("[INFO] captions.json not found locally; skipped caption scan (use --subjects-only to silence).")
     return 0
 
 def cmd_export(args):
@@ -463,13 +507,7 @@ def cmd_generate_normal(image_path: Path):
 
 def cmd_stats(args):
     """Display dataset statistics and status."""
-    print("================================================================================")
-    print("PIXEL ART ATLAS 1.4M (ANGAIS) DATASET STATUS")
-    print("================================================================================")
-    print(f"Reverse-DNS Identifier: co.huggingface.angais.pixel-art-atlas-1.4m")
-    print(f"Assets Directory: {ASSETS_DIR}")
-    print(f"Catalog Path: {CATALOG_PATH}")
-
+    as_json = getattr(args, "json", False)
     files_to_check = [
         ("LICENSES.txt", ASSETS_DIR / "LICENSES.txt"),
         ("tokens.npy", ASSETS_DIR / "tokens.npy"),
@@ -480,6 +518,40 @@ def cmd_stats(args):
         ("banner.png", ASSETS_DIR / "banner.png"),
         ("pixel-art-16x16-1.4m.zip", ASSETS_DIR / "pixel-art-16x16-1.4m.zip"),
     ]
+    parquet_count = len(list(DATA_DIR.glob("*.parquet"))) if DATA_DIR.exists() else 0
+    cat_info = {}
+    if CATALOG_PATH.exists():
+        with open(CATALOG_PATH, "r", encoding="utf-8") as f:
+            cat = json.load(f)
+        cat_info = {
+            "total_sprites": cat.get("total_sprites", 0),
+            "total_subjects": cat.get("total_subjects", 0),
+            "license": cat.get("license", "Unknown"),
+        }
+
+    if as_json:
+        files_status = {}
+        for label, p in files_to_check:
+            files_status[label] = {
+                "exists": p.exists(),
+                "size_mb": round(p.stat().st_size / (1024 * 1024), 2) if p.exists() else 0.0,
+            }
+        print(json.dumps({
+            "dataset": "co.huggingface.angais.pixel-art-atlas-1.4m",
+            "assets_dir": str(ASSETS_DIR),
+            "catalog_path": str(CATALOG_PATH),
+            "files": files_status,
+            "parquet_shards": parquet_count,
+            "catalog": cat_info,
+        }, indent=2, ensure_ascii=False))
+        return 0
+
+    print("================================================================================")
+    print("PIXEL ART ATLAS 1.4M (ANGAIS) DATASET STATUS")
+    print("================================================================================")
+    print(f"Reverse-DNS Identifier: co.huggingface.angais.pixel-art-atlas-1.4m")
+    print(f"Assets Directory: {ASSETS_DIR}")
+    print(f"Catalog Path: {CATALOG_PATH}")
 
     for label, p in files_to_check:
         if p.exists():
@@ -488,16 +560,13 @@ def cmd_stats(args):
         else:
             print(f"  [ ] {label:26s} : MISSING")
 
-    parquet_count = len(list(DATA_DIR.glob("*.parquet"))) if DATA_DIR.exists() else 0
     print(f"  [x] Parquet Shards (data/)    : {parquet_count} / 16 files")
 
-    if CATALOG_PATH.exists():
-        with open(CATALOG_PATH, "r", encoding="utf-8") as f:
-            cat = json.load(f)
+    if cat_info:
         print("--------------------------------------------------------------------------------")
-        print(f"Indexed Total Sprites   : {cat.get('total_sprites', 0):,}")
-        print(f"Indexed Total Subjects  : {cat.get('total_subjects', 0):,}")
-        print(f"License Clearance       : {cat.get('license', 'Unknown')}")
+        print(f"Indexed Total Sprites   : {cat_info['total_sprites']:,}")
+        print(f"Indexed Total Subjects  : {cat_info['total_subjects']:,}")
+        print(f"License Clearance       : {cat_info['license']}")
     print("================================================================================")
     return 0
 
@@ -513,9 +582,10 @@ def main():
 
     # search
     search_p = subparsers.add_parser("search", help="Search subjects and captions")
-    search_p.add_argument("query", type=str, help="Search query")
+    search_p.add_argument("query", nargs="?", default="", type=str, help="Search query")
     search_p.add_argument("--subjects-only", action="store_true", help="Search only subjects (fast)")
-    search_p.add_argument("--limit", type=int, default=15, help="Max results to display")
+    search_p.add_argument("--limit", "-n", "-l", type=int, default=15, help="Max results to display")
+    search_p.add_argument("--json", action="store_true", help="Output JSON results")
 
     # export
     export_p = subparsers.add_parser("export", help="Export sprite(s) to PNG")
@@ -537,7 +607,8 @@ def main():
     normal_p.add_argument("--scale", type=int, default=4, help="Scale factor")
 
     # stats
-    subparsers.add_parser("stats", help="Display dataset stats & file verification")
+    stats_p = subparsers.add_parser("stats", help="Display dataset stats & file verification")
+    stats_p.add_argument("--json", action="store_true", help="Output JSON dataset stats")
 
     args = parser.parse_args()
     if args.command == "download":

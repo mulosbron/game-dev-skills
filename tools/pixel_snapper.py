@@ -6,6 +6,7 @@ by locking pixels to a true grid, eliminating subpixel jitter, and quantizing
 to crisp indexed palettes (matching SpriteFusion Pixel Snapper & Ritmo pixel fix).
 """
 
+import json
 import sys
 import argparse
 from pathlib import Path
@@ -123,11 +124,15 @@ def main():
     parser.add_argument("--palette", "-p", choices=list(PALETTES.keys()), help="Lock to curated palette: pico8, db16, gameboy")
     parser.add_argument("--custom-hex", help="Comma-separated hex colors (e.g. '#ff0000,#00ff00,#0000ff')")
     parser.add_argument("--native", action="store_true", help="Save at native 1x logical resolution instead of upscaled")
+    parser.add_argument("--json", action="store_true", help="Output JSON summary")
 
     args = parser.parse_args()
     in_path = Path(args.input)
     if not in_path.exists():
-        print(f"Error: {in_path} not found.")
+        if args.json:
+            print(json.dumps({"error": f"{in_path} not found."}))
+        else:
+            print(f"Error: {in_path} not found.")
         sys.exit(1)
 
     custom_colors = [c.strip() for c in args.custom_hex.split(",")] if args.custom_hex else None
@@ -146,7 +151,18 @@ def main():
     out_path.parent.mkdir(parents=True, exist_ok=True)
     result_img.save(out_path)
 
-    print(f"Success: Snapped {in_path.name} to {detected_grid}x grid. Saved to {out_path} ({result_img.width}x{result_img.height})")
+    if args.json:
+        print(json.dumps({
+            "input": str(in_path),
+            "output": str(out_path),
+            "grid_size": detected_grid,
+            "native": args.native,
+            "width": result_img.width,
+            "height": result_img.height,
+            "palette": args.palette or ("custom" if custom_colors else f"mediacut:{args.colors}"),
+        }, indent=2, ensure_ascii=False))
+    else:
+        print(f"Success: Snapped {in_path.name} to {detected_grid}x grid. Saved to {out_path} ({result_img.width}x{result_img.height})")
 
 if __name__ == "__main__":
     main()

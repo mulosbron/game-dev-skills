@@ -38,19 +38,45 @@ def load_catalog() -> List[Dict[str, Any]]:
 
 def cmd_search(args: argparse.Namespace) -> None:
     catalog = load_catalog()
-    query = args.query.lower().strip()
+    tokens = args.query.lower().split() if args.query else []
     matches = []
     for item in catalog:
         cid = item.get("id", "").lower()
         title = item.get("title", "").lower()
         desc = item.get("description", "").lower()
-        if not query or query in cid or query in title or query in desc:
+        preset_txt = " ".join(
+            f"{p.get('id', '')} {p.get('name', '')} {p.get('description', '')}"
+            for p in item.get("presets", [])
+        ).lower()
+        hay = f"{cid} {title} {desc} {preset_txt}"
+        if all(t in hay for t in tokens):
             matches.append(item)
+
+    limited = matches[: args.limit]
+    if args.json:
+        results = [
+            {
+                "id": m["id"],
+                "title": m.get("title", m["id"]),
+                "version": m.get("version", "1.0"),
+                "description": m.get("description", ""),
+                "presets": [p.get("id") for p in m.get("presets", [])],
+                "controls_count": len(m.get("controls", [])),
+            }
+            for m in limited
+        ]
+        print(json.dumps({
+            "query": args.query,
+            "total_matches": len(matches),
+            "count": len(results),
+            "results": results,
+        }, indent=2, ensure_ascii=False))
+        return
 
     print(f"\nFound {len(matches)} Polyspoon model families matching '{args.query}':\n")
     print(f"{'ID':<20} | {'Title':<24} | {'Ver':<6} | {'Presets':<8} | Description")
     print("-" * 90)
-    for m in matches:
+    for m in limited:
         presets_count = len(m.get("presets", []))
         desc = (m.get("description", "")[:40] + "...") if len(m.get("description", "")) > 40 else m.get("description", "")
         print(f"{m['id']:<20} | {m.get('title', m['id']):<24} | {m.get('version', '1.0'):<6} | {presets_count:<8} | {desc}")
@@ -62,8 +88,15 @@ def cmd_inspect(args: argparse.Namespace) -> None:
     family_id = args.family.strip()
     match = next((m for m in catalog if m.get("id") == family_id), None)
     if not match:
-        print(f"Error: Family '{family_id}' not found in catalog.", file=sys.stderr)
+        if args.json:
+            print(json.dumps({"error": f"Family '{family_id}' not found in catalog."}))
+        else:
+            print(f"Error: Family '{family_id}' not found in catalog.", file=sys.stderr)
         sys.exit(1)
+
+    if args.json:
+        print(json.dumps(match, indent=2, ensure_ascii=False))
+        return
 
     print(f"\n================================================================================")
     print(f"Polyspoon Model Family: {match.get('title', family_id)} ({match.get('id')}) v{match.get('version')}")
@@ -153,14 +186,34 @@ def cmd_build(args: argparse.Namespace) -> None:
         cmd.extend(["--formats", args.formats])
     cmd.extend(["--out", str(out_path)])
 
-    print(f"Building Polyspoon asset '{family_id}' -> {out_path}...")
+    if not args.json:
+        print(f"Building Polyspoon asset '{family_id}' -> {out_path}...")
     res = subprocess.run(cmd, capture_output=True, text=True)
     if res.returncode != 0:
-        print(f"Build failed with error:\n{res.stderr}\n{res.stdout}", file=sys.stderr)
+        if args.json:
+            print(json.dumps({"error": "Build failed", "stderr": res.stderr, "stdout": res.stdout}, indent=2))
+        else:
+            print(f"Build failed with error:\n{res.stderr}\n{res.stdout}", file=sys.stderr)
         sys.exit(res.returncode)
 
     try:
         data = json.loads(res.stdout)
+        files_info = [
+            {"name": f.name, "path": str(f), "size_bytes": f.stat().st_size}
+            for f in sorted(out_path.iterdir())
+        ]
+        if args.json:
+            print(json.dumps({
+                "family": family_id,
+                "preset": args.preset,
+                "output": data.get("output", str(out_path)),
+                "geometry": data.get("geometry", {}),
+                "dimensions": data.get("dimensions"),
+                "glbSha256": data.get("glbSha256"),
+                "files": files_info,
+            }, indent=2, ensure_ascii=False))
+            return
+
         geom = data.get("geometry", {})
         print(f"\nBuild Successful!")
         print(f"Output Directory : {data.get('output')}")
@@ -169,8 +222,8 @@ def cmd_build(args: argparse.Namespace) -> None:
         print(f"Dimensions (m)   : {data.get('dimensions')}")
         print(f"GLB Hash         : {data.get('glbSha256')}")
         print(f"Files Generated  :")
-        for f in out_path.iterdir():
-            print(f"  * {f.name} ({f.stat().st_size:,} bytes)")
+        for fi in files_info:
+            print(f"  * {fi['name']} ({fi['size_bytes']:,} bytes)")
     except Exception:
         print(res.stdout)
 
@@ -182,10 +235,13 @@ def main():
     # search
     p_search = subparsers.add_parser("search", help="Search procedural model families")
     p_search.add_argument("query", nargs="?", default="", help="Keyword to search in families")
+    p_search.add_argument("--limit", "-n", "-l", type=int, default=20, help="Max results to return")
+    p_search.add_argument("--json", action="store_true", help="Output JSON results")
 
     # inspect
     p_inspect = subparsers.add_parser("inspect", help="Inspect controls and presets for a model family")
     p_inspect.add_argument("family", help="Family identifier (e.g. cottage, bench, stylized-fox)")
+    p_inspect.add_argument("--json", action="store_true", help="Output JSON metadata")
 
     # build
     p_build = subparsers.add_parser("build", help="Build a customized 3D model")
@@ -194,6 +250,7 @@ def main():
     p_build.add_argument("--parameters", default=None, help="JSON string of parameter overrides")
     p_build.add_argument("--formats", default=None, help="Additional formats (obj, fbx, usdz, or all)")
     p_build.add_argument("--out", default=None, help="Output destination folder")
+    p_build.add_argument("--json", action="store_true", help="Output JSON build summary")
 
     args = parser.parse_args()
     if args.command == "search":

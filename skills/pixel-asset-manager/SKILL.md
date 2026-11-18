@@ -16,40 +16,50 @@ This skill enables AI agents and developers to search, inspect, slice, and integ
 
 With 30,000+ assets in the workspace, never use `ls -R` or `dir /s`. Use these dedicated, token-efficient tools instead:
 
-### 1. Catalog Indexing & Search (`tools/asset_search.py`)
+### 1. Unified Catalog Indexing & Search (`tools/asset_search.py`)
 
-* **Rebuild or Update the Index:**
+* **Rebuild or Update Catalog Indexes:**
   Run whenever a new asset pack or library is added:
   ```powershell
-  python tools/asset_search.py index
+  python tools/asset_search.py index --source libraries
+  python tools/asset_search.py index --source all --json
   ```
 
-* **Search Assets:**
-  Filter by keyword, category, file extension, or library:
+* **Search Assets (Single Catalog, 2D/3D Group, or Unified `all`):**
+  Filter by `--source` (`libraries`, `lpc`, `abo`, `pixelfx`, `atlas`, `threejs`, `polyspoon`, `sand3d`, group aliases `all`, `2d`, `3d`, or comma-separated lists like `threejs,abo,polyspoon`), keyword, category, file extension, or library, and add `--json` for structured agent output:
   ```powershell
-  # Search within characters
-  python tools/asset_search.py search "knight" --category characters
+  # Unified cross-catalog search (2D + 3D + Audio) with round-robin ranking and JSON output
+  python tools/asset_search.py search "sword" --source all --limit 16 --json
 
-  # Search magic / visual effects
-  python tools/asset_search.py search "fire" --category effects
+  # Search all 3D catalogs or specific comma-separated sources
+  python tools/asset_search.py search "chair" --source 3d --limit 12 --json
+  python tools/asset_search.py search "tree" --source threejs,polyspoon --limit 10 --json
+
+  # Search within characters or effects in libraries
+  python tools/asset_search.py search "knight" --category characters --json
+  python tools/asset_search.py search "fire" --source pixelfx,libraries --category effects --json
 
   # Search audio assets (WAV / OGG only)
-  python tools/asset_search.py search "sword hit" --category sounds --ext wav
+  python tools/asset_search.py search "sword" --source libraries --category sounds --ext wav --json
 
   # Search within a specific library
   python tools/asset_search.py search "tree" --library com.github.huu-yuu.pixelsrpg-forge --limit 15
   ```
 
-* **Category Counts & Breakdown:**
+* **Sources & Category Counts Breakdown:**
   ```powershell
-  python tools/asset_search.py categories
+  python tools/asset_search.py sources --json
+  python tools/asset_search.py categories --source all --json
   ```
 
 ### 2. Inspect Asset Properties (`inspect`)
 
-Returns image dimensions, frame count, color mode, transparency, and engine naming recommendations as structured JSON:
+Returns image dimensions, frame count, color mode, transparency, WAV audio metadata, GLB geometry/material/animation stats, or full catalog metadata by ID/slug/subject as structured JSON:
 ```powershell
-python tools/asset_search.py inspect "libraries/com.github.huu-yuu.pixelsrpg-forge/Terrain_地形地块/cave.png"
+python tools/asset_search.py inspect "libraries/com.github.huu-yuu.pixelsrpg-forge/Terrain_地形地块/cave.png" --json
+python tools/asset_search.py inspect "assets/com.threejsassets/models/armchair.glb" --json
+python tools/asset_search.py inspect cottage --source polyspoon --json
+python tools/asset_search.py inspect B00EUL2B16 --source abo --json
 ```
 
 ### 3. Normal Map Generator (`tools/normal_map_gen.py`)
