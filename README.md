@@ -65,7 +65,7 @@ All four major agent ecosystems are pre-configured at the root of `game-dev-skil
 - **C++ Rendering, Physics, Animation, Navigation & VFX (5):** `the-forge`, `jolt-physics`, `ozz-animation`, `recastnavigation`, `effekseer`.
 - **Multiplayer, Web 3D & JS Game AI (5):** `colyseus` (v0.18 + `references/`), `three-quarks`, `yuka`, `build-67js-scene`, `render-67js-media`.
 - **2D Pixel Art, AI Sprites, VFX, Maps & Testing (29):** `generate2dmedia`, `generate2dsprite`, `generate2dmap`, `wang-tiles`, `water-shorelines`, `see-through`, `atmospheric-perspective`, `shadowcasting`, `sprite-stacking`, `pixel-perfect`, `loot-window`, `video2dsprite`, `sprite-gen`, `codeart2d`, `backgroundremover`, `pixel-snapper`, `spritefusion-pixel-snapper`, `spritefusion-sprite-normals`, `image-to-pixel`, `flat2iso`, `pixelorama`, `ldtk`, `lpc-character-generator`, `creature-gen`, `pixelfx`, `vfx-forge`, `pixel-art-atlas`, `pixel-asset-manager`, `voxl`.
-- **3D Authoring, Reconstruction, Blender MCP & PBR Materials (8):** `blender-kiln`, `mcp-for-blender` (+ `references/`), `glb-forge`, `polyspoon`, `material-maker`, `mesh-splatting`, `triposr`, `sand3d-to-roblox`.
+- **3D Authoring, Reconstruction, Blender MCP & PBR Materials (8):** `blender-kiln`, `mcp-for-blender` (+ `references/`), `glb-forge`, `asset-harmonizer`, `polyspoon`, `material-maker`, `mesh-splatting`, `triposr`, `sand3d-to-roblox`.
 
 ## CLI Quick Reference (`tools/`)
 

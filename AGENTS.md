@@ -1,6 +1,6 @@
 # Agent Game Forge & PlayForge (`game-dev-skills`) — Master Agent Guidelines
 
-Unified hub combining **PlayForge**, **Agent Game Forge (`GameMaker`)**, and curated engine/graphics/asset/AI game-development skills (**68 top-level skills**, **79 `awesome-gamedev` sub-skills**, **78 `claude-code-game-studios` studio sub-skills**, **24 Reverse-DNS libraries**, **5 asset collections**, and **40 Python CLI tools**).
+Unified hub combining **PlayForge**, **Agent Game Forge (`GameMaker`)**, and curated engine/graphics/asset/AI game-development skills (**69 top-level skills**, **79 `awesome-gamedev` sub-skills**, **78 `claude-code-game-studios` studio sub-skills**, **24 Reverse-DNS libraries**, **5 asset collections**, and **41 Python CLI tools**).
 
 ## Workspace Architecture
 
@@ -23,11 +23,11 @@ game-dev-skills/
 │   └── org.opengameart.lpc/                         # Liberated Pixel Cup ledger
 ├── libraries/                 # 24 Reverse-DNS packages (`com.github.*`, `org.opengameart.*`, etc.)
 ├── catalogs/                  # Offline token-free JSON catalogs (4,200+ 2D assets, 6,194 atlas subjects, 3D/Polyspoon)
-├── tools/                     # 40 Python CLI pipelines (`asset_search.py`, `glb_forge.py`, `vfx_forge.py`, `wang_tiles.py`, `water_shorelines.py`, `see_through.py`, `atmospheric_perspective.py`, `shadowcasting.py`, `camera_follow_2d.py`, `platformer_forgiveness.py`, `sprite_stacker.py`, `hit_feedback.py`, `pixel_perfect.py`, `loot_window.py`, ...)
+├── tools/                     # 41 Python CLI pipelines (`asset_search.py`, `glb_forge.py`, `vfx_forge.py`, `wang_tiles.py`, `water_shorelines.py`, `see_through.py`, `atmospheric_perspective.py`, `shadowcasting.py`, `camera_follow_2d.py`, `platformer_forgiveness.py`, `sprite_stacker.py`, `hit_feedback.py`, `pixel_perfect.py`, `loot_window.py`, ...)
 ├── exports/                   # Generated strips, normal maps, GLBs, heatmaps & shaders
 ├── docs/                      # Master guides (incl. `godot-pixel-texture-rehberi.md`)
 ├── projects/                  # Active engine projects (`farming_25d/`, etc.)
-└── skills/                    # 68 standardized skills + sub-skill routers
+└── skills/                    # 69 standardized skills + sub-skill routers
 ```
 
 ## Interactive Discovery & Q&A Protocol (Three Modes)
@@ -71,7 +71,7 @@ Always classify the request into Mode A, B, or C before editing project files or
 7. **No Implicit State Machines (Steve Ruiz Rule):** Replace entangled boolean flag combinations (`isJumping && !isClimbing && !isDead`) with explicit finite-state enums.
 8. **Cross-Pack Boundary:** Classroom/educational gamification belongs in `~/.agents/gamification-skills/`.
 
-## Skills Index (68 Top-Level Skills)
+## Skills Index (69 Top-Level Skills)
 
 ### Game Design, Feel, Architecture & Routers (11)
 | Skill | Use when |
@@ -153,12 +153,13 @@ Always classify the request into Mode A, B, or C before editing project files or
 | `skills/pixel-asset-manager/SKILL.md` | Searching/slicing 30k+ SRPG & Pixel packs (`tools/asset_search.py`, `tools/sprite_slicer.py`). |
 | `skills/voxl/SKILL.md` | 60 FPS remote game stream visual testing (`/screenshot`, `/record`, `tools/voxl_client.py`). |
 
-### 3D Models, Reconstruction, Blender & Procedural Materials (8)
+### 3D Models, Reconstruction, Blender & Procedural Materials (9)
 | Skill | Use when |
 |---|---|
 | `skills/blender-kiln/SKILL.md` | Headless Blender 5.2 3D forge, 6-view Colour/Clay review sheets, UV/print checks (`tools/blender_kiln.py`). |
 | `skills/mcp-for-blender/SKILL.md` | Connecting agents to live Blender 3.0+ sessions via MCP (`libraries/com.github.3d-gen-ai.mcp-for-blender` + `references/`). |
 | `skills/glb-forge/SKILL.md` | Inspecting/optimizing GLBs (Meshopt, Draco, WebP, LOD chains, TSL materials, `tools/glb_forge.py`). |
+| `skills/asset-harmonizer/SKILL.md` | Fitting mixed-source 3D assets into one visual language: 6-stage offline pipeline (inventory/triage, Blender normalize, texel density, palette remap/PBR/upscale, local AI retexture on 8 GB VRAM, engine LUT/master shader, QA gate) via `tools/asset_harmonizer.py` + `agents/asset-harmonizer-agent.md`. |
 | `skills/polyspoon/SKILL.md` | Editing/exporting 20 families of recipe-driven procedural low-poly 3D assets (`tools/polyspoon_tool.py`). |
 | `skills/material-maker/SKILL.md` | Authoring procedural PBR `.ptex` node/SDF materials & 3D paint exports to Godot/Unity/UE/Blender. |
 | `skills/mesh-splatting/SKILL.md` | Differentiable opaque triangle-mesh 3D reconstruction, SAM2 segmentation, and `.ply` export. |

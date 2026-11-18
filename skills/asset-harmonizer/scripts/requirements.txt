@@ -1,0 +1,23 @@
+# Asset Harmonizer Python deps (Python 3.10-3.12). Install order matters: torch FIRST (CUDA build).
+# 1) pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+#    (RTX 4070 Mobile; if cu124 wheel missing use cu121: .../whl/cu121)
+# 2) pip install -r requirements.txt
+pillow>=10.0
+numpy>=1.26
+opencv-python-headless>=4.9
+scipy>=1.11
+trimesh>=4.0
+pygltflib>=1.16
+xatlas>=0.0.9            # automatic UV unwrap (MIT)
+# --- AI / GPU side (SD1.5 fp16 retexture + upscale) ---
+diffusers>=0.30
+transformers>=4.40
+accelerate>=0.30
+safetensors>=0.4
+huggingface_hub>=0.23
+# Real-ESRGAN python route (alternative: ncnn-vulkan portable exe, no torch needed)
+# NOTE: basicsr 1.4.2 breaks with torchvision>=0.17 ("functional_tensor"). Run scripts/fix_basicsr.py after install.
+realesrgan>=0.3.0
+basicsr>=1.4.2
+facexlib
+gfpgan

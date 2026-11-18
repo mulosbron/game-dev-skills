@@ -1,0 +1,3070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asset Harmonizer — AI-free Visual Language Normalization</title>
+<style>
+:root{
+  --bg:#14161b; --panel:#1c1f26; --card:#22262f; --card2:#282d38; --line:#303642;
+  --txt:#d9dde3; --muted:#8b93a1; --acc:#e5a34c; --acc2:#f0c583;
+  --ok:#62c877; --err:#e26a55; --warn:#d9b44a; --info:#6aa7e0;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+  font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
+button{font:inherit}
+.mono,code,pre,kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+h1{font-size:20px;margin:0 0 4px}
+h3{font-size:14px;margin:0 0 8px;color:var(--acc2)}
+h4{font-size:12.5px;margin:10px 0 4px;color:var(--muted)}
+a{color:var(--info)}
+.muted{color:var(--muted);font-size:12.5px}
+.small{font-size:12px}
+.hidden{display:none!important}
+
+/* ---- top bar ---- */
+header{display:flex;align-items:center;gap:14px;padding:10px 16px;background:var(--panel);
+  border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30}
+.brand{font-weight:700;font-size:15px;letter-spacing:.2px;display:flex;align-items:center;gap:8px}
+.brand .logo{color:var(--acc);font-size:17px}
+.ver{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:2px 9px;white-space:nowrap}
+.hbtns{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+
+/* ---- layout ---- */
+#app{display:grid;grid-template-columns:196px 1fr;min-height:calc(100vh - 55px)}
+nav#nav{background:var(--panel);border-right:1px solid var(--line);padding:10px 8px;display:flex;flex-direction:column;gap:2px}
+.navbtn{display:flex;gap:8px;align-items:center;text-align:left;background:none;border:0;color:var(--muted);
+  padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px}
+.navbtn .n{width:20px;height:20px;border-radius:6px;background:var(--card2);color:var(--txt);
+  display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex:none}
+.navbtn:hover{background:var(--card2);color:var(--txt)}
+.navbtn.active{background:var(--card2);color:var(--acc2)}
+.navbtn.active .n{background:var(--acc);color:#161616}
+main{padding:18px 22px 90px;max-width:1180px}
+section.panel{display:none}
+section.panel.active{display:block}
+.desc{color:var(--muted);font-size:13px;margin:2px 0 14px;max-width:820px}
+
+/* ---- card / row ---- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:980px){.grid2{grid-template-columns:1fr}}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.row .sp{flex:1}
+label.inl{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+input[type=text],input[type=number],select{background:var(--card2);color:var(--txt);border:1px solid var(--line);
+  border-radius:7px;padding:5px 8px;font-size:12.5px}
+input[type=number]{width:76px}
+input[type=text]{width:250px}
+select{min-width:110px}
+input[type=range]{accent-color:var(--acc);width:130px}
+input[type=color]{width:34px;height:26px;padding:0;border:1px solid var(--line);border-radius:6px;background:none;cursor:pointer}
+input[type=checkbox]{accent-color:var(--acc);width:15px;height:15px}
+.btn{background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:8px;
+  padding:6px 12px;cursor:pointer;font-size:12.5px;white-space:nowrap}
+.btn:hover{border-color:var(--acc);color:var(--acc2)}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:#181818;font-weight:600}
+.btn.primary:hover{background:var(--acc2);color:#181818}
+.btn.small{padding:3px 8px;font-size:11.5px;border-radius:6px}
+.btn.danger{color:var(--err)}
+.btn:disabled{opacity:.45;cursor:default}
+
+/* ---- tables ---- */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--card);
+  border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tbl th{background:var(--card2);color:var(--muted);text-align:left;padding:7px 9px;font-weight:600;font-size:11.5px;
+  text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.tbl td{border-top:1px solid var(--line);padding:6px 9px;vertical-align:middle}
+.tbl td.num,.tbl th.num{text-align:right;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.tag{display:inline-block;padding:1px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.tag.ok{background:rgba(98,200,119,.14);color:var(--ok)}
+.tag.err{background:rgba(226,106,85,.14);color:var(--err)}
+.tag.warn{background:rgba(217,180,74,.14);color:var(--warn)}
+.tag.info{background:rgba(106,167,224,.14);color:var(--info)}
+.tblwrap{overflow-x:auto;border-radius:10px}
+
+/* ---- dropzone ---- */
+.drop{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--muted);
+  background:var(--card);cursor:pointer;margin-bottom:14px;font-size:13px}
+.drop:hover,.drop.over{border-color:var(--acc);color:var(--acc2)}
+
+/* ---- texture cards ---- */
+#texList{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.texcard{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:12px}
+.texcard .nm{font-weight:600;word-break:break-all}
+.texcard canvas{border-radius:6px;border:1px solid var(--line);image-rendering:pixelated;background:#111}
+.texcard .ops{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+
+/* ---- preview ---- */
+#pvCanvas{background:#101216;border:1px solid var(--line);border-radius:12px;touch-action:none;max-width:100%}
+.pvgrid{display:grid;grid-template-columns:1fr 285px;gap:14px}
+@media (max-width:980px){.pvgrid{grid-template-columns:1fr}}
+.pvctl{display:flex;flex-direction:column;gap:9px}
+.pvctl .ctl{display:grid;grid-template-columns:110px 1fr 44px;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.pvctl .ctl input[type=range]{width:100%}
+.pvctl .ctl .v{text-align:right;font-family:ui-monospace,Menlo,monospace;color:var(--txt)}
+.pvctl .ctl select,.pvctl .ctl input[type=color]{width:100%}
+.pvctl hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+
+/* ---- log ---- */
+#logwrap{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);z-index:40}
+#logToggle{position:absolute;right:10px;top:-30px;background:var(--panel);border:1px solid var(--line);
+  border-radius:8px 8px 0 0;color:var(--muted);padding:3px 12px;cursor:pointer;font-size:12px}
+#log{height:110px;overflow-y:auto;margin:0;padding:6px 14px;font-size:11.5px;color:#a9b2bf;white-space:pre-wrap}
+#logwrap.closed #log{display:none}
+#log .ok{color:var(--ok)} #log .err{color:var(--err)} #log .warn{color:var(--warn)} #log .info{color:var(--info)}
+.minilog{background:#101216;border:1px solid var(--line);border-radius:10px;padding:8px 12px;max-height:180px;
+  overflow-y:auto;font-size:11.5px;font-family:ui-monospace,Menlo,monospace;color:#a9b2bf;white-space:pre-wrap}
+
+/* ---- toast ---- */
+#toasts{position:fixed;top:60px;right:16px;z-index:60;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--card2);border:1px solid var(--line);border-left:3px solid var(--info);
+  border-radius:8px;padding:9px 14px;font-size:12.5px;max-width:340px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.toast.ok{border-left-color:var(--ok)} .toast.err{border-left-color:var(--err)} .toast.warn{border-left-color:var(--warn)}
+
+/* ---- modal ---- */
+#modal{position:fixed;inset:0;background:rgba(8,9,12,.66);z-index:80;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+#modalBox{background:var(--card);border:1px solid var(--line);border-radius:14px;max-width:760px;width:100%;padding:22px}
+#modalBox h2{margin:0 0 10px;font-size:17px;color:var(--acc2)}
+#modalBox pre{background:#101216;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:11.5px;overflow-x:auto;color:#b9c2cf}
+.check{color:var(--ok)} .cross{color:var(--err)} .dash{color:var(--muted)}
+.palrow{display:flex;align-items:center;gap:6px;margin:3px 0}
+.palrow input[type=color]{width:44px}
+.palrow .hx{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--muted)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin:6px 0}
+.legend b{color:var(--txt)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span class="logo">▚</span> Asset Harmonizer <span class="ver">v1.0 · fully AI-free · 100% offline</span></div>
+  <div class="hbtns">
+    <button id="btnHelp" class="btn">Help</button>
+    <button id="btnGuideDl" class="btn">Style guide .md ↓</button>
+    <button id="btnCfgDl" class="btn">Settings ↓</button>
+    <button id="btnCfgUl" class="btn">Settings ↑</button>
+    <input type="file" id="fileCfg" accept=".json" hidden>
+  </div>
+</header>
+
+<div id="app">
+  <nav id="nav"></nav>
+  <main id="main">
+
+  <!-- 0 STYLE GUIDE -->
+  <section class="panel" data-stage="0">
+    <h1>0 · Style Guide</h1>
+    <p class="desc">This is the yardstick every stage of the pipeline measures against (Guide Section 3): palette quantization reads which colors to force,
+    the texel script reads which px/cm value, and the decimate rule reads which polygon ceiling. An unwritten style means re-deciding per asset.
+    Settings are saved automatically in the browser; they can be exported/imported as JSON.</p>
+    <div class="grid2">
+      <div class="card">
+        <h3>Color Palette (8–16 colors)</h3>
+        <div id="palList"></div>
+        <div class="row">
+          <button id="palAdd" class="btn small">+ Color</button>
+          <button id="palFromImg" class="btn small">Extract palette from reference image…</button>
+          <input type="file" id="filePalRef" accept="image/*" hidden>
+        </div>
+        <canvas id="palStrip" width="300" height="22"></canvas>
+        <h4>Saturation ceiling (HSV S) — the limit the most vivid color must not exceed</h4>
+        <div class="row"><input type="range" id="cfgSat" min="30" max="100" value="70"><span class="mono" id="cfgSatV">70%</span></div>
+        <h4>Emissive mini palette (2–4 colors; _emi/_emissive files stay restricted to this palette)</h4>
+        <div id="emiList"></div>
+        <button id="emiAdd" class="btn small">+ Emissive color</button>
+      </div>
+      <div class="card">
+        <h3>Measurement Standards</h3>
+        <h4>Texel density target (px/cm, per class)</h4>
+        <div class="row">
+          <label class="inl">background <input type="number" id="tex_arka" step="0.01"></label>
+          <label class="inl">prop <input type="number" id="tex_prop" step="0.01"></label>
+          <label class="inl">hero <input type="number" id="tex_hero" step="0.01"></label>
+          <label class="inl">character <input type="number" id="tex_karakter" step="0.01"></label>
+        </div>
+        <h4>Polygon budget (triangle ceiling)</h4>
+        <div class="row">
+          <label class="inl">background <input type="number" id="bud_arka"></label>
+          <label class="inl">prop <input type="number" id="bud_prop"></label>
+          <label class="inl">hero <input type="number" id="bud_hero"></label>
+          <label class="inl">character <input type="number" id="bud_karakter"></label>
+        </div>
+        <h4>Target size — largest axis (meters) and tolerance</h4>
+        <div class="row">
+          <label class="inl">background <input type="number" id="siz_arka" step="0.1"></label>
+          <label class="inl">prop <input type="number" id="siz_prop" step="0.1"></label>
+          <label class="inl">hero <input type="number" id="siz_hero" step="0.1"></label>
+          <label class="inl">character <input type="number" id="siz_karakter" step="0.1"></label>
+          <label class="inl">±<input type="number" id="cfgSizeTol" step="1" style="width:52px">%</label>
+        </div>
+        <h4>Default texture size (used in the texel calculation when no texture is assigned)</h4>
+        <div class="row">
+          <label class="inl">background <input type="number" id="tsx_arka" step="128"></label>
+          <label class="inl">prop <input type="number" id="tsx_prop" step="128"></label>
+          <label class="inl">hero <input type="number" id="tsx_hero" step="128"></label>
+          <label class="inl">character <input type="number" id="tsx_karakter" step="128"></label>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Rules</h3>
+        <h4>Naming pattern (regex; tested without the extension)</h4>
+        <div class="row"><input type="text" id="cfgName" style="width:330px"></div>
+        <h4>Target engine (informational; written into the pivot/axis sentence)</h4>
+        <div class="row">
+          <select id="cfgEngine"><option>Unity (+Z forward, +Y up)</option><option>Unreal (+X forward, +Z up)</option><option>Godot (-Z forward, +Y up)</option></select>
+          <span class="muted">pivot: base center · +Y up (in-tool)</span>
+        </div>
+        <h4>Auto smooth angle (edge smoothing threshold)</h4>
+        <div class="row"><input type="range" id="cfgSmooth" min="10" max="70" value="40"><span class="mono" id="cfgSmoothV">40°</span></div>
+        <h4>Palette quantization defaults</h4>
+        <div class="row">
+          <label class="inl"><input type="checkbox" id="cfgDither"> Floyd–Steinberg dithering</label>
+          <label class="inl">blend strength <input type="range" id="cfgPStrength" min="0" max="100" value="100"><span class="mono" id="cfgPStrengthV">100%</span></label>
+        </div>
+        <div class="row"><button id="btnCfgReset" class="btn small danger">Reset to defaults</button>
+        <span class="muted">Changes are written to localStorage immediately.</span></div>
+      </div>
+      <div class="card">
+        <h3>Style guide .md template</h3>
+        <p class="muted">The "Style guide .md ↓" button above generates a template filled in from the values here, in the format docs/style_guide.md
+        (Guide 3.7). Every line other than the moodboard is a script input.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1 INVENTORY -->
+  <section class="panel" data-stage="1">
+    <h1>1 · Inventory and Triage</h1>
+    <p class="desc">The first stage of the pipeline is knowing what you have (Section 4): each file's polygon count, bounding box dimensions,
+    material count, UV and texture status are reported; a keep / repair / redo / discard decision is made for every asset.
+    The unit convention is guessed automatically (m / cm / mm) and can be changed manually in the inventory table.</p>
+    <div class="drop" id="dropMesh">Drag OBJ · GLB · GLTF files here or <b>click / select</b>
+      <div class="muted small">FBX is not supported → export as OBJ or GLB from Blender. Embedded textures in GLB are loaded automatically.</div>
+      <input type="file" id="fileMesh" multiple accept=".obj,.glb,.gltf" hidden>
+    </div>
+    <div class="row">
+      <span id="invSummary" class="muted"></span>
+      <span class="sp"></span>
+      <button id="btnDemo" class="btn small">Load demo project (intentionally broken stock)</button>
+      <button id="btnInvCsv" class="btn small">inventory.csv ↓</button>
+    </div>
+    <div class="tblwrap"><table class="tbl" id="invTbl">
+      <thead><tr>
+        <th>File</th><th>Class</th><th>Decision</th><th class="num">Triangles</th><th>Size X×Y×Z (m)</th>
+        <th class="num">Materials</th><th>UV</th><th>Texture</th><th class="num">px/cm</th><th>Action</th>
+      </tr></thead><tbody id="invBody"></tbody>
+    </table></div>
+    <p class="muted">The class determines the target px/cm, polygon ceiling, and size tolerance. Assets with the decision "discard" are skipped in automation.</p>
+  </section>
+
+  <!-- 2 NORMALIZATION -->
+  <section class="panel" data-stage="2">
+    <h1>2 · Geometric Normalization</h1>
+    <p class="desc">Every file is fitted to the same rules (Section 5). Order is critical: <b>apply transform → pivot → cleanup → normals → decimate</b>.
+    Apply transform is done automatically on import (node matrices are baked into positions); negative scale is reported if detected.</p>
+    <div class="row">
+      <label class="inl"><input type="checkbox" id="optScale" checked> scale to target size</label>
+      <label class="inl"><input type="checkbox" id="optPivot" checked> pivot at base center</label>
+      <label class="inl"><input type="checkbox" id="optWeld" checked> weld + degenerate cleanup</label>
+      <label class="inl"><input type="checkbox" id="optNrm" checked> recompute normals</label>
+      <label class="inl"><input type="checkbox" id="optDeci" checked> polygon budget (vertex clustering decimate)</label>
+      <span class="sp"></span>
+      <button id="btnNormAll" class="btn primary">Normalize all</button>
+    </div>
+    <div class="tblwrap"><table class="tbl" id="normTbl">
+      <thead><tr><th>File</th><th>Class</th><th>Size (m)</th><th class="num">Triangles / Ceiling</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody id="normBody"></tbody>
+    </table></div>
+    <div id="normLog" class="minilog hidden"></div>
+  </section>
+
+  <!-- 3 UV + TEXEL -->
+  <section class="panel" data-stage="3">
+    <h1>3 · UV and Texel Density</h1>
+    <p class="desc">All assets are fitted to a common px/cm standard (Section 6). Measurement:
+    <span class="mono">TD = √(uvArea × W × H ÷ worldArea_cm²)</span>. The tool multiplies all UV islands by a single scale;
+    use Blender + Texel Density Checker for per-island fine tuning. Assets without UVs get an automatic box unwrap.</p>
+    <div class="row">
+      <button id="btnUnwrapAll" class="btn">Box unwrap for those without UVs</button>
+      <button id="btnTexelAll" class="btn primary">Fit all to target px/cm</button>
+      <span class="muted">If no texture is assigned, the class default texture size is used.</span>
+    </div>
+    <div class="tblwrap"><table class="tbl" id="uvTbl">
+      <thead><tr><th>File</th><th>UV</th><th class="num">World area (cm²)</th><th class="num">UV area</th>
+        <th>Texture</th><th class="num">Current px/cm</th><th class="num">Target</th><th>Action</th></tr></thead>
+      <tbody id="uvBody"></tbody>
+    </table></div>
+    <p class="muted">Visual verification: in section 5, compare all assets from the same camera distance using the "UV checker" mode —
+    if the on-screen size of the squares is equal, the density matches the standard (Section 6.1 verification view).</p>
+  </section>
+
+  <!-- 4 TEXTURE -->
+  <section class="panel" data-stage="4">
+    <h1>4 · Texture Re-Styling (AI-free)</h1>
+    <p class="desc">Pulls textures into the game's visual language without any AI (Section 7): palette quantization, PBR map derivation
+    (Materialize-like) and AI-free upscaling (Lanczos + unsharp; deliberately chosen in place of Real-ESRGAN).
+    <b>Order rule: ① Upscale → ② Derive PBR → ③ Palette remap.</b> The palette pass is applied only to albedo maps;
+    normal/roughness data maps are never touched.</p>
+    <div class="grid2">
+      <div class="card">
+        <h3>Processing Parameters</h3>
+        <h4>Palet remap</h4>
+        <div class="row">
+          <label class="inl"><input type="checkbox" id="pDither"> dithering (painted style: on; pixel-art: off)</label>
+          <label class="inl">blend <input type="range" id="pStrength" min="0" max="100" value="100"><span class="mono" id="pStrengthV">100%</span></label>
+        </div>
+        <div class="row"><label class="inl">saturation ceiling pre-step: the <span id="pSatEcho">70</span>% value from the style guide is used.</label></div>
+        <h4>PBR derivation</h4>
+        <div class="row">
+          <label class="inl">blur <input type="range" id="pBlur" min="1" max="8" value="2"><span class="mono" id="pBlurV">2px</span></label>
+          <label class="inl">normal strength <input type="range" id="pNrmS" min="5" max="60" value="20"><span class="mono" id="pNrmSV">2.0</span></label>
+          <label class="inl"><input type="checkbox" id="pYFlip"> DirectX Y (−Y)</label>
+        </div>
+        <div class="row">
+          <label class="inl">roughness source
+            <select id="pRoughMode"><option value="height">from height</option><option value="flat">constant</option></select>
+          </label>
+          <label class="inl">constant value <input type="range" id="pRoughBase" min="0" max="100" value="80"><span class="mono" id="pRoughBaseV">0.80</span></label>
+          <label class="inl">metalness <input type="range" id="pMetal" min="0" max="100" value="0"><span class="mono" id="pMetalV">0.00</span></label>
+        </div>
+        <h4>AI-free upscaling (×2 / ×4, stepped bicubic + unsharp)</h4>
+        <div class="row"><label class="inl">sharpening <input type="range" id="pUnsharp" min="0" max="100" value="60"><span class="mono" id="pUnsharpV">0.60</span></label></div>
+        <p class="muted">The alpha channel is preserved; dithering is applied to RGB and leaves alpha untouched (Section 7.4).
+        Textures with <span class="mono">emi/glow</span> in the file name are forced to the emissive mini palette instead of the style palette.</p>
+      </div>
+      <div class="card">
+        <h3>Textures</h3>
+        <div class="drop" id="dropImg">Drag PNG / JPG texture files here or <b>click / select</b>
+          <input type="file" id="fileImg" multiple accept="image/*" hidden>
+        </div>
+        <div id="texList"></div>
+        <p class="muted">Derived maps: <span class="mono">_nrm</span> (normal), <span class="mono">_orm</span> (R=AO, G=roughness, B=metalness),
+        separate <span class="mono">_ao</span> and <span class="mono">_rough</span>. The palette-applied copy downloads as <span class="mono">_pal</span>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 ENGINE PREVIEW -->
+  <section class="panel" data-stage="5">
+    <h1>5 · Engine Integration Preview</h1>
+    <p class="desc">An in-browser simulation of the engine-side integration layer (Section 9): a single master shader (lambert),
+    palette remap, .cube LUT, ACES tonemap, one directional sun + ambient, fog. It fits the whole scene into a single color
+    world without touching any texture — so it is tried before costly retexture work. "Clay" mode is the 5-minute diagnostic test from Section 2.</p>
+    <div class="pvgrid">
+      <div>
+        <canvas id="pvCanvas" width="760" height="480"></canvas>
+        <div class="legend"><span><b>Drag</b> rotate</span><span><b>Wheel</b> zoom</span><span>Software rasterizer · z-buffer · perspective-correct</span></div>
+      </div>
+      <div class="card pvctl">
+        <div class="ctl"><span>Asset</span><select id="pvAsset"></select><span></span></div>
+        <div class="ctl"><span>Shader</span><select id="pvMode">
+          <option value="tex">Texture (master shader)</option>
+          <option value="clay">Clay (gray + single light)</option>
+          <option value="checker">UV checker</option>
+        </select><span></span></div>
+        <hr>
+        <div class="ctl"><span>Palette remap</span><input type="range" id="pvRemap" min="0" max="100" value="0"><span class="v" id="pvRemapV">0%</span></div>
+        <div class="ctl"><span>LUT</span><button id="btnLut" class="btn small">Load .cube</button><span></span></div>
+        <input type="file" id="fileLut" accept=".cube" hidden>
+        <div class="ctl"><span></span><button id="btnLutClr" class="btn small">Clear LUT — <span id="lutName" class="muted">none</span></button><span></span></div>
+        <div class="ctl"><span><input type="checkbox" id="pvTone" checked> ACES</span><span></span><span></span></div>
+        <hr>
+        <div class="ctl"><span>Sun azimuth</span><input type="range" id="pvAz" min="0" max="360" value="135"><span class="v" id="pvAzV">135°</span></div>
+        <div class="ctl"><span>Sun elevation</span><input type="range" id="pvEl" min="5" max="90" value="45"><span class="v" id="pvElV">45°</span></div>
+        <div class="ctl"><span>Sun intensity</span><input type="range" id="pvSunI" min="0" max="200" value="100"><span class="v" id="pvSunIV">1.0</span></div>
+        <div class="ctl"><span>Ambient</span><input type="color" id="pvAmb" value="#4a4137"><span></span></div>
+        <hr>
+        <div class="ctl"><span><input type="checkbox" id="pvFog"> fog</span><input type="range" id="pvFogD" min="0" max="100" value="40"><span class="v" id="pvFogDV">0.40</span></div>
+        <div class="ctl"><span>Background</span><input type="color" id="pvBg" value="#3f3a2e"><span></span></div>
+        <hr>
+        <div class="ctl"><span>Exposure</span><input type="range" id="pvExp" min="40" max="220" value="100"><span class="v" id="pvExpV">1.00</span></div>
+        <div class="ctl"><span>Contrast</span><input type="range" id="pvCon" min="50" max="180" value="100"><span class="v" id="pvConV">1.00</span></div>
+        <div class="ctl"><span>Saturation</span><input type="range" id="pvSat" min="0" max="200" value="100"><span class="v" id="pvSatV">1.00</span></div>
+        <div class="ctl"><span>Color temperature</span><input type="range" id="pvTemp" min="70" max="130" value="100"><span class="v" id="pvTempV">1.00</span></div>
+        <hr>
+        <div class="ctl"><span></span><button id="pvGrid" class="btn small">Clay grid — all</button><span></span></div>
+        <div class="ctl"><span></span><button id="pvReset" class="btn small">Reset camera</button><span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 QUALITY GATE -->
+  <section class="panel" data-stage="6">
+    <h1>6 · Quality Gate</h1>
+    <p class="desc">Definition of Done (Section 4.3) — the automatic half of the checklist is audited here: naming pattern, size, pivot,
+    polygon ceiling, UV presence, texel density deviation (≤5%) and texture saturation ceiling. Visual consistency and the scene test are human work.
+    An asset that fails is reported together with the stage it should return to.</p>
+    <div class="row">
+      <button id="btnQaRun" class="btn primary">Run audit</button>
+      <span id="qaSummary"></span>
+      <span class="sp"></span>
+      <button id="btnQaCsv" class="btn small">qa_report.csv ↓</button>
+      <button id="btnQaMd" class="btn small">qa_report.md ↓</button>
+    </div>
+    <div class="tblwrap"><table class="tbl" id="qaTbl">
+      <thead><tr><th>File</th><th>Name</th><th>Size</th><th>Pivot</th><th>Polygon</th><th>UV</th><th>Texel</th><th>Palette</th><th>Return to stage</th></tr></thead>
+      <tbody id="qaBody"></tbody>
+    </table></div>
+  </section>
+
+  <!-- 7 AUTOMATION -->
+  <section class="panel" data-stage="7">
+    <h1>7 · Automation — Run the Pipeline</h1>
+    <p class="desc">The browser version of Guide 10.1: the selected stages run in order over the entire stock. If a step fails on a file,
+    the pipeline does not stop; it goes into the report and is added to the triage list. Assets with the decision "discard" / "redo" are left for manual work.</p>
+    <div class="row">
+      <label class="inl"><input type="checkbox" id="runStep1" checked> 1 inventory measurement</label>
+      <label class="inl"><input type="checkbox" id="runStep2" checked> 2 geometric normalization</label>
+      <label class="inl"><input type="checkbox" id="runStep3" checked> 3 UV unwrap + texel density</label>
+      <label class="inl"><input type="checkbox" id="runStep4" checked> 4 palette remap (albedo)</label>
+      <label class="inl"><input type="checkbox" id="runStep5" checked> 6 quality gate</label>
+      <span class="sp"></span>
+      <button id="btnRun" class="btn primary">▶ Run Pipeline</button>
+    </div>
+    <div id="runLog" class="minilog"></div>
+    <div class="row" style="margin-top:12px">
+      <button id="btnRunCsv" class="btn small">inventory.csv ↓</button>
+      <button id="btnRunMd" class="btn small">qa_report.md ↓</button>
+      <button id="btnRunObjs" class="btn small">Download all normalized OBJs</button>
+      <button id="btnRunTexs" class="btn small">Download all palettized textures</button>
+    </div>
+  </section>
+
+  <!-- 8 REFERENCE -->
+  <section class="panel" data-stage="8">
+    <h1>8 · Reference — Folder Architecture, Plan and Limits</h1>
+    <div class="grid2">
+      <div class="card">
+        <h3>Folder architecture (Guide 3.6)</h3>
+        <pre>project/
+   docs/            style_guide.md, qa_report.md
+   assets_source/   raw files — the engine never looks here
+   assets_runtime/  the only folder the engine sees
+   pipeline/        this tool's outputs: inventory.csv, *_norm.obj, *_pal.png</pre>
+        <p class="muted">Two-tree rule: source never enters the engine; the runtime folder can always be regenerated from the pipeline.</p>
+      </div>
+      <div class="card">
+        <h3>This tool ↔ Guide mapping</h3>
+        <table class="tbl"><tbody>
+          <tr><td>Inventory + triage</td><td>Section 4 → Section 1</td></tr>
+          <tr><td>Apply transform, pivot, scale, cleanup, decimate</td><td>Section 5 → Section 2</td></tr>
+          <tr><td>Texel density measure/apply, box unwrap</td><td>Section 6 → Section 3</td></tr>
+          <tr><td>Palette quantization, PBR derivation, AI-free upscale</td><td>Section 7 → Section 4</td></tr>
+          <tr><td>Master shader, palette remap, LUT, lighting language</td><td>Section 9 → Section 5</td></tr>
+          <tr><td>QA gate + automation</td><td>Section 4.3 + 10 → Section 6-7</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h3>Summary of the thirty-day plan (Guide 11)</h3>
+        <pre>Wk 1 d1-2  style guide + palette        → Section 0
+Wk 1 d3-5  inventory + triage            → Section 1
+Wk 2       engine layer (LUT, fog)       → Section 5  (cheapest unifier FIRST)
+Wk 3 d1-2  batch normalization           → Section 2
+Wk 3 d3-5  texel density + unwrap        → Section 3
+Wk 4 d1-2  palette pass + PBR derivation → Section 4
+Wk 4 d3-5  manual work: hero assets      → out of scope
+Wk 4 end   QA gate                       → Section 6</pre>
+      </div>
+      <div class="card">
+        <h3>Deliberate limits</h3>
+        <ul class="small" style="padding-left:18px;margin:6px 0">
+          <li><b>FBX is not read</b> — binary format; export as OBJ/GLB from Blender (Section 5.5).</li>
+          <li><b>Section 8 (local AI texturing) is out of scope</b> — living up to the tool's name: it is completely AI-free.</li>
+          <li>Lanczos + unsharp is used instead of Real-ESRGAN (AI-free upscaling).</li>
+          <li>Bake (6.4), atlas packing (6.3) and retopo → stay on the Blender / Instant Meshes / xatlas side.</li>
+          <li>Decimate is vertex-clustering based: sufficient for background/midground, not for hero assets.</li>
+          <li>All processing runs locally in the browser; no file is uploaded and no network request is made.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<div id="logwrap">
+  <button id="logToggle">Log ▼</button>
+  <pre id="log"></pre>
+</div>
+
+<div id="toasts"></div>
+
+<div id="modal" class="hidden">
+  <div id="modalBox">
+    <h2>Help — how does it work?</h2>
+    <div id="helpBody" class="small"></div>
+    <div class="row" style="margin-top:14px"><span class="sp"></span><button id="btnModalClose" class="btn primary">Close</button></div>
+  </div>
+</div>
+
+</body>
+<script>
+"use strict";
+/* ============================================================
+   util.js — shared helpers, mat4, UI primitives
+   ============================================================ */
+const $=(s,r)=> (r||document).querySelector(s);
+const $$=(s,r)=> Array.from((r||document).querySelectorAll(s));
+const clamp=(x,a,b)=> x<a?a:(x>b?b:x);
+const lerp=(a,b,t)=> a+(b-a)*t;
+const DEG=Math.PI/180;
+
+function fmtN(x,d){
+  if(x===null||x===undefined||!isFinite(x)) return '–';
+  const p=(d===undefined)?2:d;
+  let v=Number(x).toFixed(p);
+  if(v.indexOf('.')>=0) v=v.replace(/0+$/,'').replace(/\.$/,'');
+  return v;
+}
+function el(tag,attrs){
+  const e=document.createElement(tag);
+  if(attrs) for(const k in attrs){
+    if(k==='class') e.className=attrs[k];
+    else if(k==='html') e.innerHTML=attrs[k];
+    else if(k.slice(0,2)==='on') e.addEventListener(k.slice(2),attrs[k]);
+    else e.setAttribute(k,attrs[k]);
+  }
+  return e;
+}
+function toast(msg,type,ms){
+  const t=el('div',{class:'toast '+(type||'')});
+  t.textContent=msg;
+  $('#toasts').appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .4s'; setTimeout(()=>t.remove(),420); }, ms||3400);
+}
+function log(msg,type){
+  const p=$('#log'); if(!p) return;
+  const line=document.createElement('span');
+  line.className=type||'';
+  line.textContent='['+new Date().toTimeString().slice(0,8)+'] '+msg+'\n';
+  p.appendChild(line);
+  p.scrollTop=p.scrollHeight;
+}
+function miniLog(container,msg,type){
+  const line=document.createElement('div');
+  if(type) line.style.color=({ok:'var(--ok)',err:'var(--err)',warn:'var(--warn)',info:'var(--info)'})[type]||'';
+  line.textContent=msg;
+  container.appendChild(line);
+  container.scrollTop=container.scrollHeight;
+}
+function downloadBlob(name,blob){
+  const a=el('a',{href:URL.createObjectURL(blob),download:name});
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
+}
+function downloadText(name,text,mime){
+  downloadBlob(name,new Blob([text],{type:mime||'text/plain;charset=utf-8'}));
+}
+function imageDataToCanvas(img){
+  const c=document.createElement('canvas'); c.width=img.width; c.height=img.height;
+  c.getContext('2d').putImageData(img,0,0); return c;
+}
+function downloadImage(name,imgData){
+  imageDataToCanvas(imgData).toBlob(b=>downloadBlob(name,b),'image/png');
+}
+function csvCell(v){
+  v=String(v);
+  return /[",;\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v;
+}
+function stamp(){ return new Date().toTimeString().slice(0,8); }
+function tick(){ return new Promise(r=>setTimeout(r,0)); }
+function debounce(fn,ms){
+  let t; return function(){ const a=arguments,self=this;
+    clearTimeout(t); t=setTimeout(()=>fn.apply(self,a), ms); };
+}
+
+/* ---------- color ---------- */
+function hex2rgb(h){
+  h=String(h).replace('#','');
+  if(h.length===3) h=h.split('').map(c=>c+c).join('');
+  const n=parseInt(h,16)||0;
+  return [(n>>16)&255,(n>>8)&255,n&255];
+}
+function rgb2hex(r,g,b){
+  const c=x=>clamp(Math.round(x),0,255).toString(16).padStart(2,'0');
+  return '#'+c(r)+c(g)+c(b);
+}
+function rgb2hsv(r,g,b){
+  r/=255; g/=255; b/=255;
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn;
+  let h=0;
+  if(d>0){
+    if(mx===r) h=((g-b)/d)%6;
+    else if(mx===g) h=(b-r)/d+2;
+    else h=(r-g)/d+4;
+    h*=60; if(h<0) h+=360;
+  }
+  return [h, mx===0?0:d/mx, mx];
+}
+function hsv2rgb(h,s,v){
+  h=((h%360)+360)%360;
+  const c=v*s, x=c*(1-Math.abs(((h/60)%2)-1)), m=v-c;
+  let r=0,g=0,b=0;
+  if(h<60){r=c;g=x;} else if(h<120){r=x;g=c;} else if(h<180){r=0;g=c;b=x;}
+  else if(h<240){r=0;g=x;b=c;} else if(h<300){r=x;g=0;b=c;} else {r=c;g=0;b=x;}
+  return [(r+m)*255,(g+m)*255,(b+m)*255];
+}
+function nearestColorIdx(palRGB,r,g,b){ // palRGB: [[r,g,b],...]  → index
+  let best=0, bd=Infinity;
+  for(let i=0;i<palRGB.length;i++){
+    const p=palRGB[i];
+    const dr=r-p[0], dg=g-p[1], db=b-p[2];
+    const d=dr*dr+dg*dg+db*db;
+    if(d<bd){ bd=d; best=i; }
+  }
+  return best;
+}
+
+/* ---------- mat4 (column-major, glTF compatible) ---------- */
+function m4ident(){ return [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]; }
+function m4mul(a,b){ // a*b
+  const o=new Array(16);
+  for(let c=0;c<4;c++) for(let r=0;r<4;r++){
+    o[c*4+r]= a[r]*b[c*4] + a[4+r]*b[c*4+1] + a[8+r]*b[c*4+2] + a[12+r]*b[c*4+3];
+  }
+  return o;
+}
+function m4apply(m,x,y,z){
+  return [
+    m[0]*x+m[4]*y+m[8]*z+m[12],
+    m[1]*x+m[5]*y+m[9]*z+m[13],
+    m[2]*x+m[6]*y+m[10]*z+m[14],
+    m[3]*x+m[7]*y+m[11]*z+m[15]
+  ];
+}
+function m4fromTRS(t,rq,s){
+  // rq: quaternion [x,y,z,w] normalize
+  let [x,y,z,w]=rq;
+  const n=Math.sqrt(x*x+y*y+z*z+w*w)||1; x/=n; y/=n; z/=n; w/=n;
+  const x2=x+x, y2=y+y, z2=z+z;
+  const xx=x*x2, xy=x*y2, xz=x*z2, yy=y*y2, yz=y*z2, zz=z*z2;
+  const wx=w*x2, wy=w*y2, wz=w*z2;
+  const m=[
+    (1-(yy+zz))*s[0], (xy+wz)*s[0], (xz-wy)*s[0], 0,
+    (xy-wz)*s[1], (1-(xx+zz))*s[1], (yz+wx)*s[1], 0,
+    (xz+wy)*s[2], (yz-wx)*s[2], (1-(xx+yy))*s[2], 0,
+    t[0], t[1], t[2], 1
+  ];
+  return m; // column-major (each row is actually a column)
+}
+function n3invT(m){
+  // inverse transpose of the upper-left 3x3 (normal matrix)
+  const a=m[0],b=m[4],c=m[8], d=m[1],e=m[5],f=m[9], g=m[2],h=m[6],i=m[10];
+  const A=e*i-f*h, B=-(d*i-f*g), C=d*h-e*g;
+  let det=a*A+b*B+c*C;
+  if(!det) return null;
+  det=1/det;
+  return [
+    A*det, -(b*i-c*h)*det, (b*f-c*e)*det,
+    B*det,  (a*i-c*g)*det, -(a*f-c*d)*det,
+    C*det, -(a*h-b*g)*det, (a*e-b*d)*det
+  ];
+}
+function n3apply(nm,x,y,z){
+  return [ nm[0]*x+nm[3]*y+nm[6]*z, nm[1]*x+nm[4]*y+nm[7]*z, nm[2]*x+nm[5]*y+nm[8]*z ];
+}
+function v3norm(v){
+  const l=Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2])||1;
+  return [v[0]/l, v[1]/l, v[2]/l];
+}
+function v3len(v){ return Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]); }
+
+/* ---------- simple deterministic value-noise (for demo textures) ---------- */
+function hash2(x,y,seed){
+  let h=(x*374761393 + y*668265263 + (seed||0)*1442695041)|0;
+  h=(h^(h>>13))*1274126177|0;
+  return ((h^(h>>16))>>>0)/4294967295;
+}
+function vnoise(x,y,seed){
+  const xi=Math.floor(x), yi=Math.floor(y);
+  const xf=x-xi, yf=y-yi;
+  const u=xf*xf*(3-2*xf), v=yf*yf*(3-2*yf);
+  const a=hash2(xi,yi,seed), b=hash2(xi+1,yi,seed), c=hash2(xi,yi+1,seed), d=hash2(xi+1,yi+1,seed);
+  return lerp(lerp(a,b,u), lerp(c,d,u), v);
+}
+/* ============================================================
+   config.js — style guide store (Guide Section 3)
+   ============================================================ */
+const CFG_KEY='yap_v1_cfg';
+const CLASSES=['arka','prop','hero','karakter'];
+
+function defaultCfg(){
+  return {
+    palette:['#f4e9d8','#d9c7a7','#b09a6f','#87702a','#5c4a1e','#3f3a2e','#7a6a58','#a18347'],
+    satCap:70,                       // % HSV S
+    dither:false,
+    paletteStrength:100,             // %
+    emissive:['#7fd8ff','#ff8c3b','#fff3b0','#b26bff'],
+    texel:{arka:2.56, prop:5.12, hero:10.24, karakter:10.24},
+    budget:{arka:300, prop:2000, hero:10000, karakter:40000},
+    targetSize:{arka:4.0, prop:1.0, hero:2.0, karakter:1.8},
+    sizeTol:25,                      // %
+    texSize:{arka:1024, prop:1024, hero:2048, karakter:2048},
+    naming:'^(env|char|ui)_[a-z0-9]+(_[a-z0-9]+)*$',
+    engine:'Unity (+Z forward, +Y up)',
+    smooth:40
+  };
+}
+let CFG=defaultCfg();
+
+function loadCfg(){
+  try{
+    const raw=localStorage.getItem(CFG_KEY);
+    if(raw){
+      const c=JSON.parse(raw);
+      CFG=Object.assign(defaultCfg(), c);
+      // merge inner objects too
+      for(const k of ['texel','budget','targetSize','texSize'])
+        if(c[k]) CFG[k]=Object.assign(defaultCfg()[k], c[k]);
+    }
+  }catch(e){ log('Could not read settings, using defaults','warn'); }
+}
+const saveCfgDebounced=debounce(()=>{
+  try{ localStorage.setItem(CFG_KEY, JSON.stringify(CFG)); }catch(e){}
+},300);
+function saveCfg(){ saveCfgDebounced(); }
+
+/* ---------- palette ---------- */
+function cfgPalRGB(){ return CFG.palette.map(h=>hex2rgb(h)); }
+function cfgEmiRGB(){ return (CFG.emissive&&CFG.emissive.length?CFG.emissive:['#ffffff']).map(h=>hex2rgb(h)); }
+
+function renderCfgPal(){
+  const box=$('#palList'); box.innerHTML='';
+  CFG.palette.forEach((h,i)=>{
+    const row=el('div',{class:'palrow'});
+    const inp=el('input',{type:'color',value:h});
+    inp.addEventListener('input',()=>{ CFG.palette[i]=inp.value; saveCfg(); drawPalStrip(); });
+    const lab=el('span',{class:'hx',html:h});
+    inp.addEventListener('input',()=>{ lab.textContent=inp.value; });
+    const del=el('button',{class:'btn small danger',html:'×'});
+    del.addEventListener('click',()=>{
+      if(CFG.palette.length<=4){ toast('Palette must contain at least 4 colors','warn'); return; }
+      CFG.palette.splice(i,1); saveCfg(); renderCfgPal(); drawPalStrip();
+    });
+    row.append(inp,lab,del); box.appendChild(row);
+  });
+  const warn=$('#palCountWarn');
+  if(warn) warn.textContent='';
+  drawPalStrip();
+}
+function drawPalStrip(){
+  const cv=$('#palStrip'); const ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  const n=CFG.palette.length;
+  CFG.palette.forEach((h,i)=>{
+    ctx.fillStyle=h;
+    ctx.fillRect(i*cv.width/n, 0, Math.ceil(cv.width/n), cv.height);
+  });
+}
+function renderCfgEmi(){
+  const box=$('#emiList'); box.innerHTML='';
+  (CFG.emissive||[]).forEach((h,i)=>{
+    const row=el('div',{class:'palrow'});
+    const inp=el('input',{type:'color',value:h});
+    inp.addEventListener('input',()=>{ CFG.emissive[i]=inp.value; saveCfg(); });
+    const del=el('button',{class:'btn small danger',html:'×'});
+    del.addEventListener('click',()=>{ CFG.emissive.splice(i,1); saveCfg(); renderCfgEmi(); });
+    row.append(inp,el('span',{class:'hx',html:h}),del); box.appendChild(row);
+  });
+}
+
+/* ---------- cfg <-> UI sync ---------- */
+function buildCfgUI(){
+  renderCfgPal(); renderCfgEmi();
+  const numIds={
+    tex_arka:['texel','arka'],tex_prop:['texel','prop'],tex_hero:['texel','hero'],tex_karakter:['texel','karakter'],
+    bud_arka:['budget','arka'],bud_prop:['budget','prop'],bud_hero:['budget','hero'],bud_karakter:['budget','karakter'],
+    siz_arka:['targetSize','arka'],siz_prop:['targetSize','prop'],siz_hero:['targetSize','hero'],siz_karakter:['targetSize','karakter'],
+    tsx_arka:['texSize','arka'],tsx_prop:['texSize','prop'],tsx_hero:['texSize','hero'],tsx_karakter:['texSize','karakter']
+  };
+  const refresh=()=>{
+    for(const id in numIds) $('#'+id).value=CFG[numIds[id][0]][numIds[id][1]];
+    $('#cfgSizeTol').value=CFG.sizeTol;
+    $('#cfgName').value=CFG.naming;
+    $('#cfgEngine').value=CFG.engine;
+    $('#cfgSat').value=CFG.satCap; $('#cfgSatV').textContent='%'+CFG.satCap;
+    $('#cfgSmooth').value=CFG.smooth; $('#cfgSmoothV').textContent=CFG.smooth+'°';
+    $('#cfgDither').checked=CFG.dither;
+    $('#cfgPStrength').value=CFG.paletteStrength; $('#cfgPStrengthV').textContent='%'+CFG.paletteStrength;
+  };
+  refresh();
+  for(const id in numIds){
+    $('#'+id).addEventListener('input',e=>{
+      const v=parseFloat(e.target.value);
+      if(isFinite(v)){ CFG[numIds[id][0]][numIds[id][1]]=v; saveCfg(); }
+    });
+  }
+  $('#cfgSizeTol').addEventListener('input',e=>{ const v=parseFloat(e.target.value); if(isFinite(v)){CFG.sizeTol=v; saveCfg();} });
+  $('#cfgName').addEventListener('input',e=>{ CFG.naming=e.target.value||defaultCfg().naming; saveCfg(); });
+  $('#cfgEngine').addEventListener('change',e=>{ CFG.engine=e.target.value; saveCfg(); });
+  $('#cfgSat').addEventListener('input',e=>{ CFG.satCap=+e.target.value; $('#cfgSatV').textContent='%'+CFG.satCap; saveCfg(); });
+  $('#cfgSmooth').addEventListener('input',e=>{ CFG.smooth=+e.target.value; $('#cfgSmoothV').textContent=CFG.smooth+'°'; saveCfg(); });
+  $('#cfgDither').addEventListener('change',e=>{ CFG.dither=e.target.checked; saveCfg(); });
+  $('#cfgPStrength').addEventListener('input',e=>{ CFG.paletteStrength=+e.target.value; $('#cfgPStrengthV').textContent='%'+CFG.paletteStrength; saveCfg(); });
+  $('#palAdd').addEventListener('click',()=>{
+    if(CFG.palette.length>=16){ toast('Palette cap is 16 colors (Guide 3.2)','warn'); return; }
+    CFG.palette.push('#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'));
+    saveCfg(); renderCfgPal();
+  });
+  $('#emiAdd').addEventListener('click',()=>{
+    if((CFG.emissive||[]).length>=4){ toast('Emissive mini palette: 2-4 colors (Guide 7.4)','warn'); return; }
+    CFG.emissive.push('#ffffff'); saveCfg(); renderCfgEmi();
+  });
+  $('#btnCfgReset').addEventListener('click',()=>{
+    CFG=defaultCfg(); localStorage.removeItem(CFG_KEY);
+    buildCfgUI(); toast('Style guide reset to defaults','ok');
+  });
+  $('#palFromImg').addEventListener('click',()=>$('#filePalRef').click());
+  $('#filePalRef').addEventListener('change',async e=>{
+    const f=e.target.files[0]; if(!f) return;
+    try{
+      const img=await fileToImageData(f);
+      const cols=medianCutPalette(img, Math.min(16, Math.max(8, CFG.palette.length)));
+      CFG.palette=cols.map(c=>rgb2hex(c[0],c[1],c[2]));
+      saveCfg(); renderCfgPal();
+      toast('Extracted '+cols.length+' colors from reference image (median cut)','ok');
+      log('Palette derived from file "'+f.name+'": '+CFG.palette.join(' '),'info');
+    }catch(err){ toast('Could not extract palette: '+err.message,'err'); }
+    e.target.value='';
+  });
+  refresh && refresh();
+}
+
+function exportGuideMd(){
+  const c=CFG;
+  const md=[
+    '# STYLE GUIDE v1.0 ('+new Date().toISOString().slice(0,10)+')',
+    '',
+    '> This file was generated by the Asset Harmonizer tool. Every line outside the moodboard is',
+    '> an input to a pipeline script or an item in the QA gate (Guide 3.7).',
+    '',
+    '## References',
+    '- (Link your PureRef board here: what to TAKE and what NOT to take from it — one sentence)',
+    '',
+    '## Palette (8-16 colors, hex)',
+    c.palette.join(' '),
+    '# saturation cap: %'+c.satCap+' (HSV S)',
+    '# emissive mini palette: '+((c.emissive||[]).join(' ')||'-'),
+    '',
+    '## Measurement standards',
+    '- texel density: arka '+c.texel.arka+' / prop '+c.texel.prop+' / hero '+c.texel.hero+' / karakter '+c.texel.karakter+' px/cm',
+    '- polygon cap: arka '+c.budget.arka+' / prop '+c.budget.prop+' / hero '+c.budget.hero+' / karakter '+c.budget.karakter+' triangles',
+    '- target size (largest axis): arka '+c.targetSize.arka+' / prop '+c.targetSize.prop+' / hero '+c.targetSize.hero+' / karakter '+c.targetSize.karakter+' m (tolerance ±%'+c.sizeTol+')',
+    '- pivot: base center; +Y up (internal); engine: '+c.engine,
+    '- naming regex: `'+c.naming+'`',
+    '',
+    '## Surface language',
+    '- auto smooth angle: '+c.smooth+' degrees',
+    '- palette quantization: dithering '+(c.dither?'ON (painterly style)':'OFF (pixel-art / hard style)')+', blend %'+c.paletteStrength,
+    '- PBR derivation: blur 2px, normal strength 2.0, ORM pack (R=AO, G=rough, B=metal)',
+    '- order rule: upscale -> derive PBR -> palette remap (Guide 7)',
+    ''
+  ].join('\n');
+  downloadText('style_guide.md', md, 'text/markdown;charset=utf-8');
+  toast('style_guide.md downloaded','ok');
+}
+
+function exportCfgJson(){
+  downloadText('style_guide_settings.json', JSON.stringify(CFG,null,2), 'application/json');
+  toast('Settings downloaded','ok');
+}
+function importCfgJson(file){
+  file.text().then(t=>{
+    const c=JSON.parse(t);
+    CFG=Object.assign(defaultCfg(), c);
+    for(const k of ['texel','budget','targetSize','texSize'])
+      if(c[k]) CFG[k]=Object.assign(defaultCfg()[k], c[k]);
+    saveCfg(); buildCfgUI();
+    toast('Settings loaded','ok');
+  }).catch(e=>toast('Could not read settings file: '+e.message,'err'));
+}
+/* ============================================================
+   importers.js — OBJ / GLB / glTF parsers (Section 4.1 input)
+   Canonical mesh format:
+     pos : Float32Array (n*3)  — indexed, in meters (after unit)
+     idx : Array<number>       — triangle list (t*3)
+     uv  : Float32Array|null   — PER CORNER (idx length*2)
+     nrm : Float32Array|null   — PER CORNER (idx length*3)
+   ============================================================ */
+let ASSET_SEQ=0;
+function newAsset(name, pos, idx, uv, nrm, mats){
+  return {
+    id:++ASSET_SEQ,
+    name:name,
+    className:'prop',
+    decision:'koru',
+    unit:1,
+    pos:pos, idx:idx, uv:uv||null, nrm:nrm||null,
+    raw:null,             // {pos,idx,uv,nrm} for unit changes
+    matCount:mats||1,
+    texId:null,
+    flags:{normalized:false, decimated:false, unwrapped:false},
+    norm:{weldRemoved:0, degen:0, decFrom:0, decTo:0, negScale:false},
+    td:null,              // {val, assumed, worldA, uvA, texW, texH}
+    qa:null,
+    pv:null               // simplified copy for preview (cache)
+  };
+}
+
+function guessUnit(maxDim){
+  // raw unit guess: 0.05–50 → m, ≥50 → cm, <0.05 → mm
+  if(maxDim>=50) return 0.01;
+  if(maxDim<0.05) return 100;
+  return 1;
+}
+
+/* ---------------- OBJ ---------------- */
+function parseOBJ(text, name){
+  const p=[], u=[], n=[], idx=[];
+  const posArr=[], uvArr=[], nrmArr=[]; // corner stream
+  const mats=new Set();
+  let hasUV=false, hasN=false;
+  const lines=text.split(/\r?\n/);
+  for(let li=0; li<lines.length; li++){
+    const line=lines[li];
+    if(line.length<2 || line[0]==='#') continue;
+    const sp=line.indexOf(' ');
+    const head=sp<0?line:line.slice(0,sp);
+    const rest=sp<0?'':line.slice(sp+1).trim();
+    switch(head){
+      case 'v': {
+        const t=rest.split(/\s+/);
+        posArr.push(parseFloat(t[0]),parseFloat(t[1]),parseFloat(t[2]));
+        break;
+      }
+      case 'vt': {
+        const t=rest.split(/\s+/);
+        uvArr.push(parseFloat(t[0]),parseFloat(t[1]));
+        break;
+      }
+      case 'vn': {
+        const t=rest.split(/\s+/);
+        nrmArr.push(parseFloat(t[0]),parseFloat(t[1]),parseFloat(t[2]));
+        break;
+      }
+      case 'usemtl': { mats.add(rest); break; }
+      case 'f': {
+        const corners=[];
+        for(const c of rest.split(/\s+/).filter(s=>s.length)){
+          const seg=c.split('/');
+          let vi=parseInt(seg[0],10);
+          if(isNaN(vi)) continue;
+          if(vi<0) vi=posArr.length/3 + vi + 1;
+          let ti=0, ni=0;
+          if(seg.length>1 && seg[1]) { ti=parseInt(seg[1],10); if(!isNaN(ti)&&ti<0) ti=uvArr.length/2+ti+1; }
+          if(seg.length>2 && seg[2]) { ni=parseInt(seg[2],10); if(!isNaN(ni)&&ni<0) ni=nrmArr.length/3+ni+1; }
+          corners.push({vi:vi, ti:ti, ni:ni});
+        }
+        // n-gon fan triangulation — each triangle corner is written to the stream explicitly (uv/n alignment guaranteed)
+        for(let k=1;k<corners.length-1;k++){
+          const tri=[corners[0],corners[k],corners[k+1]];
+          for(const c of tri){
+            const v=(c.vi-1)*3;
+            if(v<0||v+2>=posArr.length) continue;
+            p.push(posArr[v],posArr[v+1],posArr[v+2]);
+            if(c.ti>0){ const uvid=(c.ti-1)*2; if(uvid+1<uvArr.length) u.push(uvArr[uvid],uvArr[uvid+1]); else u.push(0,0); hasUV=true; }
+            else u.push(0,0);
+            if(c.ni>0){ const nid=(c.ni-1)*3; if(nid+2<nrmArr.length) n.push(nrmArr[nid],nrmArr[nid+1],nrmArr[nid+2]); else n.push(0,1,0); hasN=true; }
+            else n.push(0,1,0);
+            idx.push(p.length/3-1);
+          }
+        }
+        break;
+      }
+    }
+  }
+  if(!p.length) throw new Error('mesh data not found');
+  // corner stream → indexed mesh: weld positions, idx = corner→vertex map
+  const pos0=new Float32Array(p);
+  const w=weldPositions(pos0);
+  let uvOut=null, nrmOut=null;
+  if(hasUV && u.length===idx.length*2) uvOut=new Float32Array(u);
+  if(hasN && n.length===idx.length*3) nrmOut=new Float32Array(n);
+  const a=newAsset(name, w.pos, idx.map(i=>w.remap[i]), uvOut, nrmOut, mats.size||1);
+  a.raw={pos:w.pos.slice(), idx:a.idx.slice(), uv:uvOut?uvOut.slice():null, nrm:nrmOut?nrmOut.slice():null};
+  return a;
+}
+
+function weldPositions(pos, eps){
+  eps=eps||1e-4;
+  const map=new Map(), out=[];
+  const n=pos.length/3;
+  const remap=new Int32Array(n);
+  for(let i=0;i<n;i++){
+    const key=Math.round(pos[i*3]/eps)+','+Math.round(pos[i*3+1]/eps)+','+Math.round(pos[i*3+2]/eps);
+    let id=map.get(key);
+    if(id===undefined){ id=map.size; map.set(key,id); out.push(pos[i*3],pos[i*3+1],pos[i*3+2]); }
+    remap[i]=id;
+  }
+  return {pos:new Float32Array(out), remap:remap};
+}
+
+/* ---------------- glTF / GLB ---------------- */
+function parseGLB(buffer, name){
+  const dv=new DataView(buffer);
+  if(dv.getUint32(0,true)!==0x46546C67) throw new Error('Invalid GLB signature');
+  const totalLen=dv.getUint32(8,true);
+  let off=12, json=null, bin=null;
+  while(off<totalLen){
+    const cLen=dv.getUint32(off,true), cType=dv.getUint32(off+4,true);
+    const body=new Uint8Array(buffer, off+8, cLen);
+    if(cType===0x4E4F534A){
+      // JSON chunk is padded to 4 bytes (0x20 space; some exporters write 0x00) → trim trailing padding
+      let jsonText=new TextDecoder('utf-8').decode(body);
+      jsonText=jsonText.replace(/[\u0000-\u0020]+$/,'');
+      json=JSON.parse(jsonText);
+    }
+    else if(cType===0x004E4942) bin=body;
+    off+=8+cLen;
+    if(cLen&3) off+=4-(cLen&3);
+  }
+  if(!json) throw new Error('GLB JSON chunk missing');
+  return parseGLTFJson(json, bin, name);
+}
+
+async function parseGLTFText(text, name){
+  const json=JSON.parse(text);
+  let bin=null;
+  const bufs=json.buffers||[];
+  for(const b of bufs){
+    if(b.uri){
+      if(b.uri.startsWith('data:application/octet-stream;base64,')){
+        const b64=b.uri.slice(b.uri.indexOf('base64,')+7);
+        const s=atob(b64); const arr=new Uint8Array(s.length);
+        for(let i=0;i<s.length;i++) arr[i]=s.charCodeAt(i);
+        bin=arr; break;
+      } else {
+        throw new Error('external .bin files are not supported — export as GLB');
+      }
+    }
+  }
+  return parseGLTFJson(json, bin, name);
+}
+
+function readAccessor(json, bin, accI){
+  const acc=json.accessors[accI];
+  if(acc.sparse) throw new Error('sparse accessor not supported');
+  const comps={SCALAR:1,VEC2:2,VEC3:3,VEC4:4,MAT4:16}[acc.type];
+  const ct={5120:Int8Array,5121:Uint8Array,5122:Int16Array,5123:Uint16Array,5125:Uint32Array,5126:Float32Array}[acc.componentType];
+  if(!ct) throw new Error('unsupported componentType: '+acc.componentType);
+  const csz=ct.BYTES_PER_ELEMENT;
+  const bv=json.bufferViews[acc.bufferView||0];
+  const stride=bv.byteStride|| comps*csz;
+  const base=(bv.byteOffset||0)+(acc.byteOffset||0);
+  const out=new Float32Array(acc.count*comps);
+  if(!bin) throw new Error('no buffer data (external .bin?)');
+  const dv=new DataView(bin.buffer, bin.byteOffset+base);
+  const fmt={5120:'getInt8',5121:'getUint8',5122:'getInt16',5123:'getUint16',5125:'getUint32',5126:'getFloat32'}[acc.componentType];
+  for(let i=0;i<acc.count;i++){
+    for(let c=0;c<comps;c++){
+      const o=i*stride + c*csz;
+      out[i*comps+c]= dv[fmt](o, true);
+    }
+  }
+  return out;
+}
+
+function parseGLTFJson(json, bin, name){
+  if(!json.meshes || !json.meshes.length) throw new Error('no mesh');
+  const nodes=json.nodes||[];
+  // walk world matrices
+  const worldOf=new Map();
+  const visit=(ni, parent)=>{
+    const nd=nodes[ni]||{};
+    let local;
+    if(nd.matrix) local=nd.matrix.slice();
+    else local=m4fromTRS(nd.translation||[0,0,0], nd.rotation||[0,0,0,1], nd.scale||[1,1,1]);
+    const w=parent? m4mul(parent, local) : local;
+    worldOf.set(ni,w);
+    (nd.children||[]).forEach(c=>visit(c,w));
+  };
+  const scenes=json.scenes||[];
+  const roots=(scenes[json.scene||0]||scenes[0]||{nodes:[]}).nodes||[];
+  roots.forEach(r=>visit(r,null));
+  // also take mesh nodes not attached to the scene (single-mesh files)
+  nodes.forEach((nd,ni)=>{ if(!worldOf.has(ni) && nd.mesh!==undefined) visit(ni,null); });
+
+  const P=[], UV=[], NR=[], IDX=[];
+  const matIds=new Set();
+  let hasUV=false, hasN=false;
+  let embeddedTexPromise=null;
+
+  const meshNodeList=[];
+  nodes.forEach((nd,ni)=>{ if(nd.mesh!==undefined && worldOf.has(ni)) meshNodeList.push(ni); });
+
+  for(const ni of meshNodeList){
+    const mesh=json.meshes[nodes[ni].mesh];
+    const M=worldOf.get(ni);
+    const nm=n3invT(M);
+    for(const prim of mesh.primitives){
+      const posAcc=readAccessor(json,bin,prim.attributes.POSITION);
+      const mode=prim.mode===undefined?4:prim.mode;
+      if(mode!==4) continue; // TRIANGLES only
+      let ind;
+      if(prim.indices!==undefined){
+        const acc=json.accessors[prim.indices];
+        const raw=readAccessor(json,bin,prim.indices);
+        ind=new Array(acc.count);
+        for(let i=0;i<acc.count;i++) ind[i]=raw[i];
+      } else {
+        ind=new Array(posAcc.length/3);
+        for(let i=0;i<ind.length;i++) ind[i]=i;
+      }
+      const vertBase=P.length/3;
+      for(let i=0;i<posAcc.length;i+=3){
+        const w=m4apply(M, posAcc[i],posAcc[i+1],posAcc[i+2]);
+        P.push(w[0],w[1],w[2]);
+      }
+      // normal
+      if(prim.attributes.NORMAL!==undefined){
+        const na=readAccessor(json,bin,prim.attributes.NORMAL);
+        for(let i=0;i<na.length;i+=3){
+          const t=nm? n3apply(nm, na[i],na[i+1],na[i+2]) : [na[i],na[i+1],na[i+2]];
+          NR.push(...v3norm(t));
+        }
+        hasN=true;
+      }
+      // uv
+      if(prim.attributes.TEXCOORD_0!==undefined){
+        const ta=readAccessor(json,bin,prim.attributes.TEXCOORD_0);
+        for(let i=0;i<ta.length;i+=2) UV.push(ta[i], 1-ta[i+1]); // glTF V is flipped → OBJ convention
+        hasUV=true;
+      }
+      for(const i of ind) IDX.push(vertBase+i);
+      if(prim.material!==undefined) matIds.add(prim.material);
+    }
+  }
+  if(!P.length) throw new Error('no triangle data');
+
+  // build per-corner uv/nrm arrays (expand per-vertex → per-corner)
+  const vCount=P.length/3;
+  let uvOut=null, nrmOut=null;
+  if(hasUV && UV.length===vCount*2){
+    uvOut=new Float32Array(IDX.length*2);
+    for(let c=0;c<IDX.length;c++){ uvOut[c*2]=UV[IDX[c]*2]; uvOut[c*2+1]=UV[IDX[c]*2+1]; }
+  }
+  if(hasN && NR.length===vCount*3){
+    nrmOut=new Float32Array(IDX.length*3);
+    for(let c=0;c<IDX.length;c++){ nrmOut[c*3]=NR[IDX[c]*3]; nrmOut[c*3+1]=NR[IDX[c]*3+1]; nrmOut[c*3+2]=NR[IDX[c]*3+2]; }
+  }
+  const pos=new Float32Array(P);
+  const w=weldPositions(pos);
+  const remapIdx=IDX.map(i=>w.remap[i]);
+  const a=newAsset(name, w.pos, remapIdx, uvOut, nrmOut, Math.max(1,matIds.size));
+  a.raw={pos:w.pos.slice(), idx:remapIdx.slice(), uv:uvOut?uvOut.slice():null, nrm:nrmOut?nrmOut.slice():null};
+  // embedded texture (first baseColorTexture)
+  try{
+    if(json.textures && json.textures.length){
+      let texRef=(json.materials&&json.materials[0]&&json.materials[0].pbrMetallicRoughness&&json.materials[0].pbrMetallicRoughness.baseColorTexture)||null;
+      const tex=texRef? json.textures[texRef.index] : json.textures[0];
+      if(tex && tex.source!==undefined && json.images && json.images[tex.source]){
+        const img=json.images[tex.source];
+        let bytes=null, mime=img.mimeType||'image/png';
+        if(img.bufferView!==undefined && bin){
+          const bv=json.bufferViews[img.bufferView];
+          bytes=bin.slice(bv.byteOffset||0, (bv.byteOffset||0)+bv.byteLength);
+        } else if(img.uri && img.uri.startsWith('data:')){
+          const b64=img.uri.slice(img.uri.indexOf('base64,')+7);
+          const s=atob(b64); bytes=new Uint8Array(s.length);
+          for(let i=0;i<s.length;i++) bytes[i]=s.charCodeAt(i);
+        }
+        if(bytes){
+          a.embeddedTexture=Promise.resolve(new Blob([bytes],{type:mime}))
+            .then(b=>fileToImageData(new File([b],'embedded'+(mime.includes('jpeg')?'.jpg':'.png'),{type:mime})));
+        }
+      }
+    }
+  }catch(e){ /* if texture could not be extracted, skip silently */ }
+  return a;
+}
+
+/* ---------------- file input ---------------- */
+async function fileToImageData(fileOrBlob){
+  const bmp=await createImageBitmap(fileOrBlob);
+  const c=document.createElement('canvas');
+  c.width=bmp.width; c.height=bmp.height;
+  const ctx=c.getContext('2d');
+  ctx.drawImage(bmp,0,0);
+  const img=ctx.getImageData(0,0,c.width,c.height);
+  bmp.close && bmp.close();
+  return img;
+}
+
+async function importMeshFiles(files){
+  for(const f of files){
+    const name=f.name;
+    const ext=name.slice(name.lastIndexOf('.')+1).toLowerCase();
+    try{
+      if(ext==='fbx'){
+        toast(name+': FBX is not supported — export as OBJ/GLB from Blender (Guide 5.5)','err',5000);
+        log('FBX skipped: '+name,'err');
+        continue;
+      }
+      let asset;
+      if(ext==='obj'){
+        asset=parseOBJ(await f.text(), name);
+      } else if(ext==='glb'){
+        asset=parseGLB(await f.arrayBuffer(), name);
+      } else if(ext==='gltf'){
+        asset=await parseGLTFText(await f.text(), name);
+      } else {
+        toast(name+': unrecognized extension','warn'); continue;
+      }
+      // unit guess + apply
+      const bb=meshBBox(asset.pos);
+      const maxDim=Math.max(bb.size[0],bb.size[1],bb.size[2]);
+      asset.unit=guessUnit(maxDim);
+      applyUnit(asset, asset.unit);
+      // class guess from name
+      const nm=name.toLowerCase();
+      asset.className= nm.startsWith('char')||nm.startsWith('chr') ? 'karakter'
+                     : nm.startsWith('hero') ? 'hero'
+                     : nm.startsWith('env')||nm.startsWith('ui') ? 'prop' : 'prop';
+      // triage suggestion
+      const tri=asset.idx.length/3;
+      const bud=CFG.budget[asset.className];
+      asset.decision= (!asset.uv || tri>bud) ? 'onar' : 'koru';
+      // embedded texture
+      if(asset.embeddedTexture){
+        try{
+          const img=await asset.embeddedTexture;
+          const tex=addTextureRecord(name+'_embedded', img);
+          asset.texId=tex.id;
+          log(name+': Embedded texture read from GLB ('+img.width+'×'+img.height+')','info');
+        }catch(e){ log(name+': embedded texture could not be read','warn'); }
+      }
+      S.assets.push(asset);
+      log(name+' loaded: '+(tri)+' triangles, estimated unit ×'+asset.unit+' ('+(maxDim*asset.unit).toFixed(2)+' m), UV:'+(asset.uv?'yes':'NO'),'info');
+      toast(name+' loaded','ok');
+    }catch(err){
+      toast(name+' could not be read: '+err.message,'err',5000);
+      log('IMPORT ERROR '+name+': '+err.message,'err');
+    }
+  }
+  refreshInventory && refreshInventory();
+  refreshAllStages();
+}
+
+function applyUnit(asset, factor){
+  // re-derive from raw data
+  const r=asset.raw;
+  if(factor===1){
+    asset.pos=new Float32Array(r.pos);
+    asset.idx=r.idx.slice();
+    asset.uv=r.uv?new Float32Array(r.uv):null;
+    asset.nrm=r.nrm?new Float32Array(r.nrm):null;
+  } else {
+    const p=new Float32Array(r.pos.length);
+    for(let i=0;i<p.length;i++) p[i]=r.pos[i]*factor;
+    asset.pos=p;
+    asset.idx=r.idx.slice();
+    asset.uv=r.uv?new Float32Array(r.uv):null;
+    asset.nrm=r.nrm?new Float32Array(r.nrm):null;
+  }
+  asset.unit=factor;
+  asset.flags={normalized:false, decimated:false, unwrapped:false};
+  asset.norm={weldRemoved:0, degen:0, decFrom:0, decTo:0, negScale:false};
+  asset.td=null; asset.qa=null; asset.pv=null;
+}
+/* ============================================================
+   geom.js — geometric normalization (Section 5), UV/texel (Section 6)
+   ============================================================ */
+function meshBBox(pos){
+  const n=pos.length/3;
+  const mn=[Infinity,Infinity,Infinity], mx=[-Infinity,-Infinity,-Infinity];
+  for(let i=0;i<n;i++){
+    for(let k=0;k<3;k++){
+      const v=pos[i*3+k];
+      if(v<mn[k]) mn[k]=v;
+      if(v>mx[k]) mx[k]=v;
+    }
+  }
+  const size=[mx[0]-mn[0],mx[1]-mn[1],mx[2]-mn[2]];
+  const center=[(mn[0]+mx[0])/2,(mn[1]+mx[1])/2,(mn[2]+mx[2])/2];
+  return {min:mn, max:mx, size:size, center:center, diag:v3len(size)};
+}
+function triCount(asset){ return asset.idx.length/3; }
+
+/* areas: world (m²→cm²) and UV (0-1 space) */
+function meshAreas(asset){
+  const P=asset.pos, I=asset.idx, UV=asset.uv;
+  let worldA=0, uvA=0;
+  const T=I.length/3;
+  for(let t=0;t<T;t++){
+    const a=I[t*3], b=I[t*3+1], c=I[t*3+2];
+    const ax=P[a*3],ay=P[a*3+1],az=P[a*3+2];
+    const bx=P[b*3],by=P[b*3+1],bz=P[b*3+2];
+    const cx=P[c*3],cy=P[c*3+1],cz=P[c*3+2];
+    const ux=bx-ax,uy=by-ay,uz=bz-az;
+    const vx=cx-ax,vy=cy-ay,vz=cz-az;
+    const nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx;
+    worldA+=0.5*Math.sqrt(nx*nx+ny*ny+nz*nz);
+    if(UV){
+      const u0=UV[a*2],v0=UV[a*2+1],u1=UV[b*2],v1=UV[b*2+1],u2=UV[c*2],v2=UV[c*2+1];
+      uvA+=0.5*Math.abs((u1-u0)*(v2-v0)-(u2-u0)*(v1-v0));
+    }
+  }
+  return {worldA:worldA*10000, uvA:uvA}; // cm²
+}
+/* texel density measurement (Section 6.1) */
+function measureTexel(asset){
+  const ar=meshAreas(asset);
+  let texW,texH,assumed=false;
+  const tex=S.textures.find(t=>t.id===asset.texId);
+  if(tex){ texW=tex.w; texH=tex.h; }
+  else { texW=CFG.texSize[asset.className]||1024; texH=texW; assumed=true; }
+  let td=null;
+  if(asset.uv && ar.worldA>0 && ar.uvA>0){
+    td=Math.sqrt((ar.uvA*texW*texH)/ar.worldA);
+  }
+  asset.td={val:td, assumed:assumed, worldA:ar.worldA, uvA:ar.uvA, texW:texW, texH:texH};
+  return asset.td;
+}
+/* fit to target px/cm: multiply all UVs by a single scale */
+function setTexelDensity(asset, target){
+  measureTexel(asset);
+  if(!asset.td.val || !asset.uv) return null;
+  const f=target/asset.td.val;
+  const UV=asset.uv;
+  for(let i=0;i<UV.length;i++) UV[i]*=f;
+  measureTexel(asset);
+  return f;
+}
+
+/* ---------------- normalization chain ---------------- */
+function normalizeAsset(asset, opts){
+  opts=opts||{};
+  const notes=[];
+  // 1) scale to target size (apply transform was already done at import)
+  if(opts.scale!==false){
+    const bb=meshBBox(asset.pos);
+    const cur=Math.max(bb.size[0],bb.size[1],bb.size[2]);
+    const target=CFG.targetSize[asset.className]||1;
+    if(cur>0){
+      const f=target/cur;
+      if(Math.abs(f-1)>1e-9){
+        for(let i=0;i<asset.pos.length;i++) asset.pos[i]*=f;
+        notes.push('scale ×'+fmtN(f,3));
+      }
+    }
+  }
+  // 2) pivot: base center (Section 5.2)
+  if(opts.pivot!==false){
+    const bb=meshBBox(asset.pos);
+    const dx=(bb.min[0]+bb.max[0])/2, dz=(bb.min[2]+bb.max[2])/2, dy=bb.min[1];
+    if(dx||dz||dy){
+      for(let i=0;i<asset.pos.length;i+=3){
+        asset.pos[i]-=dx; asset.pos[i+1]-=dy; asset.pos[i+2]-=dz;
+      }
+      notes.push('pivot base-center');
+    }
+  }
+  // 3) cleanup: weld + drop degenerate triangles (Section 5.3)
+  if(opts.weld!==false){
+    const r=cleanupMesh(asset);
+    if(r.welded>0) notes.push(r.welded+' vertices welded');
+    if(r.dropped>0) notes.push(r.dropped+' degenerate triangles dropped');
+  }
+  // 4) recompute normals (crease angle)
+  if(opts.nrm!==false){
+    computeCornerNormals(asset, CFG.smooth);
+    notes.push('normals recomputed ('+CFG.smooth+'°)');
+  } else {
+    asset.nrm=null;
+  }
+  // 5) polygon budget: decimate (Section 5.4)
+  if(opts.deci!==false){
+    const bud=CFG.budget[asset.className]||2000;
+    const t0=triCount(asset);
+    if(t0>bud){
+      decimateCluster(asset, bud);
+      notes.push('decimate '+t0+' → '+triCount(asset));
+      // clustering cell centers may shift the base → re-seat the pivot
+      const bb2=meshBBox(asset.pos);
+      const dx=(bb2.min[0]+bb2.max[0])/2, dz=(bb2.min[2]+bb2.max[2])/2, dy=bb2.min[1];
+      for(let i=0;i<asset.pos.length;i+=3){
+        asset.pos[i]-=dx; asset.pos[i+1]-=dy; asset.pos[i+2]-=dz;
+      }
+    }
+  }
+  asset.flags.normalized=true;
+  asset.pv=null;
+  return notes;
+}
+
+/* weld + degenerate cleanup — preserves corner-parallel uv/nrm alignment */
+function cleanupMesh(asset){
+  const pos=asset.pos, oldI=asset.idx;
+  const oldUV=asset.uv?asset.uv.slice():null;
+  const oldNRM=asset.nrm?asset.nrm.slice():null;
+  const n=pos.length/3;
+  const w=weldPositions(pos);
+  const T=oldI.length/3;
+  const verts=[], corners=[];
+  let dropped=0;
+  for(let t=0;t<T;t++){
+    const oc0=t*3, oc1=t*3+1, oc2=t*3+2;
+    const a=w.remap[oldI[oc0]], b=w.remap[oldI[oc1]], c=w.remap[oldI[oc2]];
+    if(a===b||b===c||a===c){ dropped++; continue; }
+    const pa=oldI[oc0]*3, pb=oldI[oc1]*3, pc=oldI[oc2]*3;
+    const ux=pos[pb]-pos[pa], uy=pos[pb+1]-pos[pa+1], uz=pos[pb+2]-pos[pa+2];
+    const vx=pos[pc]-pos[pa], vy=pos[pc+1]-pos[pa+1], vz=pos[pc+2]-pos[pa+2];
+    const nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx;
+    if(nx*nx+ny*ny+nz*nz < 1e-18){ dropped++; continue; }
+    verts.push(a,b,c); corners.push(oc0,oc1,oc2);
+  }
+  // compact unused vertices
+  const used=Array.from(new Set(verts)).sort((x,y)=>x-y);
+  const vmap=new Map(); const outP=[];
+  for(const v of used){ vmap.set(v, outP.length/3); outP.push(pos[v*3],pos[v*3+1],pos[v*3+2]); }
+  asset.pos=new Float32Array(outP);
+  asset.idx=verts.map(v=>vmap.get(v));
+  if(oldUV){
+    const uv=new Float32Array(corners.length*2);
+    for(let j=0;j<corners.length;j++){ uv[j*2]=oldUV[corners[j]*2]; uv[j*2+1]=oldUV[corners[j]*2+1]; }
+    asset.uv=uv;
+  } else asset.uv=null;
+  if(oldNRM){
+    const nr=new Float32Array(corners.length*3);
+    for(let j=0;j<corners.length;j++){ nr[j*3]=oldNRM[corners[j]*3]; nr[j*3+1]=oldNRM[corners[j]*3+1]; nr[j*3+2]=oldNRM[corners[j]*3+2]; }
+    asset.nrm=nr;
+  } else asset.nrm=null;
+  return {welded:n-outP.length/3, dropped:dropped};
+}
+
+/* crease-angle corner normals (Section 5.3 auto smooth) */
+function computeCornerNormals(asset, creaseDeg){
+  const P=asset.pos, I=asset.idx;
+  const T=I.length/3, V=P.length/3;
+  const FN=new Float32Array(T*3);
+  for(let t=0;t<T;t++){
+    const a=I[t*3]*3, b=I[t*3+1]*3, c=I[t*3+2]*3;
+    const ux=P[b]-P[a], uy=P[b+1]-P[a+1], uz=P[b+2]-P[a+2];
+    const vx=P[c]-P[a], vy=P[c+1]-P[a+1], vz=P[c+2]-P[a+2];
+    let nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx;
+    const l=Math.sqrt(nx*nx+ny*ny+nz*nz)||1;
+    FN[t*3]=nx/l; FN[t*3+1]=ny/l; FN[t*3+2]=nz/l;
+  }
+  // vertex → triangle list
+  const vTri=new Array(V);
+  for(let t=0;t<T;t++) for(let k=0;k<3;k++){
+    const v=I[t*3+k];
+    (vTri[v]||(vTri[v]=[])).push(t);
+  }
+  const cosLimit=Math.cos(clamp(creaseDeg||40,1,89)*DEG);
+  const out=new Float32Array(I.length*3);
+  const clusterN=[];
+  for(let v=0;v<V;v++){
+    const tris=vTri[v]; if(!tris) continue;
+    // build clusters
+    clusterN.length=0;
+    const clusterIdx=new Array(tris.length);
+    for(let i=0;i<tris.length;i++){
+      const t=tris[i];
+      const fx=FN[t*3], fy=FN[t*3+1], fz=FN[t*3+2];
+      let found=-1;
+      for(let ci=0;ci<clusterN.length/3;ci++){
+        const d=fx*clusterN[ci*3]+fy*clusterN[ci*3+1]+fz*clusterN[ci*3+2];
+        if(d>=cosLimit){ found=ci; break; }
+      }
+      if(found<0){
+        clusterN.push(fx,fy,fz);
+        found=(clusterN.length/3)-1;
+      }
+      clusterIdx[i]=found;
+    }
+    // cluster averages
+    const cCount=clusterN.length/3;
+    const sums=new Float32Array(cCount*3);
+    for(let i=0;i<tris.length;i++){
+      const t=tris[i], ci=clusterIdx[i];
+      sums[ci*3]+=FN[t*3]; sums[ci*3+1]+=FN[t*3+1]; sums[ci*3+2]+=FN[t*3+2];
+    }
+    // write corner values
+    for(let i=0;i<tris.length;i++){
+      const t=tris[i], ci=clusterIdx[i];
+      let nx=sums[ci*3], ny=sums[ci*3+1], nz=sums[ci*3+2];
+      const l=Math.sqrt(nx*nx+ny*ny+nz*nz)||1;
+      // which corner is this vertex?
+      for(let k=0;k<3;k++){
+        if(I[t*3+k]===v){
+          const cj=t*3+k;
+          out[cj*3]=nx/l; out[cj*3+1]=ny/l; out[cj*3+2]=nz/l;
+        }
+      }
+    }
+  }
+  asset.nrm=out;
+}
+
+/* vertex clustering decimate (Section 5.4 — background/midground quality) */
+function decimateCluster(asset, targetTris){
+  let T=asset.idx.length/3;
+  if(T<=targetTris) return false;
+  const bb=meshBBox(asset.pos);
+  const dim=Math.max(bb.size[0],bb.size[1],bb.size[2])||1;
+  const oldI=asset.idx;
+  let bestP=null, bestI=null, bestUV=null;
+  let lastP=null, lastI=null, lastUV=null;
+  for(let g=4; g<=512; g=Math.ceil(g*1.7)){
+    const cell=dim/g;
+    // per-cell vertex sum + vertex→cell
+    const cells=new Map();
+    const cellOf=new Int32Array(asset.pos.length/3);
+    for(let v=0;v<asset.pos.length/3;v++){
+      const key=Math.floor(asset.pos[v*3]/cell)+','+Math.floor(asset.pos[v*3+1]/cell)+','+Math.floor(asset.pos[v*3+2]/cell);
+      let c=cells.get(key);
+      if(!c){ c={id:cells.size, x:0,y:0,z:0,n:0}; cells.set(key,c); }
+      c.x+=asset.pos[v*3]; c.y+=asset.pos[v*3+1]; c.z+=asset.pos[v*3+2]; c.n++;
+      cellOf[v]=c.id;
+    }
+    const NC=cells.size;
+    const cellPos=new Float32Array(NC*3);
+    for(const c of cells.values()){
+      cellPos[c.id*3]=c.x/c.n; cellPos[c.id*3+1]=c.y/c.n; cellPos[c.id*3+2]=c.z/c.n;
+    }
+    // rewrite triangles (keep old corner identity), drop cell-degenerate ones
+    const verts=[], corners=[];
+    for(let t=0;t<T;t++){
+      const a=cellOf[oldI[t*3]], b=cellOf[oldI[t*3+1]], c=cellOf[oldI[t*3+2]];
+      if(a===b||b===c||a===c) continue;
+      verts.push(a,b,c);
+      corners.push(t*3, t*3+1, t*3+2);
+    }
+    let uv=null;
+    if(asset.uv){
+      uv=new Float32Array(corners.length*2);
+      for(let j=0;j<corners.length;j++){
+        uv[j*2]=asset.uv[corners[j]*2]; uv[j*2+1]=asset.uv[corners[j]*2+1];
+      }
+    }
+    lastP=cellPos; lastI=verts; lastUV=uv;
+    if(verts.length/3<=targetTris){
+      // under budget — also try a finer grid; the best (finest passing) is kept
+      bestP=cellPos; bestI=verts; bestUV=uv;
+    } else if(bestP){
+      break; // budget exceeded — the last passing grid is used
+    }
+  }
+  if(!bestP){ bestP=lastP; bestI=lastI; bestUV=lastUV; } // never fit the budget: take the finest attempt
+  if(bestP){
+    asset.pos=bestP; asset.idx=bestI; asset.uv=bestUV||null;
+    asset.nrm=null;
+    computeCornerNormals(asset, CFG.smooth);
+    asset.flags.decimated=true;
+    asset.pv=null;
+    return true;
+  }
+  return false;
+}
+
+/* box unwrap (Section 6.2 automatic solution) — 3×2 grid, dominant-axis projection */
+function boxUnwrap(asset){
+  const P=asset.pos, I=asset.idx;
+  const bb=meshBBox(P);
+  const size=[bb.size[0]||1e-6, bb.size[1]||1e-6, bb.size[2]||1e-6];
+  const uv=new Float32Array(I.length*2);
+  const T=I.length/3;
+  for(let t=0;t<T;t++){
+    const a=I[t*3], b=I[t*3+1], c=I[t*3+2];
+    // face normal → dominant axis
+    const ux=P[b*3]-P[a*3], uy=P[b*3+1]-P[a*3+1], uz=P[b*3+2]-P[a*3+2];
+    const vx=P[c*3]-P[a*3], vy=P[c*3+1]-P[a*3+1], vz=P[c*3+2]-P[a*3+2];
+    let nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx;
+    const ax=Math.abs(nx), ay=Math.abs(ny), az=Math.abs(nz);
+    let fid;
+    if(ax>=ay&&ax>=az) fid=nx>=0?0:1;
+    else if(ay>=az) fid=ny>=0?2:3;
+    else fid=nz>=0?4:5;
+    const col=fid%3, row=Math.floor(fid/3);
+    for(let k=0;k<3;k++){
+      const v=I[t*3+k];
+      const x=(P[v*3]-bb.min[0])/size[0];
+      const y=(P[v*3+1]-bb.min[1])/size[1];
+      const z=(P[v*3+2]-bb.min[2])/size[2];
+      let lu,lv;
+      if(fid<2){ lu=z; lv=y; }
+      else if(fid<4){ lu=x; lv=z; }
+      else { lu=x; lv=y; }
+      uv[(t*3+k)*2]=(col+clamp(lu,0,1))/3;
+      uv[(t*3+k)*2+1]=(row+clamp(lv,0,1))/2;
+    }
+  }
+  asset.uv=uv;
+  asset.flags.unwrapped=true;
+  asset.pv=null;
+  measureTexel(asset);
+  return true;
+}
+
+/* ---------------- OBJ export ---------------- */
+function exportOBJ(asset){
+  const P=asset.pos, I=asset.idx, UV=asset.uv, NR=asset.nrm;
+  const base=asset.name.replace(/\.[^.]+$/,'').replace(/[^\w\-\u00e7\u011f\u0131\u00f6\u015f\u00fc\u00c7\u011e\u0130\u00d6\u015e\u00dc]/g,'_');
+  const lines=['# Asset Harmonizer — normalized export','# o '+base];
+  const vSeen=new Map(); let vC=0;
+  const vIdxOf=v=>{ let x=vSeen.get(v); if(x===undefined){ x=++vC; vSeen.set(v,x); lines.push('v '+P[v*3]+' '+P[v*3+1]+' '+P[v*3+2]); } return x; };
+  let vtC=0, vnC=0;
+  const T=I.length/3;
+  const fv=[], ft=[], fn=[];
+  for(let t=0;t<T;t++){
+    for(let k=0;k<3;k++){
+      const c=t*3+k;
+      vtC++;
+      if(UV) lines.push('vt '+UV[c*2]+' '+UV[c*2+1]);
+      else lines.push('vt 0 0');
+      if(NR) { vnC++; lines.push('vn '+NR[c*3]+' '+NR[c*3+1]+' '+NR[c*3+2]); }
+      fv.push(vIdxOf(I[c])); ft.push(vtC); fn.push(NR?vnC:0);
+    }
+  }
+  for(let t=0;t<T;t++){
+    const j=t*3;
+    lines.push('f '+(fv[j])+'/'+(ft[j])+'/'+(fn[j]||ft[j])+' '+(fv[j+1])+'/'+(ft[j+1])+'/'+(fn[j+1]||ft[j+1])+' '+(fv[j+2])+'/'+(ft[j+2])+'/'+(fn[j+2]||ft[j+2]));
+  }
+  return lines.join('\n')+'\n';
+}
+
+/* preview copy (rasterizer budget) */
+const PV_LIMIT=90000;
+function ensurePreview(asset){
+  if(asset.pv) return asset.pv;
+  if(triCount(asset)<=PV_LIMIT){
+    asset.pv={pos:asset.pos, idx:asset.idx, uv:asset.uv, nrm:asset.nrm};
+    return asset.pv;
+  }
+  const tmp={pos:asset.pos.slice(), idx:asset.idx.slice(), uv:asset.uv?asset.uv.slice():null, nrm:null};
+  decimateCluster(tmp, PV_LIMIT);
+  asset.pv={pos:tmp.pos, idx:tmp.idx, uv:tmp.uv, nrm:tmp.nrm};
+  return asset.pv;
+}
+/* ============================================================
+   texture.js — AI-free texture re-styling (Section 7)
+   Palette quantization · PBR derivation · Lanczos-style upscaling
+   ============================================================ */
+let TEX_SEQ=0;
+
+function addTextureRecord(name, imgData){
+  const t={ id:++TEX_SEQ, name:name, w:imgData.width, h:imgData.height,
+            img:imgData, orig:new ImageData(new Uint8ClampedArray(imgData.data), imgData.width, imgData.height),
+            hasAlpha:imageHasAlpha(imgData), derived:null };
+  S.textures.push(t);
+  return t;
+}
+function imageHasAlpha(img){
+  const d=img.data;
+  for(let i=3;i<d.length;i+=8) if(d[i]<250) return true;
+  return false;
+}
+
+/* ---------- saturation cap (Section 3.2 / 8) ---------- */
+function applySatCap(img, capPct){
+  const d=img.data, cap=capPct/100;
+  for(let i=0;i<d.length;i+=4){
+    if(d[i+3]===0) continue;
+    const [h,s,v]=rgb2hsv(d[i],d[i+1],d[i+2]);
+    if(s>cap){
+      const [r,g,b]=hsv2rgb(h,cap,v);
+      d[i]=r; d[i+1]=g; d[i+2]=b;
+    }
+  }
+}
+
+/* ---------- palette quantization (Section 7.1) ---------- */
+function quantizeToPalette(img, palRGB, opts){
+  // opts: {dither, strength(0-1), satCapPct|null, emissive:false}
+  opts=opts||{};
+  const w=img.width, h=img.height;
+  const out=new ImageData(new Uint8ClampedArray(img.data), w, h);
+  if(opts.satCapPct) applySatCap(out, opts.satCapPct);
+  const src=out.data;
+  // float working buffer (for FS error diffusion)
+  const buf=new Float32Array(w*h*3);
+  for(let i=0,j=0;i<src.length;i+=4,j+=3){ buf[j]=src[i]; buf[j+1]=src[i+1]; buf[j+2]=src[i+2]; }
+  const strength=opts.strength===undefined?1:opts.strength;
+  const dither=!!opts.dither;
+  const q=new Uint8ClampedArray(w*h*3);
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const j=(y*w+x)*3;
+      const r0=buf[j], g0=buf[j+1], b0=buf[j+2];
+      const idx=nearestColorIdx(palRGB, clamp(r0,0,255), clamp(g0,0,255), clamp(b0,0,255));
+      const p=palRGB[idx];
+      const r=p[0], g=p[1], b=p[2];
+      q[j]=r; q[j+1]=g; q[j+2]=b;
+      if(dither && strength>0.01){
+        const er=(r0-r)*strength, eg=(g0-g)*strength, eb=(b0-b)*strength;
+        const put=(xx,yy,fr,fg,fb)=>{
+          if(xx<0||xx>=w||yy<0||yy>=h) return;
+          const k=(yy*w+xx)*3;
+          buf[k]+=fr; buf[k+1]+=fg; buf[k+2]+=fb;
+        };
+        put(x+1,y,   er*7/16, eg*7/16, eb*7/16);
+        put(x-1,y+1, er*3/16, eg*3/16, eb*3/16);
+        put(x,  y+1, er*5/16, eg*5/16, eb*5/16);
+        put(x+1,y+1, er*1/16, eg*1/16, eb*1/16);
+      }
+    }
+  }
+  // blend + preserve alpha
+  for(let i=0,k=0;i<src.length;i+=4,k+=3){
+    if(strength<0.999){
+      src[i]  =lerp(src[i],  q[k], strength);
+      src[i+1]=lerp(src[i+1],q[k+1], strength);
+      src[i+2]=lerp(src[i+2],q[k+2], strength);
+    } else {
+      src[i]=q[k]; src[i+1]=q[k+1]; src[i+2]=q[k+2];
+    }
+    // alpha (i+3) is never touched — Section 7.4
+  }
+  return out;
+}
+
+/* ---------- gaussian blur (separable, gray Float32) ---------- */
+function toGray(img){
+  const d=img.data, n=img.width*img.height;
+  const g=new Float32Array(n);
+  for(let i=0,j=0;i<d.length;i+=4,j++) g[j]=(d[i]*0.299+d[i+1]*0.587+d[i+2]*0.114)/255;
+  return g;
+}
+function blurGray(g, w, h, radius){
+  if(radius<1) return g.slice();
+  const tmp=new Float32Array(g.length), out=new Float32Array(g.length);
+  const win=radius*2+1;
+  // horizontal
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      let s=0;
+      for(let k=-radius;k<=radius;k++){
+        let xx=x+k; if(xx<0)xx=0; if(xx>=w)xx=w-1;
+        s+=g[y*w+xx];
+      }
+      tmp[y*w+x]=s/win;
+    }
+  }
+  // vertical
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      let s=0;
+      for(let k=-radius;k<=radius;k++){
+        let yy=y+k; if(yy<0)yy=0; if(yy>=h)yy=h-1;
+        s+=tmp[yy*w+x];
+      }
+      out[y*w+x]=s/win;
+    }
+  }
+  return out;
+}
+
+/* ---------- PBR derivation (Section 7.2 — Materialize approach) ---------- */
+function derivePBR(img, opts){
+  // opts: {blur, normalStrength, yFlip, roughMode('height'|'flat'), roughBase(0-1), metal(0-1)}
+  const w=img.width, h=img.height, n=w*h;
+  const height=toGray(img);
+  const hs=blurGray(height, w, h, opts.blur||2);
+  // normal (Sobel-like central difference)
+  const nrm=new Uint8ClampedArray(n*4);
+  const str=(opts.normalStrength||2)*40;
+  for(let y=0;y<h;y++){
+    for(let x=0;x<w;x++){
+      const xm=Math.max(0,x-1), xp=Math.min(w-1,x+1);
+      const ym=Math.max(0,y-1), yp=Math.min(h-1,y+1);
+      const dx=(hs[y*w+xp]-hs[y*w+xm])*str;
+      const dy=(hs[yp*w+x]-hs[ym*w+x])*str*(opts.yFlip?-1:1);
+      let nx=-dx, ny=-dy, nz=1;
+      const l=Math.sqrt(nx*nx+ny*ny+nz*nz)||1;
+      const i=(y*w+x)*4;
+      nrm[i]  =(nx/l*0.5+0.5)*255;
+      nrm[i+1]=(ny/l*0.5+0.5)*255;
+      nrm[i+2]=(nz/l*0.5+0.5)*255;
+      nrm[i+3]=255;
+    }
+  }
+  // AO: cavity approach — suppress the negativity of (blur - height)
+  const ao=new Uint8ClampedArray(n*4);
+  for(let j=0;j<n;j++){
+    const v=clamp(1-(hs[j]-height[j])*3.0, 0, 1);
+    const c=v*255;
+    const i=j*4;
+    ao[i]=c; ao[i+1]=c; ao[i+2]=c; ao[i+3]=255;
+  }
+  // roughness
+  const rough=new Uint8ClampedArray(n*4);
+  for(let j=0;j<n;j++){
+    let v;
+    if(opts.roughMode==='flat') v=opts.roughBase;
+    else v=clamp(opts.roughBase + (hs[j]-0.5)*0.8, 0, 1);
+    const c=v*255, i=j*4;
+    rough[i]=c; rough[i+1]=c; rough[i+2]=c; rough[i+3]=255;
+  }
+  // ORM packing: R=AO, G=roughness, B=metalness (glTF-compatible ordering)
+  const metal=(opts.metal||0)*255;
+  const orm=new Uint8ClampedArray(n*4);
+  for(let j=0;j<n;j++){
+    const i=j*4, o=j*4;
+    orm[i]  =ao[i];
+    orm[i+1]=rough[i+1];
+    orm[i+2]=metal;
+    orm[i+3]=255;
+  }
+  const mk=d=>new ImageData(d,w,h);
+  return { nrm:mk(nrm), ao:mk(ao), rough:mk(rough), orm:mk(orm) };
+}
+
+/* ---------- AI-free upscaling (AI-free alternative to Section 7.3) ---------- */
+function upscaleImage(img, factor, unsharpAmt){
+  let cur=img;
+  let f=factor;
+  while(f>1){ // stepwise ×2 bicubic (canvas high quality)
+    const w=Math.round(cur.width*2), h=Math.round(cur.height*2);
+    const c=document.createElement('canvas'); c.width=w; c.height=h;
+    const ctx=c.getContext('2d');
+    ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+    ctx.drawImage(imageDataToCanvas(cur), 0,0, w,h);
+    cur=ctx.getImageData(0,0,w,h);
+    f/=2;
+  }
+  // unsharp mask: out = src + amt*(src - blur(src))
+  if(unsharpAmt>0.01){
+    const w=cur.width, h=cur.height;
+    const src=cur.data;
+    const g=toGray(cur);
+    const bl=blurGray(g, w, h, 2);
+    const out=new Uint8ClampedArray(src);
+    for(let i=0,j=0;i<src.length;i+=4,j++){
+      const detail=(g[j]-bl[j])*255*unsharpAmt;
+      out[i]=src[i]+detail;
+      out[i+1]=src[i+1]+detail;
+      out[i+2]=src[i+2]+detail;
+    }
+    cur=new ImageData(out, w, h);
+  }
+  return cur;
+}
+
+/* ---------- median cut palette extraction ---------- */
+function medianCutPalette(img, count){
+  const d=img.data;
+  const pts=[];
+  const step=Math.max(1, Math.floor((img.width*img.height)/40000));
+  let px=0;
+  for(let i=0;i<d.length;i+=4*step){
+    if(d[i+3]<40) continue;
+    pts.push([d[i],d[i+1],d[i+2]]);
+    px++;
+  }
+  if(!pts.length) pts.push([128,128,128]);
+  let boxes=[pts];
+  while(boxes.length<count){
+    // split the most populated box with the widest channel
+    let bi=-1, br=-1, bc=-1;
+    boxes.forEach((b,i)=>{
+      if(b.length<2) return;
+      for(let c=0;c<3;c++){
+        let mn=255,mx=0;
+        for(const p of b){ if(p[c]<mn)mn=p[c]; if(p[c]>mx)mx=p[c]; }
+        const r=(mx-mn)*b.length;
+        if(r>br){ br=r; bi=i; bc=c; }
+      }
+    });
+    if(bi<0) break;
+    const box=boxes[bi];
+    box.sort((a,b2)=>a[bc]-b2[bc]);
+    const mid=Math.floor(box.length/2);
+    boxes.splice(bi,1, box.slice(0,mid), box.slice(mid));
+  }
+  const cols=boxes.map(b=>{
+    let r=0,g=0,b2=0;
+    for(const p of b){ r+=p[0]; g+=p[1]; b2+=p[2]; }
+    return [r/b.length, g/b.length, b2/b.length];
+  }).filter(c=>isFinite(c[0]));
+  // sort by brightness
+  cols.sort((a,b)=>(a[0]*0.3+a[1]*0.6+a[2]*0.1)-(b[0]*0.3+b[1]*0.6+b[2]*0.1));
+  return cols.length?cols:[[128,128,128]];
+}
+
+/* ---------- texture operations / UI helpers ---------- */
+function texHasAlphaNote(t){ return t.hasAlpha?' (alpha preserved)':''; }
+function isEmissiveName(name){ return /emi|glow|lav|fire/i.test(name); }
+
+/* upscale that also updates the record dims (so texel measurement stays correct) */
+function upscaleTextureRecord(t, factor, unsharpAmt){
+  const out=upscaleImage(t.img, factor, unsharpAmt);
+  t.img=out; t.w=out.width; t.h=out.height; t.derived=null;
+  return out;
+}
+
+function applyPaletteToTexture(t, opts){
+  opts=opts||{};
+  const pal=isEmissiveName(t.name) && (CFG.emissive||[]).length ? cfgEmiRGB() : cfgPalRGB();
+  const out=quantizeToPalette(t.img, pal, {
+    dither: opts.dither!==undefined?opts.dither:CFG.dither,
+    strength: opts.strength!==undefined?opts.strength:CFG.paletteStrength/100,
+    satCapPct: opts.satCapPct!==undefined?opts.satCapPct:CFG.satCap,
+    emissive: isEmissiveName(t.name)
+  });
+  t.img=out; t.derived=null;
+  return out;
+}
+/* ============================================================
+   render.js — software rasterizer (z-buffer, perspective-correct)
+   Engine integration simulation (Section 9): master shader, palette
+   remap, LUT, ACES tonemap, lighting language and fog.
+   ============================================================ */
+const CAM={yaw:0.75, pitch:0.42, dist:2.2, target:[0,0.5,0]};
+let PV_DIRTY=true;
+
+function sunDirFromAngles(azDeg, elDeg){
+  const az=azDeg*DEG, el=elDeg*DEG;
+  const x=Math.cos(el)*Math.sin(az), y=Math.sin(el), z=Math.cos(el)*Math.cos(az);
+  return v3norm([x,y,z]);
+}
+
+function checkerColor(u,v){
+  u=u-Math.floor(u); v=v-Math.floor(v);
+  const N=8;
+  const iu=Math.floor(u*N), iv=Math.floor(v*N);
+  const par=(iu+iv)&1;
+  let g=par?0.78:0.30;
+  const fu=u*N-iu, fv=v*N-iv;
+  if(fu<0.045||fv<0.045) g=0.10;                 // grid lines
+  if((iu===0||iu===N-1)&&(iv===0||iv===N-1)) g=par?0.9:0.2;
+  return [g*0.95, g*0.97, g];
+}
+
+function parseCubeLUT(text){
+  const lines=text.split(/\r?\n/);
+  let size=0; const vals=[];
+  for(const raw of lines){
+    const line=raw.trim();
+    if(!line||line[0]==='#') continue;
+    if(/^TITLE/i.test(line)) continue;
+    if(/^LUT_3D_SIZE/i.test(line)){ size=parseInt(line.split(/\s+/)[1],10); continue; }
+    if(/^LUT_1D_SIZE/i.test(line)) continue;
+    if(/^(DOMAIN_MIN|DOMAIN_MAX)/i.test(line)) continue;
+    const t=line.split(/\s+/);
+    if(t.length>=3){
+      const r=parseFloat(t[0]), g=parseFloat(t[1]), b=parseFloat(t[2]);
+      if(isFinite(r)&&isFinite(g)&&isFinite(b)) vals.push(r,g,b);
+    }
+  }
+  if(!size||vals.length<size*size*size*3) throw new Error('invalid .cube (LUT_3D_SIZE required)');
+  return {size:size, data:new Float32Array(vals)};
+}
+
+function aces(x){
+  return clamp((x*(2.51*x+0.03))/(x*(2.43*x+0.59)+0.14), 0, 1);
+}
+
+/* main render — asset (pv mesh) + opts */
+function renderPreview(canvas, asset, opts){
+  const W=canvas.width, H=canvas.height;
+  const ctx=canvas.getContext('2d');
+  const mesh=asset?ensurePreview(asset):null;
+  const tex=asset && asset.texId!=null ? S.textures.find(t=>t.id===asset.texId) : null;
+
+  const img=ctx.createImageData(W,H);
+  const data=img.data;
+  const zbuf=new Float32Array(W*H);
+  zbuf.fill(Infinity);
+  let tri=0;
+
+  // background
+  const bg=opts.bg;
+  for(let i=0;i<data.length;i+=4){ data[i]=bg[0]*255; data[i+1]=bg[1]*255; data[i+2]=bg[2]*255; data[i+3]=255; }
+
+  if(mesh){
+    const P=mesh.pos, I=mesh.idx, UV=mesh.uv, NR=mesh.nrm;
+    const bb=meshBBox(P);
+    const center=bb.center;
+    const diag=Math.max(bb.diag,0.3);
+    // camera
+    const yaw=opts.cam.yaw, pitch=opts.cam.pitch;
+    const dist=opts.cam.fit ? diag*1.55 : opts.cam.dist*diag;
+    const eye=[
+      center[0]+dist*Math.cos(pitch)*Math.sin(yaw),
+      center[1]+dist*Math.sin(pitch),
+      center[2]+dist*Math.cos(pitch)*Math.cos(yaw)
+    ];
+    // view (lookAt, Y-up): fwd=eye→center, right=horizontal right, up=forward×right
+    const fwd=v3norm([center[0]-eye[0],center[1]-eye[1],center[2]-eye[2]]);
+    const right=v3norm([fwd[2],0,-fwd[0]]);
+    const up=[fwd[1]*right[2]-fwd[2]*right[1], fwd[2]*right[0]-fwd[0]*right[2], fwd[0]*right[1]-fwd[1]*right[0]];
+    const fovF=1/Math.tan(28*DEG);
+    const aspect=W/H;
+    const near=0.02;
+
+    const V=I.length/3;
+    const sun=sunDirFromAngles(opts.sunAz, opts.sunEl);
+    const sunI=opts.sunI;
+    const amb=opts.amb;
+    const remapS=opts.remap;
+    const palRGB=remapS>0?cfgPalRGB():null;
+    const fogOn=opts.fog, fogD=opts.fogD;
+    const fogStart=dist*0.55, fogEnd=dist*(0.55+1.9*fogD+0.05);
+    const fogC=opts.bg;
+    const texData=tex?tex.img.data:null, texW=tex?tex.w:0, texH=tex?tex.h:0;
+    const mode=opts.mode;
+
+    for(let t=0;t<V;t++){
+      const i0=I[t*3], i1=I[t*3+1], i2=I[t*3+2];
+      let clipAll=0;
+      const vs=[];
+      let ok=true;
+      for(let k=0;k<3;k++){
+        const vi=k===0?i0:k===1?i1:i2;
+        const px=P[vi*3], py=P[vi*3+1], pz=P[vi*3+2];
+        const ex=px-eye[0], ey=py-eye[1], ez=pz-eye[2];
+        const vx=ex*right[0]+ey*right[1]+ez*right[2];
+        const vy=ex*up[0]+ey*up[1]+ez*up[2];
+        const vz=ex*fwd[0]+ey*fwd[1]+ez*fwd[2];
+        if(vz<near) clipAll++;
+        const inv=1/vz;
+        const ndcX=fovF/aspect*vx*inv;
+        const ndcY=fovF*vy*inv;
+        vs.push((ndcX*0.5+0.5)*W, (0.5-ndcY*0.5)*H, -vz);
+      }
+      if(clipAll===3){ continue; }
+      if(clipAll>0){ continue; } // simple near-cull (safe if the camera is not inside the mesh)
+      const x0=vs[0],y0=vs[1],d0=vs[2], x1=vs[3],y1=vs[4],d1=vs[5], x2=vs[6],y2=vs[7],d2=vs[8];
+      const area2=(x1-x0)*(y2-y0)-(y1-y0)*(x2-x0);
+      if(area2===0) continue;
+      const minx=Math.max(0, Math.floor(Math.min(x0,x1,x2)));
+      const maxx=Math.min(W-1, Math.ceil(Math.max(x0,x1,x2)));
+      const miny=Math.max(0, Math.floor(Math.min(y0,y1,y2)));
+      const maxy=Math.min(H-1, Math.ceil(Math.max(y0,y1,y2)));
+      if(minx>maxx||miny>maxy) continue;
+      const invA=1/area2;
+      const hasUV=!!UV && (mode!=='clay');
+      const hasN=!!NR;
+      const twoSide=true;
+
+      for(let yy=miny;yy<=maxy;yy++){
+        const py=yy+0.5;
+        for(let xx=minx;xx<=maxx;xx++){
+          const px=xx+0.5;
+          const l0=((y1-y2)*(px-x2)+(x2-x1)*(py-y2))*invA;
+          const l1=((y2-y0)*(px-x2)+(x0-x2)*(py-y2))*invA;
+          const l2=1-l0-l1;
+          if(l0<0||l1<0||l2<0) continue;
+          const zi=zbuf[yy*W+xx];
+          const depth=l0*d0+l1*d1+l2*d2;
+          if(depth>=zi) continue;
+          // attribute lerp
+          let r,g,b;
+          if(mode==='clay'){ r=0.72;g=0.72;b=0.72; }
+          else if(hasUV){
+            const u=l0*UV[i0*2]+l1*UV[i1*2]+l2*UV[i2*2];
+            const v=l0*UV[i0*2+1]+l1*UV[i1*2+1]+l2*UV[i2*2+1];
+            if(mode==='checker'){
+              const c=checkerColor(u,v); r=c[0];g=c[1];b=c[2];
+            } else if(texData){
+              let uu=u-Math.floor(u), vv=v-Math.floor(v);
+              const tx=Math.min(texW-1, Math.floor(uu*texW));
+              const ty=Math.min(texH-1, Math.floor((1-vv)*texH));
+              const o=(ty*texW+tx)*4;
+              r=texData[o]/255; g=texData[o+1]/255; b=texData[o+2]/255;
+            } else {
+              const c=checkerColor(u,v); r=c[0];g=c[1];b=c[2];
+            }
+          } else if(mode==='checker'){
+            const c=[0.62,0.62,0.64]; r=c[0];g=c[1];b=c[2];
+          } else { r=0.72;g=0.72;b=0.72; }
+          // normal
+          let nx=0,ny=0,nz=1;
+          if(hasN){
+            nx=l0*NR[i0*3]+l1*NR[i1*3]+l2*NR[i2*3];
+            ny=l0*NR[i0*3+1]+l1*NR[i1*3+1]+l2*NR[i2*3+1];
+            nz=l0*NR[i0*3+2]+l1*NR[i1*3+2]+l2*NR[i2*3+2];
+          } else {
+            // compute surface normal
+            const ax=P[i1*3]-P[i0*3], ay=P[i1*3+1]-P[i0*3+1], az2=P[i1*3+2]-P[i0*3+2];
+            const bx=P[i2*3]-P[i0*3], by=P[i2*3+1]-P[i0*3+1], bz=P[i2*3+2]-P[i0*3+2];
+            nx=ay*bz-az2*by; ny=az2*bx-ax*bz; nz=ax*by-ay*bx;
+          }
+          let nl=Math.sqrt(nx*nx+ny*ny+nz*nz)||1;
+          nx/=nl; ny/=nl; nz/=nl;
+          // two-sided: face the camera
+          const wxx=l0*P[i0*3]+l1*P[i1*3]+l2*P[i2*3];
+          const wyy=l0*P[i0*3+1]+l1*P[i1*3+1]+l2*P[i2*3+1];
+          const wzz=l0*P[i0*3+2]+l1*P[i1*3+2]+l2*P[i2*3+2];
+          let vdx=wxx-eye[0], vdy=wyy-eye[1], vdz=wzz-eye[2];
+          const vdl=Math.sqrt(vdx*vdx+vdy*vdy+vdz*vdz)||1;
+          vdx/=vdl; vdy/=vdl; vdz/=vdl;
+          const facing=nx*vdx+ny*vdy+nz*vdz;
+          if(twoSide && facing>0){ nx=-nx; ny=-ny; nz=-nz; }
+          // lambert + hemispheric ambient (Section 9.3) — L: direction toward the sun
+          const diff=Math.max(nx*sun[0]+ny*sun[1]+nz*sun[2], 0);
+          const hemi=0.62+0.38*(ny*0.5+0.5);
+          r*= (amb[0]*hemi + sunI*diff*1.0);
+          g*= (amb[1]*hemi + sunI*diff*0.97);
+          b*= (amb[2]*hemi + sunI*diff*0.9);
+          // fog
+          if(fogOn){
+            const f=clamp((depth-fogStart)/(fogEnd-fogStart),0,1);
+            r=lerp(r,fogC[0],f); g=lerp(g,fogC[1],f); b=lerp(b,fogC[2],f);
+          }
+          // palette remap node (Section 9.1)
+          if(remapS>0.01){
+            const qi=nearestColorIdx(palRGB, r*255, g*255, b*255);
+            const p=palRGB[qi];
+            r=lerp(r, p[0]/255, remapS);
+            g=lerp(g, p[1]/255, remapS);
+            b=lerp(b, p[2]/255, remapS);
+          }
+          zbuf[yy*W+xx]=depth;
+          const o=(yy*W+xx)*4;
+          data[o]=r*255; data[o+1]=g*255; data[o+2]=b*255;
+          tri++;
+        }
+      }
+    }
+  }
+
+  // ---- post-processing ----
+  const gr=opts.grade;
+  const lut=opts.lut;
+  const useTone=opts.tone;
+  const exp=gr.exp, con=gr.con, sat=gr.sat, temp=gr.temp;
+  for(let i=0;i<data.length;i+=4){
+    let r=data[i]/255, g=data[i+1]/255, b=data[i+2]/255;
+    r*=exp; g*=exp; b*=exp;
+    if(temp!==1){ r*=temp; b*=(2-temp); }
+    if(con!==1){ r=(r-0.5)*con+0.5; g=(g-0.5)*con+0.5; b=(b-0.5)*con+0.5; }
+    if(sat!==1){
+      const l=r*0.299+g*0.587+b*0.114;
+      r=lerp(l,r,sat); g=lerp(l,g,sat); b=lerp(l,b,sat);
+    }
+    if(useTone){ r=aces(r); g=aces(g); b=aces(b); }
+    if(lut){
+      const s=lut.size, s1=s-1;
+      const fx=clamp(r,0,1)*s1, fy=clamp(g,0,1)*s1, fz=clamp(b,0,1)*s1;
+      const x0=Math.floor(fx), y0=Math.floor(fy), z0=Math.floor(fz);
+      const x1=Math.min(s1,x0+1), y1=Math.min(s1,y0+1), z1=Math.min(s1,z0+1);
+      const tx=fx-x0, ty=fy-y0, tz=fz-z0;
+      const D=lut.data;
+      const at=(x,y,z)=>{ const idx=x + y*s + z*s*s; return [D[idx*3],D[idx*3+1],D[idx*3+2]]; };
+      const c000=at(x0,y0,z0), c100=at(x1,y0,z0), c010=at(x0,y1,z0), c110=at(x1,y1,z0);
+      const c001=at(x0,y0,z1), c101=at(x1,y0,z1), c011=at(x0,y1,z1), c111=at(x1,y1,z1);
+      const c00=[lerp(c000[0],c100[0],tx),lerp(c000[1],c100[1],tx),lerp(c000[2],c100[2],tx)];
+      const c10=[lerp(c010[0],c110[0],tx),lerp(c010[1],c110[1],tx),lerp(c010[2],c110[2],tx)];
+      const c01=[lerp(c001[0],c101[0],tx),lerp(c001[1],c101[1],tx),lerp(c001[2],c101[2],tx)];
+      const c11=[lerp(c011[0],c111[0],tx),lerp(c011[1],c111[1],tx),lerp(c011[2],c111[2],tx)];
+      const c0=[lerp(c00[0],c10[0],ty),lerp(c00[1],c10[1],ty),lerp(c00[2],c10[2],ty)];
+      const c1=[lerp(c01[0],c11[0],ty),lerp(c01[1],c11[1],ty),lerp(c01[2],c11[2],ty)];
+      r=lerp(c0[0],c1[0],tz); g=lerp(c0[1],c1[1],tz); b=lerp(c0[2],c1[2],tz);
+    }
+    data[i]=clamp(r*255,0,255); data[i+1]=clamp(g*255,0,255); data[i+2]=clamp(b*255,0,255);
+  }
+  ctx.putImageData(img,0,0);
+  return tri;
+}
+
+/* clay grid — Section 2 diagnostic test: all assets laid out under a single light */
+function renderGridAll(canvas, assets, opts){
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  const bg=opts.bg;
+  ctx.fillStyle='rgb('+Math.round(bg[0]*255)+','+Math.round(bg[1]*255)+','+Math.round(bg[2]*255)+')';
+  ctx.fillRect(0,0,W,H);
+  const list=assets.filter(a=>a.decision!=='at').slice(0,12);
+  if(!list.length) return 0;
+  const cols=Math.ceil(Math.sqrt(list.length));
+  const rows=Math.ceil(list.length/cols);
+  const tw=Math.floor(W/cols), th=Math.floor(H/rows);
+  let rendered=0;
+  for(let i=0;i<list.length;i++){
+    const a=list[i];
+    const c=document.createElement('canvas'); c.width=tw-2; c.height=th-22;
+    const meshOpts=Object.assign({}, opts, {
+      mode:'clay', remap:0, fog:false, cam:{yaw:0.8, pitch:0.4, dist:1.6, fit:true}, grade:{exp:1,con:1,sat:1,temp:1}
+    });
+    renderPreview(c, a, meshOpts);
+    ctx.drawImage(c, (i%cols)*tw+1, Math.floor(i/cols)*th+1);
+    ctx.fillStyle='rgba(0,0,0,.55)';
+    ctx.fillRect((i%cols)*tw+1, th-20, tw-2, 18);
+    ctx.fillStyle='#e8d9b0';
+    ctx.font='10px ui-monospace,monospace';
+    ctx.fillText(a.name.slice(0, Math.floor(tw/6.2)), (i%cols)*tw+6, th-7);
+    rendered++;
+  }
+  return rendered;
+}
+
+/* ---------- orbit controls ---------- */
+function initPreviewControls(canvas, redraw){
+  let dragging=false, lx=0, ly=0;
+  canvas.addEventListener('pointerdown',e=>{
+    dragging=true; lx=e.clientX; ly=e.clientY;
+    canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener('pointermove',e=>{
+    if(!dragging) return;
+    CAM.yaw+=(e.clientX-lx)*0.008;
+    CAM.pitch=clamp(CAM.pitch+(e.clientY-ly)*0.006, -0.2, 1.5);
+    lx=e.clientX; ly=e.clientY;
+    redraw();
+  });
+  canvas.addEventListener('pointerup',e=>{ dragging=false; try{canvas.releasePointerCapture(e.pointerId);}catch(_){} });
+  canvas.addEventListener('wheel',e=>{
+    e.preventDefault();
+    CAM.dist=clamp(CAM.dist*(1+Math.sign(e.deltaY)*0.09), 0.35, 12);
+    redraw();
+  },{passive:false});
+}
+/* ============================================================
+   qa.js — quality gate (the automated half of Section 4.3)
+   ============================================================ */
+function auditAsset(asset){
+  const checks=[];
+  let fix=[];
+  const tri=triCount(asset);
+  const bb=meshBBox(asset.pos);
+  const maxDim=Math.max(bb.size[0],bb.size[1],bb.size[2]);
+
+  // 1) name pattern
+  let nameOk=false;
+  try{ nameOk=new RegExp(CFG.naming).test(asset.name.replace(/\.[^.]+$/,'')); }catch(e){ nameOk=false; }
+  checks.push({key:'name',label:'Name',state:nameOk?'ok':'err',note:nameOk?'pattern matches':'pattern mismatch'});
+  if(!nameOk) fix.push('Section 3.5 naming rule');
+
+  // 2) size
+  const target=CFG.targetSize[asset.className]||1;
+  const tol=(CFG.sizeTol||25)/100;
+  const sizeOk=maxDim>0 && Math.abs(maxDim-target)/target<=tol;
+  checks.push({key:'size',label:'Size',state:sizeOk?'ok':'err',note:fmtN(maxDim)+' m / target '+fmtN(target)});
+  if(!sizeOk) fix.push('Stage 2 scale');
+
+  // 3) pivot (if normalized, base minY≈0)
+  if(asset.flags.normalized){
+    const pivOk=Math.abs(bb.min[1])<1e-3;
+    checks.push({key:'pivot',label:'Pivot',state:pivOk?'ok':'err',note:pivOk?'base y=0':'y='+fmtN(bb.min[1],4)});
+    if(!pivOk) fix.push('Stage 2 pivot');
+  } else {
+    checks.push({key:'pivot',label:'Pivot',state:'skip',note:'not normalized'});
+  }
+
+  // 4) polygon budget
+  const bud=CFG.budget[asset.className]||2000;
+  const triOk=tri<=bud;
+  checks.push({key:'tri',label:'Polygons',state:triOk?'ok':'err',note:tri+' / '+bud});
+  if(!triOk) fix.push('Stage 2 decimate');
+
+  // 5) UV presence
+  const uvOk=!!asset.uv;
+  checks.push({key:'uv',label:'UV',state:uvOk?'ok':'err',note:uvOk?'yes':'no'});
+  if(!uvOk) fix.push('Stage 3 box unwrap');
+
+  // 6) texel density deviation ≤ 5%
+  if(asset.uv){
+    const td=measureTexel(asset);
+    const targetTD=CFG.texel[asset.className]||5.12;
+    if(td.val){
+      const dev=Math.abs(td.val-targetTD)/targetTD;
+      checks.push({key:'texel',label:'Texel',state:dev<=0.05?'ok':'err',note:fmtN(td.val)+' vs '+fmtN(targetTD)+' px/cm ('+fmtN(dev*100,1)+'%)'});
+      if(dev>0.05) fix.push('Stage 3 density set');
+    } else {
+      checks.push({key:'texel',label:'Texel',state:'skip',note:'could not be measured'});
+    }
+  } else {
+    checks.push({key:'texel',label:'Texel',state:'skip',note:'no UV'});
+  }
+
+  // 7) texture palette / saturation cap
+  const tex=S.textures.find(t=>t.id===asset.texId);
+  if(tex){
+    const mx=maxSaturation(tex.img);
+    const cap=(CFG.satCap||70)/100;
+    const palOk=mx<=cap+0.02;
+    checks.push({key:'pal',label:'Palette',state:palOk?'ok':'err',note:'max S '+fmtN(mx*100,0)+'% / cap '+CFG.satCap+'%'});
+    if(!palOk) fix.push('Stage 4 palette remap');
+  } else {
+    checks.push({key:'pal',label:'Palette',state:'skip',note:'no texture'});
+  }
+
+  const pass=checks.every(c=>c.state!=='err');
+  asset.qa={checks:checks, pass:pass, fix:fix.length?fix.join(' → '):'—'};
+  return asset.qa;
+}
+
+function maxSaturation(img){
+  const d=img.data;
+  const n=img.width*img.height;
+  const step=Math.max(1,Math.floor(n/20000));
+  let mx=0;
+  for(let j=0;j<n;j+=step){
+    const i=j*4;
+    if(d[i+3]<40) continue;
+    const s=rgb2hsv(d[i],d[i+1],d[i+2])[1];
+    if(s>mx) mx=s;
+  }
+  return mx;
+}
+
+function runQaAudit(){
+  let pass=0, fail=0, skip=0;
+  for(const a of S.assets){
+    if(a.decision==='at'){ a.qa={checks:[{key:'skip',label:'Triage',state:'skip',note:'decision: discard'}],pass:true,fix:'—'}; skip++; continue; }
+    const q=auditAsset(a);
+    if(q.pass) pass++; else fail++;
+  }
+  return {pass:pass, fail:fail, skip:skip};
+}
+
+function renderQaTable(){
+  const tb=$('#qaBody'); tb.innerHTML='';
+  for(const a of S.assets){
+    const tr=document.createElement('tr');
+    const q=a.qa;
+    const st=c=>{
+      if(!c) return '<span class="dash">–</span>';
+      if(c.state==='ok') return '<span class="check">✓</span>';
+      if(c.state==='err') return '<span class="cross">✗</span> <span class="muted">'+c.note+'</span>';
+      return '<span class="dash">–</span> <span class="muted">'+c.note+'</span>';
+    };
+    const cells=['name','size','pivot','tri','uv','texel','pal'];
+    let row='<td>'+a.name+'</td>';
+    if(q){
+      const m={}; q.checks.forEach(c=>m[c.key]=c);
+      for(const k of cells) row+='<td>'+st(m[k])+'</td>';
+      row+='<td class="small '+(q.pass?'':'muted')+'">'+(q.pass?'<span class="tag ok">PASSED</span>':'<span class="tag err">'+q.fix+'</span>')+'</td>';
+    } else {
+      row+='<td colspan="8" class="muted">not audited</td>';
+    }
+    tr.innerHTML=row;
+    tb.appendChild(tr);
+  }
+}
+
+function buildQaCsv(){
+  const head=['file','name','size','pivot','polygons','uv','texel','palette','result','return_stage'];
+  const rows=[head];
+  for(const a of S.assets){
+    const q=a.qa; const m={};
+    if(q) q.checks.forEach(c=>m[c.key]=c.state==='ok'?'ok':(c.state==='err'?'error':c.note));
+    rows.push([a.name, m.name||'', m.size||'', m.pivot||'', m.tri||'', m.uv||'', m.texel||'', m.pal||'',
+      q?(q.pass?'passed':'failed'):'not_audited', q?q.fix:'']);
+  }
+  return rows.map(r=>r.map(csvCell).join(';')).join('\n');
+}
+
+function buildQaMd(){
+  const lines=['# QA REPORT — Quality Gate','',
+    'Generated by: Asset Harmonizer · '+new Date().toISOString().slice(0,10)+' '+stamp(),
+    'Style guide version: palette '+CFG.palette.length+' colors, cap '+CFG.satCap+'% S, texel '+CFG.texel.prop+'/'+CFG.texel.hero+' px/cm, budgets '+CFG.budget.arka+'/'+CFG.budget.prop+'/'+CFG.budget.hero,'',
+    '| File | Name | Size | Pivot | Polygons | UV | Texel | Palette | Result | Stage to return to |',
+    '|---|---|---|---|---|---|---|---|---|---|'];
+  let pass=0,fail=0;
+  for(const a of S.assets){
+    const q=a.qa; if(!q){ continue; }
+    if(q.pass) pass++; else fail++;
+    const m={}; q.checks.forEach(c=>m[c.key]=c);
+    const cell=c=> !c?'–':(c.state==='ok'?'✓':(c.state==='err'?'✗ '+c.note:'– '+c.note));
+    lines.push('| '+[a.name,cell(m.name),cell(m.size),cell(m.pivot),cell(m.tri),cell(m.uv),cell(m.texel),cell(m.pal),
+      q.pass?'**PASSED**':'**FAILED**', q.fix].join(' | ')+' |');
+  }
+  lines.push('','**Summary:** '+pass+' passed, '+fail+' failed. Failing assets are sent back to the relevant stage (Guide 4.3).','');
+  return lines.join('\n');
+}
+
+function buildInventoryCsv(){
+  const rows=[['file','class','decision','triangles','size_x','size_y','size_z','material','has_uv','texture','texel_px_cm','unit_multiplier']];
+  for(const a of S.assets){
+    const bb=meshBBox(a.pos);
+    const tex=S.textures.find(t=>t.id===a.texId);
+    rows.push([a.name, a.className, a.decision, triCount(a),
+      bb.size[0].toFixed(3), bb.size[1].toFixed(3), bb.size[2].toFixed(3),
+      a.matCount, a.uv?'yes':'no', tex?tex.name:(a.td&&a.td.assumed?'(assumed '+a.td.texW+'px)':'no'),
+      a.td&&a.td.val?a.td.val.toFixed(2):'', a.unit]);
+  }
+  return rows.map(r=>r.map(csvCell).join(';')).join('\n');
+}
+/* ============================================================
+   pipeline.js — chained pipeline execution (Section 10.1)
+   If a step fails on a file, the pipeline does not stop; it goes into the report.
+   ============================================================ */
+async function runPipeline(){
+  const btn=$('#btnRun'); btn.disabled=true;
+  const rl=$('#runLog'); rl.innerHTML=''; rl.classList.remove('hidden');
+  miniLog(rl,'— PIPELINE STARTED '+stamp()+' —','info');
+  const steps={
+    s1:$('#runStep1').checked, s2:$('#runStep2').checked,
+    s3:$('#runStep3').checked, s4:$('#runStep4').checked, s5:$('#runStep5').checked
+  };
+  const stats={processed:0, skipped:0, errors:0};
+
+  for(const a of S.assets){
+    const T=triCount(a);
+    if(a.decision==='at'){ stats.skipped++; miniLog(rl,'· '+a.name+' — decision "discard", left in the archive','warn'); continue; }
+    if(a.decision==='yeniden_yap'){ stats.skipped++; miniLog(rl,'· '+a.name+' — decision "redo", left for manual work','warn'); continue; }
+    try{
+      // 1) inventory measurement
+      if(steps.s1){
+        measureTexel(a);
+        miniLog(rl,'1 ✓ '+a.name+' — inventory: '+T+' triangles, UV '+(a.uv?'yes':'no'),'');
+        await tick();
+      }
+      // 2) geometric normalization
+      if(steps.s2){
+        const notes=normalizeAsset(a, {scale:true, pivot:true, weld:true, nrm:true, deci:true});
+        miniLog(rl,'2 ✓ '+a.name+' — '+notes.join(', '),'ok');
+        await tick();
+      }
+      // 3) UV + texel density
+      if(steps.s3){
+        if(!a.uv){ boxUnwrap(a); miniLog(rl,'3 · '+a.name+' — had no UV, box unwrap applied','info'); }
+        const target=CFG.texel[a.className];
+        const f=setTexelDensity(a, target);
+        if(f!==null) miniLog(rl,'3 ✓ '+a.name+' — texel density '+fmtN(a.td.val)+' px/cm (UV ×'+fmtN(f,3)+')','ok');
+        else miniLog(rl,'3 ! '+a.name+' — texel could not be applied (no UV)','warn');
+        await tick();
+      }
+      // 4) palette remap (assigned albedo only)
+      if(steps.s4 && a.texId!=null){
+        const t=S.textures.find(x=>x.id===a.texId);
+        if(t){
+          if(isEmissiveName(t.name)) miniLog(rl,'4 · '+a.name+' — emissive texture, forced to mini palette','');
+          applyPaletteToTexture(t, {});
+          miniLog(rl,'4 ✓ '+t.name+' — palette remap ('+t.w+'×'+t.h+')','ok');
+        }
+        await tick();
+      }
+      stats.processed++;
+    }catch(err){
+      stats.errors++;
+      miniLog(rl,'✗ '+a.name+' — ERROR: '+err.message+' (file added to the triage list)','err');
+      a.decision=a.decision==='koru'?'onar':a.decision;
+      log('PIPELINE ERROR '+a.name+': '+err.message,'err');
+    }
+  }
+  // 6) quality gate
+  if(steps.s5){
+    const r=runQaAudit();
+    miniLog(rl,'6 ✓ quality gate: '+r.pass+' passed, '+r.fail+' failed, '+r.skip+' skipped', r.fail?'warn':'ok');
+  }
+  miniLog(rl,'— PIPELINE FINISHED: '+stats.processed+' processed, '+stats.skipped+' skipped, '+stats.errors+' errors —', stats.errors?'warn':'ok');
+  log('Pipeline completed: '+stats.processed+' processed, '+stats.errors+' errors', stats.errors?'warn':'ok');
+  toast('Pipeline finished: '+stats.processed+' assets processed, '+stats.errors+' errors', stats.errors?'warn':'ok');
+  btn.disabled=false;
+  refreshAllStages();
+  if($('#pvCanvas')) refreshPreview();
+}
+
+function exportAllObjs(){
+  const list=S.assets.filter(a=>a.decision!=='at');
+  if(!list.length){ toast('No assets to download','warn'); return; }
+  let i=0;
+  const next=()=>{
+    if(i>=list.length){ toast(list.length+' OBJs downloaded','ok'); return; }
+    const a=list[i++];
+    downloadText(a.name.replace(/\.[^.]+$/,'')+'_norm.obj', exportOBJ(a), 'model/obj');
+    setTimeout(next, 350);
+  };
+  next();
+}
+function exportAllPalTex(){
+  const list=S.textures.slice();
+  if(!list.length){ toast('No textures to download','warn'); return; }
+  let i=0;
+  const next=()=>{
+    if(i>=list.length){ toast(list.length+' textures downloaded','ok'); return; }
+    const t=list[i++];
+    downloadImage(t.name.replace(/\.[^.]+$/,'')+'_pal.png', t.img);
+    setTimeout(next, 350);
+  };
+  next();
+}
+/* ============================================================
+   demo.js — procedural demo stock (with deliberate mismatches)
+   From the seven layers in Section 2: scale/unit, polygon count, UV, palette.
+   ============================================================ */
+function genTexture(name, w, h, fn){
+  const img=new ImageData(w,h);
+  const d=img.data;
+  for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+    const i=(y*w+x)*4;
+    const c=fn(x,y,w,h);
+    d[i]=c[0]; d[i+1]=c[1]; d[i+2]=c[2]; d[i+3]=255;
+  }
+  return addTextureRecord(name, img);
+}
+
+/* add box: center (cx,cy,cz), size (sx,sy,sz), per-face UV */
+function pushBox(P, I, UV, NR, cx,cy,cz, sx,sy,sz){
+  const hx=sx/2, hy=sy/2, hz=sz/2;
+  const v=[
+    [cx-hx,cy-hy,cz-hz],[cx+hx,cy-hy,cz-hz],[cx+hx,cy+hy,cz-hz],[cx-hx,cy+hy,cz-hz], // back (z-)
+    [cx+hx,cy-hy,cz+hz],[cx-hx,cy-hy,cz+hz],[cx-hx,cy+hy,cz+hz],[cx+hx,cy+hy,cz+hz], // front (z+)
+    [cx-hx,cy-hy,cz+hz],[cx-hx,cy-hy,cz-hz],[cx-hx,cy+hy,cz-hz],[cx-hx,cy+hy,cz+hz], // left (x-)
+    [cx+hx,cy-hy,cz-hz],[cx+hx,cy-hy,cz+hz],[cx+hx,cy+hy,cz+hz],[cx+hx,cy+hy,cz-hz], // right (x+)
+    [cx-hx,cy+hy,cz-hz],[cx+hx,cy+hy,cz-hz],[cx+hx,cy+hy,cz+hz],[cx-hx,cy+hy,cz+hz], // top (y+)
+    [cx-hx,cy-hy,cz+hz],[cx+hx,cy-hy,cz+hz],[cx+hx,cy-hy,cz-hz],[cx-hx,cy-hy,cz-hz]  // bottom (y-)
+  ];
+  const quads=[[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[16,17,18,19],[20,21,22,23]];
+  const base=P.length/3;
+  for(const p of v) P.push(p[0],p[1],p[2]);
+  const uvq=[[0,0],[1,0],[1,1],[0,1]];
+  for(const q of quads){
+    // two triangles: (0,1,2) (0,2,3) — CCW
+    const tri=[[q[0],q[1],q[2]],[q[0],q[2],q[3]]];
+    for(const t of tri){
+      for(let k=0;k<3;k++){
+        const vi=t[k];
+        I.push(base+vi);
+        UV.push(uvq[k][0], uvq[k][1]);
+      }
+    }
+  }
+}
+
+function finishAsset(name, P, I, UV, NR, mats){
+  const pos=new Float32Array(P);
+  const w=weldPositions(pos);
+  // I indexes the corner stream → remap to vertex ids after welding
+  const a=newAsset(name, w.pos, I.map(i=>w.remap[i]), UV.length===I.length*2?new Float32Array(UV):null, null, mats||1);
+  a.raw={pos:w.pos.slice(), idx:I.map(i=>w.remap[i]), uv:UV.length===I.length*2?new Float32Array(UV):null, nrm:null};
+  return a;
+}
+
+function buildDemo(){
+  // clear the old stock
+  S.assets.length=0; S.textures.length=0; TEX_SEQ=0; ASSET_SEQ=0;
+
+  /* 1) chair — in centimeter coordinates (unit mismatch), NO UVs */
+  {
+    const P=[],I=[],UV=[],NR=[];
+    // 4 legs + seat + backrest (cm)
+    pushBox(P,I,UV,NR, -20,22.5,-20, 8,45,8);
+    pushBox(P,I,UV,NR,  20,22.5,-20, 8,45,8);
+    pushBox(P,I,UV,NR, -20,22.5, 20, 8,45,8);
+    pushBox(P,I,UV,NR,  20,22.5, 20, 8,45,8);
+    pushBox(P,I,UV,NR,  0,47.5,0, 48,5,48);      // seat
+    pushBox(P,I,UV,NR,  0,72.5,-23, 48,45,6);    // backrest
+    const a=finishAsset('env_chair_a.obj', P,I,UV,NR, 1);
+    a.uv=null; a.raw.uv=null;   // deliberate: source file without UVs (Section 6.2 scenario)
+    S.assets.push(a);
+  }
+
+  /* 2) barrel — excessively high poly count (over budget) + oversaturated texture */
+  {
+    const P=[],I=[],UV=[],NR=[];
+    const seg=72, bands=16, R=0.30, Hh=0.90;
+    const ringV=[];
+    for(let j=0;j<=bands;j++){
+      const y=j/bands*Hh;
+      const t=2*j/bands-1;
+      const rr=R*(1-0.28*t*t); // barrel bulge: 72% radius at the ends, 100% in the middle
+      for(let i=0;i<seg;i++){
+        const ang=i/seg*Math.PI*2;
+        ringV.push([Math.cos(ang)*rr, y, Math.sin(ang)*rr, i/seg, j/bands]);
+      }
+    }
+    const addCorner=(vv, u,v)=>{ P.push(vv[0],vv[1],vv[2]); UV.push(u,v); };
+    for(let j=0;j<bands;j++){
+      for(let i=0;i<seg;i++){
+        const a0=j*seg+i, a1=j*seg+(i+1)%seg;
+        const b0=(j+1)*seg+i, b1=(j+1)*seg+(i+1)%seg;
+        const u0=i/seg, u1=(i+1)/seg, v0=j/bands, v1=(j+1)/bands;
+        addCorner(ringV[a0],u0,v0); addCorner(ringV[b0],u0,v1); addCorner(ringV[a1],u1,v0);
+        addCorner(ringV[a1],u1,v0); addCorner(ringV[b0],u0,v1); addCorner(ringV[b1],u1,v1);
+        for(let k=0;k<6;k++) I.push(P.length/3-6+k);
+      }
+    }
+    // caps (ring j=0 → bottom, ring j=bands → top)
+    const cTop=[0,Hh,0], cBot=[0,0,0];
+    for(let i=0;i<seg;i++){
+      const a0=ringV[i], a1=ringV[(i+1)%seg];                 // bottom ring
+      const z0=ringV[bands*seg+i], z1=ringV[bands*seg+(i+1)%seg]; // top ring
+      P.push(cTop[0],cTop[1],cTop[2]); UV.push(0.5,0.5);
+      addCorner(z1,(i+1)/seg,1); addCorner(z0,i/seg,1);
+      for(let k=0;k<3;k++) I.push(P.length/3-3+k);
+      P.push(cBot[0],cBot[1],cBot[2]); UV.push(0.5,0.5);
+      addCorner(a0,i/seg,0); addCorner(a1,(i+1)/seg,0);
+      for(let k=0;k<3;k++) I.push(P.length/3-3+k);
+    }
+    const a=finishAsset('env_barrel_high.obj', P,I,UV,NR, 2);
+    S.assets.push(a);
+    const rust=genTexture('env_barrel_diff.png', 256,256,(x,y)=>{
+      const n=vnoise(x/26,y/26,7)*0.55+vnoise(x/7,y/7,13)*0.25;
+      const v=clamp(0.42+n*0.42,0.15,0.92);
+      const c=hsv2rgb(24, 0.86, v); // saturation 0.86 → exceeds the cap
+      return [c[0],c[1],c[2]];
+    });
+    a.texId=rust.id;
+  }
+
+  /* 3) wall module — close to standards, gray texture */
+  {
+    const P=[],I=[],UV=[],NR=[];
+    pushBox(P,I,UV,NR, 0,1.0,0, 2.0,2.0,0.2);
+    const a=finishAsset('env_wall_module.obj', P,I,UV,NR, 1);
+    S.assets.push(a);
+    const wall=genTexture('env_wall_diff.png', 256,256,(x,y,w,h)=>{
+      const mortar=(x%86<5)||(y%86<5);
+      if(mortar) return [96,94,90];
+      const n=vnoise(x/14,y/14,31)*0.2+vnoise(x/4,y/4,41)*0.1;
+      const v=clamp(0.56+n,0,1);
+      return [v*150,v*148,v*142];
+    });
+    a.texId=wall.id;
+  }
+
+  /* 4) test character — boxy humanoid, with UVs */
+  {
+    const P=[],I=[],UV=[],NR=[];
+    pushBox(P,I,UV,NR, 0,1.20,0, 0.42,0.55,0.24);  // torso
+    pushBox(P,I,UV,NR, 0,1.60,0, 0.24,0.25,0.24);  // head
+    pushBox(P,I,UV,NR, -0.29,1.18,0, 0.13,0.48,0.13); // left arm
+    pushBox(P,I,UV,NR,  0.29,1.18,0, 0.13,0.48,0.13); // right arm
+    pushBox(P,I,UV,NR, -0.12,0.45,0, 0.16,0.90,0.16); // left leg
+    pushBox(P,I,UV,NR,  0.12,0.45,0, 0.16,0.90,0.16); // right leg
+    const a=finishAsset('char_test_dummy.obj', P,I,UV,NR, 1);
+    S.assets.push(a);
+    const skin=genTexture('char_test_diff.png', 128,128,(x,y)=>{
+      const n=vnoise(x/16,y/16,77)*0.15;
+      const c=hsv2rgb(172, 0.52, 0.5+n);
+      return [c[0],c[1],c[2]];
+    });
+    a.texId=skin.id;
+  }
+
+  // unit guesses + triage
+  for(const a of S.assets){
+    const bb=meshBBox(a.pos);
+    const maxDim=Math.max(bb.size[0],bb.size[1],bb.size[2]);
+    a.unit=guessUnit(maxDim);
+    applyUnit(a, a.unit);
+    const nm=a.name.toLowerCase();
+    a.className= nm.startsWith('char')?'karakter': nm.startsWith('hero')?'hero':'prop';
+    const tri=a.idx.length/3;
+    const bud=CFG.budget[a.className];
+    a.decision=(!a.uv || tri>bud)?'onar':'koru';
+    a.decisionManual=false;
+    measureTexel(a);
+    log('DEMO '+a.name+': '+tri+' triangles, unit ×'+a.unit+', UV '+(a.uv?'yes':'NONE')+', decision: '+a.decision,'info');
+  }
+  toast('Demo project loaded: 4 deliberately mismatched assets + 3 textures','ok',4200);
+  log('Demo stock loaded. You can run the pipeline from the "7 · Automation" section.','info');
+}
+/* ============================================================
+   main.js — UI bindings, section navigation, init
+   ============================================================ */
+const S={assets:[], textures:[], lut:null};
+
+const STAGES=[
+  {t:'Style Guide', s:'0'}, {t:'Inventory & Triage', s:'1'}, {t:'Geometry', s:'2'},
+  {t:'UV & Texel', s:'3'}, {t:'Texture', s:'4'}, {t:'Engine Preview', s:'5'},
+  {t:'Quality Gate', s:'6'}, {t:'Automation', s:'7'}, {t:'Reference', s:'8'}
+];
+let CUR_STAGE=0;
+
+function buildNav(){
+  const nav=$('#nav'); nav.innerHTML='';
+  STAGES.forEach((st,i)=>{
+    const b=el('button',{class:'navbtn'+(i===CUR_STAGE?' active':''), html:'<span class="n">'+st.s+'</span>'+st.t});
+    b.addEventListener('click',()=>navTo(i));
+    nav.appendChild(b);
+  });
+}
+function navTo(i){
+  CUR_STAGE=i;
+  $$('#nav .navbtn').forEach((b,k)=>b.classList.toggle('active',k===i));
+  $$('section.panel').forEach(p=>p.classList.toggle('active', +p.dataset.stage===i));
+  if(i===3) S.assets.forEach(a=>measureTexel(a));
+  if(i===3) refreshUV();
+  if(i===4){ $('#pSatEcho').textContent=CFG.satCap; }
+  if(i===5){ refreshPreviewSelectors(); refreshPreview(); }
+  if(i===6) renderQaTable();
+}
+
+function refreshAllStages(){
+  refreshInventory();
+  refreshNorm();
+  refreshUV();
+  refreshTexList();
+  refreshPreviewSelectors();
+  renderQaTable();
+}
+
+/* ================= 1 INVENTORY ================= */
+function refreshInventory(){
+  const tb=$('#invBody'); tb.innerHTML='';
+  let tri=0, bad=0;
+  for(const a of S.assets){
+    tri+=triCount(a);
+    const bb=meshBBox(a.pos);
+    const tr=document.createElement('tr');
+    const clsSel=el('select',{});
+    CLASSES.forEach(c=>{
+      const o=el('option',{value:c,html:c}); if(c===a.className)o.selected=true; clsSel.appendChild(o);
+    });
+    clsSel.addEventListener('change',()=>{ a.className=clsSel.value; a.qa=null; measureTexel(a); refreshInventory(); refreshUV(); });
+    const decSel=el('select',{});
+    [['koru','keep'],['onar','repair'],['yeniden_yap','redo'],['at','discard']].forEach(([v,l])=>{
+      const o=el('option',{value:v,html:l}); if(v===a.decision)o.selected=true; decSel.appendChild(o);
+    });
+    decSel.addEventListener('change',()=>{ a.decision=decSel.value; refreshInventory(); });
+    const unitSel=el('select',{});
+    [['1','meter'],['0.01','centimeter'],['0.001','millimeter'],['0.0254','inch']].forEach(([v,l])=>{
+      const o=el('option',{value:v,html:l}); if(+v===a.unit)o.selected=true; unitSel.appendChild(o);
+    });
+    unitSel.addEventListener('change',()=>{ applyUnit(a, parseFloat(unitSel.value)); measureTexel(a); refreshInventory(); refreshUV(); });
+    const del=el('button',{class:'btn small danger',html:'delete'});
+    del.addEventListener('click',()=>{
+      S.assets=S.assets.filter(x=>x.id!==a.id);
+      refreshAllStages();
+    });
+    const cName=el('td'); cName.textContent=a.name; tr.appendChild(cName);
+    const cCls=el('td'); cCls.appendChild(clsSel); tr.appendChild(cCls);
+    const cDec=el('td'); cDec.appendChild(decSel); tr.appendChild(cDec);
+    const cTri=el('td',{class:'num'}); cTri.textContent=triCount(a); tr.appendChild(cTri);
+    const cDim=el('td',{class:'num'}); cDim.textContent=bb.size.map(x=>fmtN(x)).join('×'); tr.appendChild(cDim);
+    const cMat=el('td',{class:'num'}); cMat.textContent=a.matCount; tr.appendChild(cMat);
+    const cUV=el('td'); cUV.innerHTML=a.uv?'<span class="tag ok">yes</span>':'<span class="tag err">no</span>'; tr.appendChild(cUV);
+    const cTex=el('td');
+    const tex=S.textures.find(t=>t.id===a.texId);
+    cTex.innerHTML=tex?('<span class="tag info">'+tex.name+'</span>'):(a.td&&a.td.assumed?'<span class="tag warn">assumed '+a.td.texW+'px</span>':'<span class="muted">none</span>');
+    tr.appendChild(cTex);
+    const cTD=el('td',{class:'num'}); cTD.textContent=a.td&&a.td.val?fmtN(a.td.val):'–'; tr.appendChild(cTD);
+    const cOp=el('td'); cOp.appendChild(unitSel); cOp.appendChild(document.createTextNode(' ')); cOp.appendChild(del); tr.appendChild(cOp);
+    tb.appendChild(tr);
+    if(!a.uv || a.decision!=='koru') bad++;
+  }
+  $('#invSummary').innerHTML=S.assets.length
+    ? ('<b>'+S.assets.length+'</b> assets · <b>'+tri+'</b> triangles · <b>'+bad+'</b> triage flags — decision per row: keep/repair/redo/discard')
+    : 'Stock is empty — drag in files or load the demo.';
+}
+
+/* ================= 2 NORMALIZATION ================= */
+function refreshNorm(){
+  const tb=$('#normBody'); tb.innerHTML='';
+  for(const a of S.assets){
+    const bb=meshBBox(a.pos);
+    const tr=document.createElement('tr');
+    const st=a.flags.normalized
+      ? '<span class="tag ok">normalize</span>'+(a.flags.decimated?' <span class="tag info">decimate</span>':'')
+      : (a.decision==='at'?'<span class="tag warn">discard</span>':'<span class="muted">pending</span>');
+    const bud=CFG.budget[a.className];
+    tr.innerHTML='<td>'+a.name+'</td><td>'+a.className+'</td>'
+      +'<td class="num">'+bb.size.map(x=>fmtN(x)).join('×')+'</td>'
+      +'<td class="num">'+triCount(a)+' / '+bud+'</td>'
+      +'<td>'+st+'</td>';
+    const cOp=el('td');
+    const bRun=el('button',{class:'btn small primary',html:'Normalize'});
+    bRun.addEventListener('click',()=>{
+      const notes=normalizeAsset(a,{scale:$('#optScale').checked, pivot:$('#optPivot').checked,
+        weld:$('#optWeld').checked, nrm:$('#optNrm').checked, deci:$('#optDeci').checked});
+      log(a.name+' normalize: '+notes.join(', '),'ok');
+      toast(a.name+': '+notes.join(', ')||'no changes','ok');
+      refreshAllStages();
+    });
+    const bExp=el('button',{class:'btn small',html:'OBJ ↓'});
+    bExp.addEventListener('click',()=>downloadText(a.name.replace(/\.[^.]+$/,'')+'_norm.obj', exportOBJ(a),'model/obj'));
+    const bRes=el('button',{class:'btn small',html:'Reset'});
+    bRes.addEventListener('click',()=>{
+      applyUnit(a, a.unit);
+      log(a.name+' restored to original','info');
+      refreshAllStages();
+    });
+    [bRun,bExp,bRes].forEach((b,i)=>{ cOp.appendChild(b); if(i<2)cOp.appendChild(document.createTextNode(' ')); });
+    tr.appendChild(cOp);
+    tb.appendChild(tr);
+  }
+}
+function normalizeAll(){
+  for(const a of S.assets){
+    if(a.decision==='at'||a.decision==='yeniden_yap') continue;
+    const notes=normalizeAsset(a,{scale:$('#optScale').checked, pivot:$('#optPivot').checked,
+      weld:$('#optWeld').checked, nrm:$('#optNrm').checked, deci:$('#optDeci').checked});
+    log(a.name+' normalize: '+notes.join(', '),'ok');
+  }
+  toast('Batch normalization finished','ok');
+  refreshAllStages();
+}
+
+/* ================= 3 UV + TEXEL ================= */
+function refreshUV(){
+  const tb=$('#uvBody'); tb.innerHTML='';
+  for(const a of S.assets){
+    const td=measureTexel(a);
+    const tr=document.createElement('tr');
+    const texSel=el('select',{});
+    const o0=el('option',{value:'',html:'(assumed)'}); if(a.texId==null)o0.selected=true; texSel.appendChild(o0);
+    S.textures.forEach(t=>{
+      const o=el('option',{value:t.id,html:t.name+' ('+t.w+'×'+t.h+')'}); if(t.id===a.texId)o.selected=true; texSel.appendChild(o);
+    });
+    texSel.addEventListener('change',()=>{
+      const v=texSel.value; a.texId=v===''?null:+v;
+      measureTexel(a); refreshUV(); refreshPreviewSelectors();
+    });
+    const target=CFG.texel[a.className];
+    tr.innerHTML='<td>'+a.name+'</td>'
+      +'<td>'+(a.uv?'<span class="tag ok">yes</span>'+(a.flags.unwrapped?' <span class="tag info">unwrap</span>':''):'<span class="tag err">no</span>')+'</td>'
+      +'<td class="num">'+fmtN(td.worldA,0)+'</td>'
+      +'<td class="num">'+fmtN(td.uvA,3)+'</td>';
+    const cTex=el('td'); cTex.appendChild(texSel); tr.appendChild(cTex);
+    const cCur=el('td',{class:'num'}); cCur.textContent=td.val?fmtN(td.val):'–'; tr.appendChild(cCur);
+    const cTar=el('td',{class:'num'}); cTar.textContent=fmtN(target); tr.appendChild(cTar);
+    const cOp=el('td');
+    const bUn=el('button',{class:'btn small',html:'Unwrap', title:'box unwrap (3×2 grid)'});
+    bUn.addEventListener('click',()=>{ boxUnwrap(a); log(a.name+': box unwrap','info'); refreshAllStages(); });
+    const bAp=el('button',{class:'btn small primary',html:'Apply'});
+    bAp.addEventListener('click',()=>{
+      const f=setTexelDensity(a,target);
+      if(f===null){ toast(a.name+': no UVs — unwrap first','warn'); return; }
+      log(a.name+': texel density '+fmtN(target)+' px/cm applied (UV ×'+fmtN(f,3)+')','ok');
+      refreshAllStages();
+    });
+    cOp.appendChild(bUn); cOp.appendChild(document.createTextNode(' ')); cOp.appendChild(bAp);
+    tr.appendChild(cOp);
+    tb.appendChild(tr);
+  }
+}
+function unwrapAll(){
+  let n=0;
+  for(const a of S.assets){ if(!a.uv && a.decision!=='at'){ boxUnwrap(a); n++; } }
+  toast(n+' assets box-unwrapped','ok');
+  log('Batch box unwrap: '+n+' assets','info');
+  refreshAllStages();
+}
+function texelAll(){
+  let n=0;
+  for(const a of S.assets){
+    if(!a.uv || a.decision==='at') continue;
+    setTexelDensity(a, CFG.texel[a.className]); n++;
+  }
+  toast(n+' assets set to target px/cm','ok');
+  log('Batch texel density: '+n+' assets','ok');
+  refreshAllStages();
+}
+
+/* ================= 4 TEXTURE ================= */
+async function addImageFiles(files){
+  for(const f of files){
+    try{
+      const img=await fileToImageData(f);
+      const t=addTextureRecord(f.name, img);
+      log('Texture loaded: '+f.name+' ('+img.width+'×'+img.height+(t.hasAlpha?', has alpha':'')+')','info');
+    }catch(e){ toast(f.name+' could not be read: '+e.message,'err'); }
+  }
+  refreshTexList();
+}
+function refreshTexList(){
+  const list=$('#texList'); list.innerHTML='';
+  $('#pSatEcho').textContent=CFG.satCap;
+  for(const t of S.textures){
+    const card=el('div',{class:'texcard'});
+    const thumb=document.createElement('canvas');
+    thumb.width=110; thumb.height=Math.round(110*t.h/t.w);
+    const tc=thumb.getContext('2d');
+    tc.imageSmoothingEnabled=false;
+    tc.drawImage(imageDataToCanvas(t.img),0,0,thumb.width,thumb.height);
+    card.appendChild(thumb);
+    const nm=el('div',{class:'nm'}); nm.textContent=t.name; card.appendChild(nm);
+    const meta=el('div',{class:'muted small'}); meta.textContent=t.w+'×'+t.h+(t.hasAlpha?' · alpha':''); card.appendChild(meta);
+    const assigned=S.assets.find(a=>a.texId===t.id);
+    const asg=el('div',{class:'muted small'}); asg.textContent=assigned?('assigned: '+assigned.name):'assigned: —'; card.appendChild(asg);
+    const ops=el('div',{class:'ops'});
+    const mkBtn=(html,fn,cls)=>{ const b=el('button',{class:'btn small'+(cls?' '+cls:''),html:html}); b.addEventListener('click',fn); ops.appendChild(b); return b; };
+    mkBtn('2×',()=>{ upscaleTextureRecord(t,2,+$('#pUnsharp').value/100); log(t.name+': 2× non-AI upscale ('+t.w+'×'+t.h+')','info'); refreshTexList(); });
+    mkBtn('4×',()=>{ upscaleTextureRecord(t,4,+$('#pUnsharp').value/100); log(t.name+': 4× non-AI upscale ('+t.w+'×'+t.h+')','info'); refreshTexList(); });
+    mkBtn('Derive PBR',()=>{
+      t.derived=derivePBR(t.img,{blur:+$('#pBlur').value, normalStrength:+$('#pNrmS').value/10,
+        yFlip:$('#pYFlip').checked, roughMode:$('#pRoughMode').value,
+        roughBase:+$('#pRoughBase').value/100, metal:+$('#pMetal').value/100});
+      log(t.name+': PBR set derived (_nrm, _orm, _ao, _rough)','ok');
+      toast('PBR derived — download buttons enabled','ok');
+      refreshTexList();
+    },'primary');
+    mkBtn('Apply palette',()=>{
+      applyPaletteToTexture(t,{dither:$('#pDither').checked, strength:+$('#pStrength').value/100});
+      log(t.name+': palet remap'+((/emi|glow/i.test(t.name)&&CFG.emissive.length)?' (emissive mini palette)':''),'ok');
+      refreshTexList();
+    },'primary');
+    card.appendChild(ops);
+    const ops2=el('div',{class:'ops'});
+    const dl=(html,img,nmSuffix,dis)=>{ const b=el('button',{class:'btn small',html:html}); b.disabled=!img; b.addEventListener('click',()=>downloadImage(t.name.replace(/\.[^.]+$/,'')+nmSuffix,img)); ops2.appendChild(b); };
+    dl('_nrm ↓', t.derived&&t.derived.nrm,'_nrm.png');
+    dl('_orm ↓', t.derived&&t.derived.orm,'_orm.png');
+    dl('_ao ↓', t.derived&&t.derived.ao,'_ao.png');
+    dl('_rough ↓', t.derived&&t.derived.rough,'_rough.png');
+    mkBtn2(ops2,'↺ undo',()=>{ t.img=new ImageData(new Uint8ClampedArray(t.orig.data),t.orig.width,t.orig.height); t.w=t.img.width; t.h=t.img.height; t.derived=null; refreshTexList(); });
+    mkBtn2(ops2,'delete',()=>{ S.textures=S.textures.filter(x=>x.id!==t.id); S.assets.forEach(a=>{ if(a.texId===t.id)a.texId=null; }); refreshTexList(); },'danger');
+    card.appendChild(ops2);
+    list.appendChild(card);
+  }
+}
+function mkBtn2(parent,html,fn,cls){
+  const b=el('button',{class:'btn small'+(cls?' '+cls:''),html:html});
+  b.addEventListener('click',fn); parent.appendChild(b); return b;
+}
+
+/* ================= 5 PREVIEW ================= */
+let PV_ASSET_ID=null, PV_GRID=false;
+function previewOpts(){
+  return {
+    mode: $('#pvMode').value,
+    sunAz:+$('#pvAz').value, sunEl:+$('#pvEl').value, sunI:+$('#pvSunI').value/100,
+    amb:hex2rgb($('#pvAmb').value).map(x=>x/255),
+    bg:hex2rgb($('#pvBg').value).map(x=>x/255),
+    fog:$('#pvFog').checked, fogD:+$('#pvFogD').value/100,
+    remap:+$('#pvRemap').value/100,
+    grade:{exp:+$('#pvExp').value/100, con:+$('#pvCon').value/100, sat:+$('#pvSat').value/100, temp:+$('#pvTemp').value/100},
+    tone:$('#pvTone').checked,
+    lut:S.lut,
+    cam:{yaw:CAM.yaw, pitch:CAM.pitch, dist:CAM.dist, fit:PV_GRID}
+  };
+}
+function refreshPreviewSelectors(){
+  const sel=$('#pvAsset'); if(!sel) return;
+  sel.innerHTML='';
+  const list=S.assets.filter(a=>a.decision!=='at');
+  if(!list.find(a=>a.id===PV_ASSET_ID)) PV_ASSET_ID=list.length?list[0].id:null;
+  list.forEach(a=>{
+    const o=el('option',{value:a.id,html:a.name});
+    if(a.id===PV_ASSET_ID)o.selected=true;
+    sel.appendChild(o);
+  });
+}
+function refreshPreview(){
+  const cv=$('#pvCanvas'); if(!cv) return;
+  const t0=performance.now();
+  let px=0;
+  if(PV_GRID){
+    px=renderGridAll(cv, S.assets, previewOpts());
+  } else {
+    const a=S.assets.find(x=>x.id===PV_ASSET_ID);
+    px=renderPreview(cv, a||null, previewOpts());
+  }
+  const ms=Math.round(performance.now()-t0);
+  log('Preview rendered: '+px+' px, '+ms+' ms','info');
+}
+function bindPreview(){
+  [['pvRemap','pvRemapV','%100',0],['pvFogD','pvFogDV',null,0],['pvAz','pvAzV','°',0],
+   ['pvEl','pvElV','°',0],['pvSunI','pvSunIV',null,100],['pvExp','pvExpV',null,100],
+   ['pvCon','pvConV',null,100],['pvSat','pvSatV',null,100],['pvTemp','pvTempV',null,100]
+  ].forEach(([a,b,suf,div])=>{
+    const e=$('#'+a), v=$('#'+b); if(!e||!v) return;
+    const upd=()=>{ v.textContent=(div? fmtN(+e.value/div,2) : e.value)+(suf||''); };
+    e.addEventListener('input',()=>{ upd(); refreshPreview(); });
+    upd();
+  });
+  $('#pvMode').addEventListener('change',refreshPreview);
+  $('#pvTone').addEventListener('change',refreshPreview);
+  $('#pvFog').addEventListener('change',refreshPreview);
+  $('#pvAmb').addEventListener('input',refreshPreview);
+  $('#pvBg').addEventListener('input',refreshPreview);
+  $('#pvAsset').addEventListener('change',()=>{ PV_ASSET_ID=+$('#pvAsset').value; PV_GRID=false; refreshPreview(); });
+  $('#pvGrid').addEventListener('click',()=>{ PV_GRID=!PV_GRID; refreshPreview(); });
+  $('#pvReset').addEventListener('click',()=>{ CAM.yaw=0.75; CAM.pitch=0.42; CAM.dist=2.2; refreshPreview(); });
+  $('#btnLut').addEventListener('click',()=>$('#fileLut').click());
+  $('#fileLut').addEventListener('change',async e=>{
+    const f=e.target.files[0]; if(!f) return;
+    try{
+      S.lut=parseCubeLUT(await f.text());
+      $('#lutName').textContent=f.name+' ('+S.lut.size+'³)';
+      log('LUT loaded: '+f.name+' ('+S.lut.size+'³)','ok');
+      toast('LUT applied: '+f.name,'ok');
+    }catch(err){ toast('LUT could not be read: '+err.message,'err'); }
+    refreshPreview(); e.target.value='';
+  });
+  $('#btnLutClr').addEventListener('click',()=>{ S.lut=null; $('#lutName').textContent='none'; refreshPreview(); });
+  initPreviewControls($('#pvCanvas'), refreshPreview);
+}
+
+/* ================= 6 QA ================= */
+function qaRunUI(){
+  const r=runQaAudit();
+  $('#qaSummary').innerHTML='<span class="tag ok">'+r.pass+' passed</span> <span class="tag '+(r.fail?'err':'info')+'">'+r.fail+' failed</span>';
+  renderQaTable();
+  log('Quality gate: '+r.pass+' passed, '+r.fail+' failed', r.fail?'warn':'ok');
+  return r;
+}
+
+/* ================= HELP MODAL ================= */
+function buildHelp(){
+  $('#helpBody').innerHTML=[
+    '<p><b>What is this?</b> The browser version of the guide\'s "fully local, no AI" pipeline: it takes OBJ/GLB assets from different sources',
+    'through six stages and merges them into a single visual language. No file is uploaded; everything runs on this page, on the CPU.</p>',
+    '<p><b>Quick start:</b> 1) "1 · Inventory" → <i>Load demo project</i> (deliberately broken stock).',
+    '2) "7 · Automation" → <i>Run Pipeline</i>. 3) "5 · Engine Preview" → see the result in clay/checker mode and with the LUT.',
+    '4) Download the quality gate report and the normalized OBJs.</p>',
+    '<p><b>Your own files:</b> drag in OBJ / GLB / GLTF (embedded textures). FBX is not supported — export OBJ/GLB from Blender (Guide 5.5).</p>',
+    '<pre>Processing order (Guide 7):   upscale → derive PBR → palette remap\nNormalization order (5):      apply → pivot → cleanup → normals → decimate\nCheap to expensive (9.3):     LUT+fog → master shader+remap → palette pass → manual work</pre>',
+    '<p><b>Limits:</b> Section 8 (local AI texturing) is intentionally absent. Baking, atlas packing, retopo and per-island texel',
+    'tuning stay on the Blender/xatlas/Texel Density Checker side. Decimate is based on vertex clustering (background/mid-ground quality).</p>'
+  ].join('');
+  $('#btnHelp').addEventListener('click',()=>$('#modal').classList.remove('hidden'));
+  $('#btnModalClose').addEventListener('click',()=>$('#modal').classList.add('hidden'));
+  $('#modal').addEventListener('click',e=>{ if(e.target.id==='modal') $('#modal').classList.add('hidden'); });
+}
+
+/* ================= DROPZONE ================= */
+function bindDrops(){
+  const dm=$('#dropMesh'), fm=$('#fileMesh');
+  dm.addEventListener('click',()=>fm.click());
+  dm.addEventListener('dragover',e=>{ e.preventDefault(); dm.classList.add('over'); });
+  dm.addEventListener('dragleave',()=>dm.classList.remove('over'));
+  dm.addEventListener('drop',e=>{
+    e.preventDefault(); dm.classList.remove('over');
+    importMeshFiles(Array.from(e.dataTransfer.files));
+  });
+  fm.addEventListener('change',e=>{ importMeshFiles(Array.from(e.target.files)); e.target.value=''; });
+
+  const di=$('#dropImg'), fi=$('#fileImg');
+  di.addEventListener('click',()=>fi.click());
+  di.addEventListener('dragover',e=>{ e.preventDefault(); di.classList.add('over'); });
+  di.addEventListener('dragleave',()=>di.classList.remove('over'));
+  di.addEventListener('drop',e=>{
+    e.preventDefault(); di.classList.remove('over');
+    addImageFiles(Array.from(e.dataTransfer.files));
+  });
+  fi.addEventListener('change',e=>{ addImageFiles(Array.from(e.target.files)); e.target.value=''; });
+}
+
+/* ================= INIT ================= */
+function init(){
+  loadCfg();
+  buildNav();
+  buildCfgUI();
+  buildHelp();
+  bindDrops();
+  bindPreview();
+
+  $('#logToggle').addEventListener('click',()=>{
+    const w=$('#logwrap'); w.classList.toggle('closed');
+    $('#logToggle').textContent=w.classList.contains('closed')?'Log ▲':'Log ▼';
+  });
+  $('#logwrap').classList.add('closed'); $('#logToggle').textContent='Log ▲';
+
+  $('#btnGuideDl').addEventListener('click',exportGuideMd);
+  $('#btnCfgDl').addEventListener('click',exportCfgJson);
+  $('#btnCfgUl').addEventListener('click',()=>$('#fileCfg').click());
+  $('#fileCfg').addEventListener('change',e=>{ if(e.target.files[0]) importCfgJson(e.target.files[0]); e.target.value=''; });
+
+  $('#btnInvCsv').addEventListener('click',()=>downloadText('inventory.csv',buildInventoryCsv(),'text/csv'));
+  $('#btnDemo').addEventListener('click',()=>{ buildDemo(); refreshAllStages(); navTo(1); });
+
+  $('#btnNormAll').addEventListener('click',normalizeAll);
+
+  $('#btnUnwrapAll').addEventListener('click',unwrapAll);
+  $('#btnTexelAll').addEventListener('click',texelAll);
+
+  $('#btnQaRun').addEventListener('click',qaRunUI);
+  $('#btnQaCsv').addEventListener('click',()=>downloadText('qa_report.csv',buildQaCsv(),'text/csv'));
+  $('#btnQaMd').addEventListener('click',()=>downloadText('qa_report.md',buildQaMd(),'text/markdown'));
+
+  $('#btnRun').addEventListener('click',runPipeline);
+  $('#btnRunCsv').addEventListener('click',()=>downloadText('inventory.csv',buildInventoryCsv(),'text/csv'));
+  $('#btnRunMd').addEventListener('click',()=>downloadText('qa_report.md',buildQaMd(),'text/markdown'));
+  $('#btnRunObjs').addEventListener('click',exportAllObjs);
+  $('#btnRunTexs').addEventListener('click',exportAllPalTex);
+
+  navTo(0);
+  log('Asset Harmonizer ready — fully local, no AI. Start with the demo: Section 1 → "Load demo project".','info');
+}
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
