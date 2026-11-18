@@ -6,7 +6,9 @@ game-ready spritesheets and GameMaker horizontal '_stripN.png' animations,
 while tracking exact author licensing and attribution from CREDITS.csv.
 """
 
+import os
 import sys
+import json
 import argparse
 import csv
 from pathlib import Path
@@ -15,7 +17,10 @@ from PIL import Image
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 LPC_ROOT = WORKSPACE_ROOT / "libraries" / "com.github.liberatedpixelcup.universal-lpc-spritesheet-character-generator"
 SPRITESHEETS_DIR = LPC_ROOT / "spritesheets"
+SHEET_DEFS_DIR = LPC_ROOT / "sheet_definitions"
 CREDITS_CSV = LPC_ROOT / "CREDITS.csv"
+ELIZAWY_LPC_ROOT = WORKSPACE_ROOT / "libraries" / "com.github.elizawy.lpc"
+CATALOG_FILE = WORKSPACE_ROOT / "catalogs" / "lpc_catalog.json"
 
 # Standard LPC Animation Grid Definitions (64x64 pixel cells)
 # (row_offset, frame_count, has_4_directions: Up, Left, Down, Right)
@@ -296,15 +301,227 @@ def generate_credits_file(used_files: list, output_path: Path):
     print(f"Saved legal attribution ledger: {out_txt}")
     return out_txt
 
+
+def build_lpc_catalog(verbose: bool = True) -> dict:
+    """
+    Indexes Universal LPC sheet_definitions, spritesheets leaf part folders,
+    CREDITS.csv license summary, and com.github.elizawy.lpc category counts
+    into catalogs/lpc_catalog.json.
+    """
+    CATALOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    definitions = []
+
+    if SHEET_DEFS_DIR.exists():
+        for jpath in sorted(SHEET_DEFS_DIR.rglob("*.json")):
+            if jpath.name.startswith("meta_"):
+                continue
+            try:
+                raw = json.loads(jpath.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            if not isinstance(raw, dict) or not raw.get("name"):
+                continue
+
+            rel_def = jpath.relative_to(SHEET_DEFS_DIR).as_posix()
+            cat = rel_def.split("/")[0] if "/" in rel_def else "general"
+
+            layer_paths = []
+            for key, val in raw.items():
+                if key.startswith("layer_") and isinstance(val, dict):
+                    for body_key, pval in val.items():
+                        if body_key in ("zPos", "custom_animation"):
+                            continue
+                        if isinstance(pval, str) and pval.strip():
+                            clean_p = pval.strip().strip("/")
+                            if clean_p not in layer_paths:
+                                layer_paths.append(clean_p)
+
+            licenses = []
+            authors = []
+            for c in raw.get("credits", []) or []:
+                if not isinstance(c, dict):
+                    continue
+                for lic in c.get("licenses", []) or []:
+                    if lic and lic not in licenses:
+                        licenses.append(lic)
+                for auth in c.get("authors", []) or []:
+                    if auth and auth not in authors:
+                        authors.append(auth)
+
+            definitions.append({
+                "id": jpath.stem,
+                "category": cat,
+                "name": raw.get("name", jpath.stem),
+                "type_name": raw.get("type_name", ""),
+                "priority": raw.get("priority"),
+                "animations": raw.get("animations", []),
+                "variants": raw.get("variants", []),
+                "layer_paths": layer_paths,
+                "licenses": licenses,
+                "authors_count": len(authors),
+                "definition_file": f"libraries/com.github.liberatedpixelcup.universal-lpc-spritesheet-character-generator/sheet_definitions/{rel_def}",
+            })
+
+    parts = []
+    parts_by_category = {}
+    total_spritesheet_pngs = 0
+
+    if SPRITESHEETS_DIR.exists():
+        for root, dirs, files in os.walk(SPRITESHEETS_DIR):
+            dirs[:] = sorted(d for d in dirs if not d.startswith("."))
+            pngs = sorted(f[:-4] for f in files if f.lower().endswith(".png"))
+            if not pngs:
+                continue
+            total_spritesheet_pngs += len(pngs)
+            rel_dir = Path(root).relative_to(SPRITESHEETS_DIR).as_posix()
+            cat = rel_dir.split("/")[0] if "/" in rel_dir else rel_dir
+            parts_by_category[cat] = parts_by_category.get(cat, 0) + 1
+            parts.append({
+                "part_path": rel_dir,
+                "category": cat,
+                "animations": pngs,
+                "png_count": len(pngs),
+            })
+
+    credits_total_rows = 0
+    credits_license_counts = {}
+    if CREDITS_CSV.exists():
+        try:
+            with open(CREDITS_CSV, mode="r", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    credits_total_rows += 1
+                    for lic in (row.get("licenses") or "").split(","):
+                        lic_s = lic.strip()
+                        if lic_s:
+                            credits_license_counts[lic_s] = credits_license_counts.get(lic_s, 0) + 1
+        except Exception:
+            pass
+
+    elizawy_categories = {}
+    elizawy_total_pngs = 0
+    elizawy_leaf_folders = 0
+    if ELIZAWY_LPC_ROOT.exists():
+        for root, dirs, files in os.walk(ELIZAWY_LPC_ROOT):
+            dirs[:] = sorted(d for d in dirs if d != ".git" and not d.startswith("."))
+            pngs = [f for f in files if f.lower().endswith(".png")]
+            if not pngs:
+                continue
+            elizawy_total_pngs += len(pngs)
+            elizawy_leaf_folders += 1
+            rel = Path(root).relative_to(ELIZAWY_LPC_ROOT).as_posix()
+            top = rel.split("/")[0] if "/" in rel else "root"
+            entry = elizawy_categories.setdefault(top, {"leaf_folders": 0, "png_count": 0})
+            entry["leaf_folders"] += 1
+            entry["png_count"] += len(pngs)
+
+    catalog = {
+        "repository": "com.github.liberatedpixelcup.universal-lpc-spritesheet-character-generator",
+        "license_summary": "CC-BY-SA 3.0/4.0, CC-BY 3.0/4.0, OGA-BY 3.0, CC0 1.0, GPL 3.0 (per-asset in CREDITS.csv)",
+        "total_definitions": len(definitions),
+        "total_part_folders": len(parts),
+        "total_spritesheet_pngs": total_spritesheet_pngs,
+        "parts_by_category": dict(sorted(parts_by_category.items(), key=lambda x: -x[1])),
+        "credits_summary": {
+            "total_rows": credits_total_rows,
+            "license_mentions": dict(sorted(credits_license_counts.items(), key=lambda x: -x[1])),
+        },
+        "related_repositories": {
+            "com.github.elizawy.lpc": {
+                "total_pngs": elizawy_total_pngs,
+                "total_leaf_folders": elizawy_leaf_folders,
+                "categories": dict(sorted(elizawy_categories.items(), key=lambda x: -x[1]["png_count"])),
+            }
+        },
+        "presets": list(PRESETS.keys()),
+        "animations": list(ANIMATIONS.keys()),
+        "definitions": definitions,
+        "parts": parts,
+    }
+
+    with open(CATALOG_FILE, "w", encoding="utf-8") as f:
+        json.dump(catalog, f, ensure_ascii=False, separators=(",", ":"))
+
+    if verbose:
+        print(
+            f"Built LPC catalog: {len(definitions)} sheet definitions, "
+            f"{len(parts)} part folders ({total_spritesheet_pngs} PNGs), "
+            f"elizawy.lpc ({elizawy_total_pngs} PNGs in {elizawy_leaf_folders} folders) -> {CATALOG_FILE}"
+        )
+    return catalog
+
+
+def search_lpc_catalog(query: str, category: str = None, limit: int = 20) -> list:
+    if CATALOG_FILE.exists():
+        try:
+            catalog = json.loads(CATALOG_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            catalog = build_lpc_catalog(verbose=False)
+    else:
+        catalog = build_lpc_catalog(verbose=False)
+
+    tokens = query.lower().split() if query else []
+    cat_filter = category.lower() if category else None
+    results = []
+
+    for d in catalog.get("definitions", []):
+        if cat_filter and d.get("category", "").lower() != cat_filter:
+            continue
+        hay = " ".join([
+            d.get("id", ""),
+            d.get("name", ""),
+            d.get("category", ""),
+            d.get("type_name", ""),
+            " ".join(d.get("layer_paths", [])),
+        ]).lower()
+        if all(t in hay for t in tokens):
+            results.append({
+                "kind": "definition",
+                "id": d.get("id"),
+                "name": d.get("name"),
+                "category": d.get("category"),
+                "layer_paths": d.get("layer_paths", []),
+                "animations": d.get("animations", []),
+                "variants": d.get("variants", []),
+            })
+            if len(results) >= limit:
+                return results
+
+    for p in catalog.get("parts", []):
+        if cat_filter and p.get("category", "").lower() != cat_filter:
+            continue
+        hay = " ".join([
+            p.get("part_path", ""),
+            p.get("category", ""),
+            " ".join(p.get("animations", [])),
+        ]).lower()
+        if all(t in hay for t in tokens):
+            results.append({
+                "kind": "part",
+                "part_path": p.get("part_path"),
+                "category": p.get("category"),
+                "animations": p.get("animations", []),
+                "png_count": p.get("png_count", 0),
+            })
+            if len(results) >= limit:
+                return results
+
+    return results
+
+
 def main():
     parser = argparse.ArgumentParser(description="Universal LPC Character Builder & GameMaker Exporter")
     subparsers = parser.add_subparsers(dest="command", help="Sub-commands")
 
+    # Index command
+    subparsers.add_parser("index", help="Build catalogs/lpc_catalog.json from sheet_definitions and spritesheets")
+
     # Search command
-    search_p = subparsers.add_parser("search", help="Search available LPC character parts")
-    search_p.add_argument("query", help="Keyword to search (e.g. 'plate', 'wizard', 'hair')")
+    search_p = subparsers.add_parser("search", help="Search available LPC character parts and sheet definitions")
+    search_p.add_argument("query", nargs="?", default="", help="Keyword to search (e.g. 'plate', 'wizard', 'hair')")
     search_p.add_argument("--category", "-c", help="Category filter (body, hair, torso, legs, feet, weapon, hat)")
     search_p.add_argument("--limit", "-l", type=int, default=20, help="Max results")
+    search_p.add_argument("--json", action="store_true", help="Output JSON results")
 
     # Build command
     build_p = subparsers.add_parser("build", help="Assemble character layers into spritesheets")
@@ -326,19 +543,22 @@ def main():
 
     args = parser.parse_args()
 
+    if args.command == "index":
+        build_lpc_catalog(verbose=True)
+        return
+
     if args.command == "search":
-        query = args.query.lower()
-        search_dir = SPRITESHEETS_DIR / args.category if args.category else SPRITESHEETS_DIR
-        results = []
-        for p in search_dir.rglob("*.png"):
-            rel = p.relative_to(SPRITESHEETS_DIR).as_posix()
-            if query in rel.lower():
-                results.append(rel)
-                if len(results) >= args.limit:
-                    break
-        print(f"Found {len(results)} matches for '{args.query}':")
-        for r in results:
-            print(f"- {r}")
+        results = search_lpc_catalog(args.query, category=args.category, limit=args.limit)
+        if args.json:
+            print(json.dumps({"query": args.query, "count": len(results), "results": results}, indent=2, ensure_ascii=False))
+        else:
+            print(f"Found {len(results)} matches for '{args.query}':")
+            for r in results:
+                if r.get("kind") == "definition":
+                    lp = r["layer_paths"][0] if r.get("layer_paths") else r.get("id")
+                    print(f"- [def:{r.get('category')}] {r.get('name')} ({lp})")
+                else:
+                    print(f"- [part:{r.get('category')}] {r.get('part_path')} ({r.get('png_count')} anims)")
         return
 
     if args.command == "build":

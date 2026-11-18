@@ -17,6 +17,7 @@ from typing import Dict, Any, List, Optional
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 ABO_DIR = WORKSPACE_ROOT / "assets" / "com.amazon.berkeley.abo"
 CATALOG_FILE = ABO_DIR / "catalog.jsonl"
+CATALOG_INDEX_FILE = WORKSPACE_ROOT / "catalogs" / "abo_catalog.json"
 MODELS_DIR = ABO_DIR / "models"
 COLLISION_DIR = ABO_DIR / "collision"
 THUMBS_DIR = ABO_DIR / "thumbs"
@@ -61,7 +62,7 @@ def ensure_catalog():
         urllib.request.urlretrieve(url, CATALOG_FILE)
         print(f"Master catalog saved to {CATALOG_FILE}")
 
-def load_catalog() -> List[Dict[str, Any]]:
+def load_raw_jsonl_catalog() -> List[Dict[str, Any]]:
     ensure_catalog()
     items = []
     with open(CATALOG_FILE, "r", encoding="utf-8") as f:
@@ -70,7 +71,66 @@ def load_catalog() -> List[Dict[str, Any]]:
                 items.append(json.loads(line))
     return items
 
-def search_catalog(query: str = "", category: Optional[str] = None, limit: int = 20):
+
+def build_abo_catalog(verbose: bool = True) -> Dict[str, Any]:
+    raw_items = load_raw_jsonl_catalog()
+    categories: Dict[str, int] = {}
+    brands = set()
+    compact_items: List[Dict[str, Any]] = []
+
+    for item in raw_items:
+        ptype = (item.get("product_type") or "other").strip()
+        categories[ptype] = categories.get(ptype, 0) + 1
+        brand = (item.get("brand") or "").strip()
+        if brand:
+            brands.add(brand)
+
+        compact_items.append({
+            "id": item.get("id", ""),
+            "name": item.get("name", ""),
+            "product_type": ptype,
+            "brand": brand,
+            "size_cm": item.get("size_cm", ""),
+            "triangles": item.get("triangles"),
+            "glb_megabytes": item.get("glb_megabytes"),
+        })
+
+    catalog_data = {
+        "dataset": "com.amazon.berkeley.abo",
+        "license": "CC-BY-4.0",
+        "source": "codepawl/abo-glb (Amazon Berkeley Objects)",
+        "total_models": len(compact_items),
+        "total_categories": len(categories),
+        "brands_count": len(brands),
+        "categories": dict(sorted(categories.items(), key=lambda x: -x[1])),
+        "items": compact_items,
+    }
+
+    CATALOG_INDEX_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(CATALOG_INDEX_FILE, "w", encoding="utf-8") as f:
+        json.dump(catalog_data, f, ensure_ascii=False, separators=(",", ":"))
+
+    if verbose:
+        print(
+            f"Built ABO catalog: {len(compact_items)} models, "
+            f"{len(categories)} categories, {len(brands)} brands -> {CATALOG_INDEX_FILE}"
+        )
+    return catalog_data
+
+
+def load_catalog() -> List[Dict[str, Any]]:
+    if CATALOG_INDEX_FILE.exists():
+        try:
+            with open(CATALOG_INDEX_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict) and isinstance(data.get("items"), list):
+                return data["items"]
+        except Exception:
+            pass
+    return load_raw_jsonl_catalog()
+
+
+def search_catalog(query: str = "", category: Optional[str] = None, limit: int = 20, as_json: bool = False):
     catalog = load_catalog()
     tokens = query.lower().split() if query else []
     results = []
@@ -84,6 +144,17 @@ def search_catalog(query: str = "", category: Optional[str] = None, limit: int =
             results.append(item)
             if len(results) >= limit:
                 break
+
+    if as_json:
+        enriched = []
+        for r in results:
+            enriched.append({
+                **r,
+                "downloaded": (MODELS_DIR / f"{r['id']}.glb").exists(),
+                "license": "CC-BY-4.0",
+            })
+        print(json.dumps({"query": query, "category": category, "count": len(enriched), "results": enriched}, indent=2, ensure_ascii=False))
+        return
 
     print(f"Found {len(results)} ABO products matching '{query}':")
     for r in results:
@@ -189,26 +260,35 @@ def download_batch(category: str, limit: int = 5):
             success += 1
     print(f"Downloaded {success}/{limit} items in '{category}'.")
 
-def list_categories():
+def list_categories(as_json: bool = False):
     catalog = load_catalog()
     counts = {}
     for item in catalog:
         cat = item.get("product_type", "other")
         counts[cat] = counts.get(cat, 0) + 1
 
-    print(f"ABO Catalog Breakdown ({len(catalog)} total models):")
-    for cat, c in sorted(counts.items(), key=lambda x: -x[1])[:25]:
+    sorted_counts = dict(sorted(counts.items(), key=lambda x: -x[1]))
+    if as_json:
+        print(json.dumps({"total_models": len(catalog), "total_categories": len(sorted_counts), "categories": sorted_counts}, indent=2, ensure_ascii=False))
+        return
+
+    print(f"ABO Catalog Breakdown ({len(catalog)} total models, {len(sorted_counts)} categories):")
+    for cat, c in list(sorted_counts.items())[:25]:
         print(f"  {cat:28s}: {c} models")
 
 def main():
     parser = argparse.ArgumentParser(description="Amazon Berkeley Objects (ABO) 3D Model Manager")
     subparsers = parser.add_subparsers(dest="command")
 
+    # index
+    subparsers.add_parser("index", help="Build catalogs/abo_catalog.json from catalog.jsonl")
+
     # search
     s_p = subparsers.add_parser("search", help="Search 7,953 products by keyword")
     s_p.add_argument("query", nargs="?", default="", help="Keyword (chair, table, desk, lamp)")
     s_p.add_argument("--category", "-c", help="Filter by product_type")
     s_p.add_argument("--limit", "-n", type=int, default=20, help="Max results")
+    s_p.add_argument("--json", action="store_true", help="Output JSON results")
 
     # download
     dl_p = subparsers.add_parser("download", help="Download a specific 3D model by ID")
@@ -221,18 +301,21 @@ def main():
     b_p.add_argument("--limit", "-n", type=int, default=5, help="Number of items to download")
 
     # categories
-    subparsers.add_parser("categories", help="List all 3D product categories")
+    cat_p = subparsers.add_parser("categories", help="List all 3D product categories")
+    cat_p.add_argument("--json", action="store_true", help="Output JSON categories")
 
     args = parser.parse_args()
 
-    if args.command == "search":
-        search_catalog(args.query, category=args.category, limit=args.limit)
+    if args.command == "index":
+        build_abo_catalog(verbose=True)
+    elif args.command == "search":
+        search_catalog(args.query, category=args.category, limit=args.limit, as_json=args.json)
     elif args.command == "download":
         download_model(args.id, with_collision=not args.no_collision)
     elif args.command == "download-batch":
         download_batch(args.category, limit=args.limit)
     elif args.command == "categories":
-        list_categories()
+        list_categories(as_json=args.json)
     else:
         parser.print_help()
 
