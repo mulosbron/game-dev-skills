@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="tr">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -60,7 +60,7 @@
   .face .t{font-size:11px;color:var(--muted);margin-bottom:4px}
   .face canvas{margin:0 auto;max-width:100%;max-height:54px;width:auto;height:auto}
   .face .dim{font-size:11px;color:var(--ok)}
-  .face.opt .t::after{content:" (isteğe bağlı)";color:#6b7382}
+  .face.opt .t::after{content:" (optional)";color:#6b7382}
   .face input{display:none}
   .notes h3{color:var(--accent);font-size:14px;margin:18px 0 6px}
   .notes p,.notes li{color:var(--text);max-width:900px}
@@ -72,12 +72,12 @@
 <body>
 <header>
   <h1>Flat<span>2</span>Iso Studio</h1>
-  <div class="sub">Düz (ortografik) pixel art → 2:1 isometric (dimetric) dönüştürücü · sütun kaydırma, kutu oluşturucu, 4 yön</div>
+  <div class="sub">Flat (orthographic) pixel art → 2:1 isometric (dimetric) converter · column shift, box builder, 4 directions</div>
 </header>
 <nav>
-  <button class="active" data-tab="shift">1 · Sütun Kaydırma (Lotovik / Flat2Iso)</button>
-  <button data-tab="box">2 · Kutu Oluşturucu (Ön + Yan + Üst)</button>
-  <button data-tab="notes">Teknik Notlar</button>
+  <button class="active" data-tab="shift">1 · Column Shift (Lotovik / Flat2Iso)</button>
+  <button data-tab="box">2 · Box Builder (Front + Side + Top)</button>
+  <button data-tab="notes">Technical Notes</button>
 </nav>
 <main>
 
@@ -86,63 +86,63 @@
 <div class="layout">
   <div>
     <div class="card">
-      <h2>Kaynak</h2>
+      <h2>Source</h2>
       <div class="drop" id="dropShift">
         <input type="file" accept="image/*" id="fileShift">
-        <strong>Görsel sürükle</strong> veya tıkla<br><span class="small">PNG önerilir · <kbd>Ctrl</kbd>+<kbd>V</kbd> ile yapıştırabilirsin</span>
+        <strong>Drag image</strong> or click<br><span class="small">PNG recommended · paste with <kbd>Ctrl</kbd>+<kbd>V</kbd></span>
       </div>
       <div class="row">
-        <div><label>Piksel ölçeği (büyütülmüş kaynak için)</label><input type="number" id="shiftScale" min="1" max="64" value="1"></div>
-        <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button class="btn sec" id="shiftAuto" title="Kaynağın kaç kat büyütülmüş olduğunu tespit et">Otomatik</button></div>
+        <div><label>Pixel scale (for upscaled source)</label><input type="number" id="shiftScale" min="1" max="64" value="1"></div>
+        <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button class="btn sec" id="shiftAuto" title="Detect how many times the source is upscaled">Auto</button></div>
       </div>
-      <div class="btns"><button class="btn sec" id="shiftDemo">Demo sprite yükle</button></div>
-      <div class="small" id="shiftInfo" style="margin-top:8px">Görsel yok.</div>
+      <div class="btns"><button class="btn sec" id="shiftDemo">Load demo sprite</button></div>
+      <div class="small" id="shiftInfo" style="margin-top:8px">No image.</div>
     </div>
 
     <div class="card">
-      <h2>Dönüşüm</h2>
-      <label>Steps (aynı yükseklikte kalan sütun sayısı) <span class="pill">2 = klasik 2:1</span></label>
+      <h2>Transform</h2>
+      <label>Steps (columns kept at the same height) <span class="pill">2 = classic 2:1</span></label>
       <select id="steps">
         <option value="1">1 — 1:1 (45°)</option>
-        <option value="2" selected>2 — 2:1 (26.57°, standart)</option>
+        <option value="2" selected>2 — 2:1 (26.57°, standard)</option>
         <option value="3">3 — 3:1</option>
         <option value="4">4 — 4:1</option>
       </select>
-      <label>Yön (Direction)</label>
+      <label>Direction</label>
       <select id="direction">
-        <option value="right">Right — sağ taraf yükselir</option>
-        <option value="left">Left — sol taraf yükselir</option>
-        <option value="split">Split — merkezden iki yöne</option>
+        <option value="right">Right — right side rises</option>
+        <option value="left">Left — left side rises</option>
+        <option value="split">Split — both ways from center</option>
       </select>
       <div id="splitBox" style="display:none">
-        <label>Split merkezi (sütun indeksi, 0 tabanlı)</label>
+        <label>Split center (column index, 0-based)</label>
         <input type="number" id="splitCenter" min="0" value="0">
         <input type="range" id="splitRange" min="0" value="0">
-        <div class="small">Merkezin solu sola doğru, sağı sağa doğru yükselir (köşe en alçakta). Tersle: köşe en yüksekte.</div>
+        <div class="small">Left of center rises left, right of center rises right (corner lowest). Invert: corner highest.</div>
       </div>
-      <div class="check"><input type="checkbox" id="invert"> <span>Tersle (yükselmek yerine alçal)</span></div>
-      <div class="check"><input type="checkbox" id="shiftOutline"> <span>Siluet çevresine 1 px dış çizgi ekle</span></div>
-      <div class="row" id="shiftOutlineRow" style="display:none"><div><label>Dış çizgi rengi</label><input type="color" id="shiftOutlineColor" value="#1a1326"></div></div>
+      <div class="check"><input type="checkbox" id="invert"> <span>Invert (descend instead of rise)</span></div>
+      <div class="check"><input type="checkbox" id="shiftOutline"> <span>Add 1 px outline around silhouette</span></div>
+      <div class="row" id="shiftOutlineRow" style="display:none"><div><label>Outline color</label><input type="color" id="shiftOutlineColor" value="#1a1326"></div></div>
       <div class="small" id="shiftParity" style="margin-top:8px"></div>
     </div>
 
     <div class="card">
-      <h2>Dışa Aktar</h2>
+      <h2>Export</h2>
       <div class="row">
-        <div><label>Önizleme zoom</label><input type="range" id="shiftZoom" min="1" max="16" value="6"></div>
-        <div><label>Export ölçeği</label><input type="number" id="shiftExport" min="1" max="32" value="1"></div>
+        <div><label>Preview zoom</label><input type="range" id="shiftZoom" min="1" max="16" value="6"></div>
+        <div><label>Export scale</label><input type="number" id="shiftExport" min="1" max="32" value="1"></div>
       </div>
       <div class="btns">
-        <button class="btn" id="shiftDownload" disabled>PNG indir</button>
-        <button class="btn sec" id="shiftCopy" disabled>Panoya kopyala</button>
-        <button class="btn sec" id="shiftToBox" disabled>Sonucu Kutu'ya gönder →</button>
+        <button class="btn" id="shiftDownload" disabled>Download PNG</button>
+        <button class="btn sec" id="shiftCopy" disabled>Copy to clipboard</button>
+        <button class="btn sec" id="shiftToBox" disabled>Send result to Box →</button>
       </div>
     </div>
   </div>
 
   <div>
     <div class="previews">
-      <div class="view"><h3>Orijinal (flat) <span id="shiftDimA"></span></h3><div class="stage"><canvas id="cvShiftA"></canvas></div></div>
+      <div class="view"><h3>Original (flat) <span id="shiftDimA"></span></h3><div class="stage"><canvas id="cvShiftA"></canvas></div></div>
       <div class="view"><h3>Isometric <span id="shiftDimB"></span></h3><div class="stage"><canvas id="cvShiftB"></canvas></div></div>
     </div>
   </div>
@@ -154,76 +154,76 @@
 <div class="layout">
   <div>
     <div class="card">
-      <h2>Yüzler (ortografik görünümler)</h2>
+      <h2>Faces (orthographic views)</h2>
       <div class="faces">
-        <div class="face" data-face="front"><input type="file" accept="image/*"><div class="t">Ön (Front)</div><canvas></canvas><div class="dim">—</div></div>
-        <div class="face" data-face="side"><input type="file" accept="image/*"><div class="t">Sağ Yan (Side)</div><canvas></canvas><div class="dim">—</div></div>
-        <div class="face" data-face="top"><input type="file" accept="image/*"><div class="t">Üst (Top)</div><canvas></canvas><div class="dim">—</div></div>
-        <div class="face opt" data-face="back"><input type="file" accept="image/*"><div class="t">Arka</div><canvas></canvas><div class="dim">—</div></div>
-        <div class="face opt" data-face="left"><input type="file" accept="image/*"><div class="t">Sol Yan</div><canvas></canvas><div class="dim">—</div></div>
+        <div class="face" data-face="front"><input type="file" accept="image/*"><div class="t">Front</div><canvas></canvas><div class="dim">—</div></div>
+        <div class="face" data-face="side"><input type="file" accept="image/*"><div class="t">Right Side</div><canvas></canvas><div class="dim">—</div></div>
+        <div class="face" data-face="top"><input type="file" accept="image/*"><div class="t">Top</div><canvas></canvas><div class="dim">—</div></div>
+        <div class="face opt" data-face="back"><input type="file" accept="image/*"><div class="t">Back</div><canvas></canvas><div class="dim">—</div></div>
+        <div class="face opt" data-face="left"><input type="file" accept="image/*"><div class="t">Left Side</div><canvas></canvas><div class="dim">—</div></div>
         <div class="face" style="cursor:default;display:flex;flex-direction:column;justify-content:center;gap:6px">
-          <button class="btn sec" id="boxDemo">Demo kutu yükle</button>
-          <button class="btn sec" id="boxClear">Temizle</button>
+          <button class="btn sec" id="boxDemo">Load demo box</button>
+          <button class="btn sec" id="boxClear">Clear</button>
         </div>
       </div>
-      <div class="small" style="margin-top:8px">Kural: Ön genişliği = Üst genişliği (W), Yan genişliği = Üst yüksekliği (D), Ön yüksekliği = Yan yüksekliği (H). Üst görünümde <b>alt kenar = ön</b>, <b>sağ kenar = sağ yan</b>. Arka/Sol yoksa Ön/Sağ aynalanır.</div>
+      <div class="small" style="margin-top:8px">Rule: Front width = Top width (W), Side width = Top height (D), Front height = Side height (H). In Top view, <b>bottom edge = front</b>, <b>right edge = right side</b>. If Back/Left are omitted, Front/Right are mirrored.</div>
       <div class="row" style="margin-top:8px">
-        <div><label>Piksel ölçeği</label><input type="number" id="boxScale" min="1" max="64" value="1"></div>
-        <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button class="btn sec" id="boxAuto">Otomatik</button></div>
+        <div><label>Pixel scale</label><input type="number" id="boxScale" min="1" max="64" value="1"></div>
+        <div style="flex:0 0 auto;display:flex;align-items:flex-end"><button class="btn sec" id="boxAuto">Auto</button></div>
       </div>
       <div class="err" id="boxErr"></div>
     </div>
 
     <div class="card">
-      <h2>Işık ve Çizgi</h2>
-      <label>Işık ön ayarı</label>
+      <h2>Lighting &amp; Outlines</h2>
+      <label>Lighting preset</label>
       <select id="lightPreset">
-        <option value="std">Klasik: üst en açık, sol orta, sağ en koyu</option>
-        <option value="rev">Ters: üst en açık, sağ orta, sol en koyu</option>
-        <option value="none">Işık yok (renkler aynen)</option>
-        <option value="custom">Özel</option>
+        <option value="std">Classic: top brightest, left mid, right darkest</option>
+        <option value="rev">Reversed: top brightest, right mid, left darkest</option>
+        <option value="none">No lighting (keep exact colors)</option>
+        <option value="custom">Custom</option>
       </select>
       <div class="row">
-        <div><label>Üst ×</label><input type="number" id="lTop" step="0.05" min="0" max="2" value="1"></div>
-        <div><label>Sol ×</label><input type="number" id="lLeft" step="0.05" min="0" max="2" value="0.82"></div>
-        <div><label>Sağ ×</label><input type="number" id="lRight" step="0.05" min="0" max="2" value="0.62"></div>
+        <div><label>Top ×</label><input type="number" id="lTop" step="0.05" min="0" max="2" value="1"></div>
+        <div><label>Left ×</label><input type="number" id="lLeft" step="0.05" min="0" max="2" value="0.82"></div>
+        <div><label>Right ×</label><input type="number" id="lRight" step="0.05" min="0" max="2" value="0.62"></div>
       </div>
-      <div class="check"><input type="checkbox" id="keepOutline" checked> <span>Dış çizgi renklerini ışıktan koru (en koyu renk)</span></div>
-      <div class="check"><input type="checkbox" id="boxOutline"> <span>Siluet çevresine 1 px dış çizgi ekle</span></div>
-      <div class="check"><input type="checkbox" id="boxSeams"> <span>Yüz birleşim kenarlarını koyulaştır (depth-aware)</span></div>
+      <div class="check"><input type="checkbox" id="keepOutline" checked> <span>Protect outline colors from lighting (darkest color)</span></div>
+      <div class="check"><input type="checkbox" id="boxOutline"> <span>Add 1 px outline around silhouette</span></div>
+      <div class="check"><input type="checkbox" id="boxSeams"> <span>Darken face seam edges (depth-aware)</span></div>
       <div class="row">
-        <div><label>Dış çizgi rengi</label><input type="color" id="boxOutlineColor" value="#1a1326"></div>
-        <div><label>Kenar koyuluk ×</label><input type="number" id="seamDark" step="0.05" min="0" max="1" value="0.7"></div>
+        <div><label>Outline color</label><input type="color" id="boxOutlineColor" value="#1a1326"></div>
+        <div><label>Seam darkness ×</label><input type="number" id="seamDark" step="0.05" min="0" max="1" value="0.7"></div>
       </div>
     </div>
 
     <div class="card">
-      <h2>Yön ve Dışa Aktar</h2>
-      <label>Görünüm yönü (nesneyi döndür)</label>
+      <h2>Direction &amp; Export</h2>
+      <label>View direction (rotate object)</label>
       <select id="rotation">
-        <option value="0">0° — Ön sol yüzde, Sağ Yan sağ yüzde</option>
-        <option value="1">90° — Sol Yan sol yüzde, Ön sağ yüzde</option>
-        <option value="2">180° — Arka sol yüzde, Sol Yan sağ yüzde</option>
-        <option value="3">270° — Sağ Yan sol yüzde, Arka sağ yüzde</option>
+        <option value="0">0° — Front on left face, Right Side on right face</option>
+        <option value="1">90° — Left Side on left face, Front on right face</option>
+        <option value="2">180° — Back on left face, Left Side on right face</option>
+        <option value="3">270° — Right Side on left face, Back on right face</option>
       </select>
       <div class="row">
-        <div><label>Önizleme zoom</label><input type="range" id="boxZoom" min="1" max="16" value="6"></div>
-        <div><label>Export ölçeği</label><input type="number" id="boxExport" min="1" max="32" value="1"></div>
+        <div><label>Preview zoom</label><input type="range" id="boxZoom" min="1" max="16" value="6"></div>
+        <div><label>Export scale</label><input type="number" id="boxExport" min="1" max="32" value="1"></div>
       </div>
       <div class="btns">
-        <button class="btn" id="boxDownload" disabled>PNG indir</button>
-        <button class="btn sec" id="boxCopy" disabled>Panoya kopyala</button>
-        <button class="btn sec" id="boxSheet" disabled>4 yönlü sprite sheet indir</button>
+        <button class="btn" id="boxDownload" disabled>Download PNG</button>
+        <button class="btn sec" id="boxCopy" disabled>Copy to clipboard</button>
+        <button class="btn sec" id="boxSheet" disabled>Download 4-direction sprite sheet</button>
       </div>
     </div>
   </div>
 
   <div>
     <div class="previews">
-      <div class="view"><h3>Flat görünümler <span id="boxDimA"></span></h3><div class="stage"><canvas id="cvBoxA"></canvas></div></div>
+      <div class="view"><h3>Flat views <span id="boxDimA"></span></h3><div class="stage"><canvas id="cvBoxA"></canvas></div></div>
       <div class="view"><h3>Isometric <span id="boxDimB"></span></h3><div class="stage"><canvas id="cvBoxB"></canvas></div></div>
     </div>
-    <div class="view" style="margin-top:14px"><h3>4 yön (0° · 90° · 180° · 270°)</h3><div class="stage"><canvas id="cvBox4"></canvas></div></div>
+    <div class="view" style="margin-top:14px"><h3>4 directions (0° · 90° · 180° · 270°)</h3><div class="stage"><canvas id="cvBox4"></canvas></div></div>
   </div>
 </div>
 </section>
@@ -231,23 +231,23 @@
 <!-- ============ TAB 3: NOTES ============ -->
 <section class="tab notes" id="tab-notes">
   <div class="card">
-    <h3>1. Sütun kaydırma (Lotovik "2-pixel selection" hilesi)</h3>
-    <p>Düz çizim <code>steps</code> piksel genişliğinde dikey sütunlara bölünür; her sonraki sütun bir öncekine göre 1 piksel yukarı kayar. <code>steps = 2</code> ile tam olarak 2:1 (≈26.57°) eğim çıkar. Dikey hatlar hiç bozulmaz, yatay hatlar temiz 2:1 merdivene döner. Araç hiçbir piksel karıştırmaz: her kaynak pikseli tam olarak bir hedef piksele taşınır, anti-aliasing yoktur.</p>
-    <h3>2. Incursio Flat2Iso mantığı</h3>
+    <h3>1. Column shifting (Lotovik "2-pixel selection" trick)</h3>
+    <p>The flat drawing is split into vertical columns of <code>steps</code> pixels wide; each subsequent column shifts up by 1 pixel relative to the previous one. With <code>steps = 2</code> you get an exact 2:1 (≈26.57°) slope. Vertical lines remain undistorted, and horizontal lines turn into clean 2:1 staircases. The tool never blends pixels: each source pixel maps to exactly one target pixel, with zero anti-aliasing.</p>
+    <h3>2. Incursio Flat2Iso logic</h3>
     <ul>
-      <li><b>Steps</b>: aynı yükseklikte kalan sütun sayısı (1 = 45°, 2 = 2:1, 3 = 3:1…).</li>
-      <li><b>Direction</b>: Right (sağ yükselir), Left (sol yükselir), Split (merkezden iki yöne). Split'te merkez sütunu sen seçersin.</li>
-      <li><b>Parite kuralı</b>: çift genişlikli nesnede çift steps, tek genişlikte tek steps tercih edilir; araç uyarır.</li>
+      <li><b>Steps</b>: number of columns kept at the same height (1 = 45°, 2 = 2:1, 3 = 3:1…).</li>
+      <li><b>Direction</b>: Right (rises right), Left (rises left), Split (rises both ways from center). In Split mode, you choose the center column.</li>
+      <li><b>Parity rule</b>: even steps for even-width objects and odd steps for odd-width objects are preferred; the tool warns on mismatch.</li>
     </ul>
-    <h3>3. Kutu oluşturucu (PixZels yaklaşımının hafif hali)</h3>
-    <p>Ön + Sağ Yan + Üst görünümleri alınır. Ön yüz sol yüze (köşeden uzaklaştıkça 2 sütunda 1 px yükselir), Yan yüz sağ yüze aynı kuralla yerleştirilir. Üst yüz, her hedef piksel için ters eşleme ile (dest → kaynak) 2:1 elmas üzerine projekte edilir; böylece delik ya da üst üste binme oluşmaz ve elmasın kenarı yan yüzlerin üst merdiveniyle piksel piksel çakışır. Işık klasik üç yüz sistemine göre uygulanır; dış çizgi rengi (yüzdeki en koyu renk) istenirse ışıktan korunur.</p>
-    <p>4 yön: Arka ve Sol Yan verilmezse Ön ve Sağ aynalanarak üretilir; Üst görünüm 90° adımlarla döndürülür.</p>
-    <h3>Kurallar</h3>
+    <h3>3. Box builder (lightweight PixZels approach)</h3>
+    <p>Takes Front + Right Side + Top views. Front goes on the left face (rising 1 px every 2 columns away from the corner), and Side goes on the right face with the same rule. The Top face is projected onto a 2:1 diamond via inverse mapping (dest → source) for each target pixel, preventing holes or overlaps and aligning diamond edges pixel-for-pixel with the top staircases of the side faces. Lighting follows the classic 3-face system; the outline color (darkest color on the face) can optionally be protected from lighting.</p>
+    <p>4 directions: If Back and Left Side are omitted, they are generated by mirroring Front and Right; the Top view is rotated in 90° increments.</p>
+    <h3>Rules</h3>
     <ul>
-      <li>Yatay-eğimli tüm hatlar 2:1 (steps = 2 ile garanti edilir).</li>
-      <li>Dikey hatlar tamamen düz kalır.</li>
-      <li>Hiçbir yerde anti-aliasing / blur yok; tüm örnekleme en yakın komşu.</li>
-      <li>Büyütülmüş (ör. 8×) kaynaklar için "Piksel ölçeği → Otomatik" ile gerçek piksel boyutuna indirilir, sonra "Export ölçeği" ile tekrar büyütülür.</li>
+      <li>All horizontally sloped lines are 2:1 (guaranteed with steps = 2).</li>
+      <li>Vertical lines stay completely straight.</li>
+      <li>Zero anti-aliasing / blur anywhere; all sampling is nearest-neighbor.</li>
+      <li>For upscaled sources (e.g. 8×), use "Pixel scale → Auto" to reduce to true pixel size, then upscale again with "Export scale".</li>
     </ul>
   </div>
 </section>
@@ -437,7 +437,7 @@ function shiftLoadImage(img) { shiftSrcImg = img; $('shiftScale').value = 1; shi
 function shiftSetPix(p) { shiftSrcImg = null; shiftSrc = p; $('shiftScale').value = 1; shiftAfterSource(); }
 function shiftRefreshSource() { if (!shiftSrcImg) return; shiftSrc = pixFromImage(shiftSrcImg, parseInt($('shiftScale').value)||1); shiftAfterSource(); }
 function shiftAfterSource() {
-  $('shiftInfo').textContent = `Kaynak: ${shiftSrc.w} × ${shiftSrc.h} px`;
+  $('shiftInfo').textContent = `Source: ${shiftSrc.w} × ${shiftSrc.h} px`;
   $('splitCenter').max = shiftSrc.w - 1; $('splitRange').max = shiftSrc.w - 1;
   if (parseInt($('splitCenter').value) > shiftSrc.w-1 || parseInt($('splitCenter').value) === 0) { $('splitCenter').value = Math.floor(shiftSrc.w/2); $('splitRange').value = $('splitCenter').value; }
   shiftRender();
@@ -452,7 +452,7 @@ function shiftRender() {
   drawPix($('cvShiftA'), shiftSrc, z); drawPix($('cvShiftB'), out, z);
   $('shiftDimA').textContent = `${shiftSrc.w}×${shiftSrc.h}`; $('shiftDimB').textContent = `${out.w}×${out.h}`;
   const evenW = shiftSrc.w % 2 === 0, evenS = steps % 2 === 0;
-  $('shiftParity').textContent = (evenW === evenS) ? `✓ Parite uyumlu: genişlik ${shiftSrc.w} (${evenW?'çift':'tek'}), steps ${steps} (${evenS?'çift':'tek'}).` : `⚠ Parite: genişlik ${shiftSrc.w} (${evenW?'çift':'tek'}) ama steps ${steps} (${evenS?'çift':'tek'}). Çift genişlikte çift steps, tek genişlikte tek steps daha temiz kenar verir.`;
+  $('shiftParity').textContent = (evenW === evenS) ? `✓ Parity match: width ${shiftSrc.w} (${evenW?'even':'odd'}), steps ${steps} (${evenS?'even':'odd'}).` : `⚠ Parity: width ${shiftSrc.w} (${evenW?'even':'odd'}) but steps ${steps} (${evenS?'even':'odd'}). Even steps for even width and odd steps for odd width yield cleaner edges.`;
   ['shiftDownload','shiftCopy','shiftToBox'].forEach(id => $(id).disabled = false);
 }
 ['steps','direction','splitCenter','invert','shiftOutline','shiftOutlineColor','shiftZoom'].forEach(id => $(id).addEventListener('input', () => {
@@ -466,7 +466,7 @@ $('shiftScale').addEventListener('input', shiftRefreshSource);
 $('shiftAuto').addEventListener('click', () => { if (!shiftSrcImg) return; const full = pixFromImage(shiftSrcImg, 1); $('shiftScale').value = detectScale(full); shiftRefreshSource(); });
 $('shiftDemo').addEventListener('click', () => shiftSetPix(demoFront()));
 $('shiftDownload').addEventListener('click', () => download(shiftOut, parseInt($('shiftExport').value)||1, `iso_${$('direction').value}_s${$('steps').value}.png`));
-$('shiftCopy').addEventListener('click', async () => { const ok = await copyPix(shiftOut, parseInt($('shiftExport').value)||1); $('shiftCopy').textContent = ok ? 'Kopyalandı ✓' : 'Kopyalanamadı'; setTimeout(()=>$('shiftCopy').textContent='Panoya kopyala', 1500); });
+$('shiftCopy').addEventListener('click', async () => { const ok = await copyPix(shiftOut, parseInt($('shiftExport').value)||1); $('shiftCopy').textContent = ok ? 'Copied ✓' : 'Copy failed'; setTimeout(()=>$('shiftCopy').textContent='Copy to clipboard', 1500); });
 $('shiftToBox').addEventListener('click', () => { if (!shiftSrc) return; boxSetFace('front', shiftSrc); document.querySelector('nav button[data-tab="box"]').click(); });
 
 function wireDrop(el, input, onFile) {
@@ -520,12 +520,12 @@ $('lightPreset').addEventListener('change', () => {
 
 function boxValidate() {
   const F = boxFaces; const errs = [];
-  if (!F.front || !F.side || !F.top) return 'Ön, Sağ Yan ve Üst görünümleri gerekli.';
-  if (F.front.w !== F.top.w) errs.push(`Ön genişliği (${F.front.w}) ≠ Üst genişliği (${F.top.w})`);
-  if (F.side.w !== F.top.h) errs.push(`Yan genişliği (${F.side.w}) ≠ Üst yüksekliği (${F.top.h})`);
-  if (F.front.h !== F.side.h) errs.push(`Ön yüksekliği (${F.front.h}) ≠ Yan yüksekliği (${F.side.h})`);
-  if (F.back && (F.back.w !== F.front.w || F.back.h !== F.front.h)) errs.push('Arka boyutu Ön ile aynı olmalı');
-  if (F.left && (F.left.w !== F.side.w || F.left.h !== F.side.h)) errs.push('Sol Yan boyutu Sağ Yan ile aynı olmalı');
+  if (!F.front || !F.side || !F.top) return 'Front, Right Side, and Top views are required.';
+  if (F.front.w !== F.top.w) errs.push(`Front width (${F.front.w}) ≠ Top width (${F.top.w})`);
+  if (F.side.w !== F.top.h) errs.push(`Side width (${F.side.w}) ≠ Top height (${F.top.h})`);
+  if (F.front.h !== F.side.h) errs.push(`Front height (${F.front.h}) ≠ Side height (${F.side.h})`);
+  if (F.back && (F.back.w !== F.front.w || F.back.h !== F.front.h)) errs.push('Back size must match Front');
+  if (F.left && (F.left.w !== F.side.w || F.left.h !== F.side.h)) errs.push('Left Side size must match Right Side');
   return errs.join(' · ');
 }
 function boxOpts() {
@@ -556,10 +556,10 @@ function drawFlatViews(z) {
   if (!list.length) { $('cvBoxA').width = $('cvBoxA').height = 0; $('boxDimA').textContent=''; return; }
   const gap = 2, w = list.reduce((a,p)=>a+p.w,0) + gap*(list.length-1), h = Math.max(...list.map(p=>p.h));
   const c = newPix(w, h); let x = 0; for (const p of list) { for (let yy=0;yy<p.h;yy++) for (let xx=0;xx<p.w;xx++) set(c, x+xx, yy, get(p,xx,yy)); x += p.w + gap; }
-  drawPix($('cvBoxA'), c, z); $('boxDimA').textContent = `Ön · Yan · Üst`;
+  drawPix($('cvBoxA'), c, z); $('boxDimA').textContent = `Front · Side · Top`;
 }
 $('boxDownload').addEventListener('click', () => download(boxOut, parseInt($('boxExport').value)||1, `iso_box_rot${$('rotation').value}.png`));
-$('boxCopy').addEventListener('click', async () => { const ok = await copyPix(boxOut, parseInt($('boxExport').value)||1); $('boxCopy').textContent = ok ? 'Kopyalandı ✓' : 'Kopyalanamadı'; setTimeout(()=>$('boxCopy').textContent='Panoya kopyala', 1500); });
+$('boxCopy').addEventListener('click', async () => { const ok = await copyPix(boxOut, parseInt($('boxExport').value)||1); $('boxCopy').textContent = ok ? 'Copied ✓' : 'Copy failed'; setTimeout(()=>$('boxCopy').textContent='Copy to clipboard', 1500); });
 $('boxSheet').addEventListener('click', () => download(boxSheetPix, parseInt($('boxExport').value)||1, 'iso_box_4dir_sheet.png'));
 
 // expose for testing

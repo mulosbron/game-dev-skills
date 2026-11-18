@@ -30,7 +30,7 @@ game-dev-skills/
 └── skills/                    # 68 top-level skill directories (every skill listed in AGENTS.md)
 ```
 
-## Step-by-Step User & Plugin Guide (Adım Adım Kullanım Rehberi)
+## Step-by-Step User & Plugin Guide
 
 ### 1. Load as a Plugin or Workspace Pack
 All four major agent ecosystems are pre-configured at the root of `game-dev-skills/`:
@@ -45,18 +45,18 @@ All four major agent ecosystems are pre-configured at the root of `game-dev-skil
 
 ### 2. How the 3 Interactive Workflows Operate (`Discover → Report/GDD → Approve → Build`)
 
-1. **Mode 1 — New Game from Scratch (Markdown `GDD.md` Kapısı):**
-   - **Adım 1 (`GDD.md`):** Agent önce **Markdown formatında bir GDD (`GDD.md`)** ister. Hazır GDD'n varsa sadece eksik teknik kararları sorar; yoksa 1 kısa soru-cevap turuyla (tür, sanat tarzı, 30sn döngü, motor, asset hattı, v1 kapsam dışı — her soruda `(Recommended)` seçeneğiyle) **`GDD.md` taslağını** oluşturup onayını bekler.
-   - **Adım 2 (Prototip → Katmanlar):** Onaydan sonra seçilen skill/araçlarla önce tek sahnede çalışan **60 saniyelik oynanabilir prototip**, ardından `game-feel`, VFX/SFX ve QA/level kontrolleri eklenir.
-   - *(Opsiyonel Stüdyo Hattı: `skills/claude-code-game-studios/SKILL.md` ile `/start`, `/brainstorm`, `/art-bible`, `/prototype`, `/qa-plan`, `/playtest-report` fazları.)*
+1. **Mode 1 — New Game from Scratch (Markdown `GDD.md` Gate):**
+   - **Step 1 (`GDD.md`):** The agent first requests a **Markdown GDD (`GDD.md`)**. If you already have one, it only asks about missing technical decisions; otherwise, in 1 brief Q&A round (covering genre, art style, 30s core loop, engine, asset pipeline, v1 exclusions — each with a `(Recommended)` option), it drafts **`GDD.md`** and waits for your approval.
+   - **Step 2 (Prototype → Layers):** After approval, it builds a single-scene **60-second playable prototype** with the selected skills/tools, then layers in `game-feel`, VFX/SFX, and QA/level checks.
+   - *(Optional Studio Pipeline: `skills/claude-code-game-studios/SKILL.md` with `/start`, `/brainstorm`, `/art-bible`, `/prototype`, `/qa-plan`, `/playtest-report` phases.)*
 
-2. **Mode 2 — Improving an Existing Game (Tür/Sanat Keşfi → Teşhis & Eylem Raporu):**
-   - **Adım 1 (Oyunu Tanıma):** Agent önce kodları değiştirmeden oyunun **türünü, cinsini, sanat tarzını ve motorunu** proje dosyalarından okur ve kullanıcının hangi alanı iyileştirmek istediğini (**UI/UX, VFX, SFX/Ses, Game Feel, Oynanış/AI, Kamera, Fizik**) netleştirir.
-   - **Adım 2 (Sorun Tespiti & Rapor):** Projeyi tarayıp dosya/satır bazlı **Teşhis ve Eylem Raporu** sunar (*"Tespit Edilen Sorunlar → Şu UI/VFX/SFX/hissiyat değişikliğini şöyle yapacağız"*).
-   - **Adım 3 (Onaylı Uygulama):** Onayından sonra mevcut mimariyi bozmadan adım adım uygular.
+2. **Mode 2 — Improving an Existing Game (Genre/Art Discovery → Diagnostic & Action Report):**
+   - **Step 1 (Understand the Game):** Without modifying code first, the agent reads the game's **genre, sub-type, art style, and engine** from project files and clarifies which area you want improved (**UI/UX, VFX, SFX/Audio, Game Feel, Gameplay/AI, Camera, Physics**).
+   - **Step 2 (Problem Detection & Report):** It scans the project and presents a file/line-level **Diagnostic & Action Report** (*"Detected Issues → Proposed UI/VFX/SFX/feel changes"*).
+   - **Step 3 (Approved Execution):** After your approval, it applies changes step by step without breaking existing architecture.
 
-3. **Mode 3 — Asset-Only Production (Sadece Asset / VFX / 3D / Ses Üretimi):**
-   - GDD veya tam proje analizi istenmez; yalnızca hedef motor formatı (`_stripN.png`, `.glb`, `.tres`, palet/çözünürlük) doğrulanıp doğrudan `tools/*.py` veya ilgili asset skilleri (`pixelfx`, `vfx-forge`, `polyspoon`, `blender-kiln`, `triposr`, `material-maker`, `spritefusion-sprite-normals`, `generate2dsprite`) çalıştırılır.
+3. **Mode 3 — Asset-Only Production (Standalone Asset / VFX / 3D / Audio Generation):**
+   - No GDD or full-project audit is required; it only confirms the target engine format (`_stripN.png`, `.glb`, `.tres`, palette/resolution) and directly runs `tools/*.py` or the matching asset skills (`pixelfx`, `vfx-forge`, `polyspoon`, `blender-kiln`, `triposr`, `material-maker`, `spritefusion-sprite-normals`, `generate2dsprite`).
 
 ## Skill Highlights by Domain
 

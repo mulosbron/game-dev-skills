@@ -2,10 +2,10 @@
 """
 Pet & Companion Sprite Generator for 'Aestra: The Last Wish' (projects/nos)
 Generates high-detail 2.5D pixel art animations for all 4 Pets:
-1. Kabuk (Kaplumbağa / Tortoise - Tank/Taunt)
-2. Cüruf (Kaya Golemi / Rock Golem - Slow/Taunt)
-3. Cık (Kuzgun / Raven - Fast Mule Courier)
-4. Kıvılcım (Ateş Tilkisi / Fire Fox - Fire/Taunt)
+1. Kabuk (Tortoise - Tank/Taunt)
+2. Curuf (Rock Golem - Slow/Taunt)
+3. Cik (Raven - Fast Mule Courier)
+4. Kivilcim (Fire Fox - Fire/Taunt)
 
 Exports:
 - 16 horizontal sprite strips (_stripN.png) at 48x48 frame resolution
@@ -64,7 +64,7 @@ C_CURUF_CRYSTAL_MID  = (34, 185, 218, 255)
 C_CURUF_CRYSTAL_HI   = (108, 236, 252, 255)
 C_CURUF_CRYSTAL_CORE = (215, 250, 255, 255)
 
-# Cık (Kuzgun - Violet Midnight Raven)
+# Cik (Raven - Violet Midnight Raven)
 C_CIK_FEATHER_BLACK  = (14, 14, 22, 255)
 C_CIK_FEATHER_DARK   = (26, 24, 40, 255)
 C_CIK_FEATHER_VIOLET = (48, 42, 72, 255)
@@ -74,7 +74,7 @@ C_CIK_BEAK_TIP       = (198, 160, 68, 255)
 C_CIK_EYE_AMBER      = (245, 178, 36, 255)
 C_CIK_TALON          = (214, 172, 44, 255)
 
-# Kıvılcım (Ateş Tilkisi - Ember Fox & Living Fire)
+# Kivilcim (Fire Fox - Ember Fox & Living Fire)
 C_FOX_FUR_DARK       = (160, 52, 18, 255)
 C_FOX_FUR_MID        = (212, 82, 24, 255)
 C_FOX_FUR_LIGHT      = (242, 128, 38, 255)
@@ -107,7 +107,7 @@ def draw_shadow(draw: ImageDraw.ImageDraw, cx: int, cy: int, rx: int, ry: int):
     draw.ellipse([cx - rx, cy - ry, cx + rx, cy + ry], fill=C_SHADOW)
 
 # ===========================================================================
-# 1. KABUK (Tortoise / Kaplumbağa)
+# 1. KABUK (Tortoise)
 # ===========================================================================
 def draw_kabuk_frame(f_idx: int, anim_type: str, num_frames: int) -> Image.Image:
     img = Image.new("RGBA", (FRAME_SIZE, FRAME_SIZE), (0, 0, 0, 0))
@@ -738,7 +738,7 @@ def draw_cik_frame(f_idx: int, anim_type: str, num_frames: int) -> Image.Image:
     return img
 
 # ===========================================================================
-# 4. KIVILCIM (Ateş Tilkisi / Fire Fox)
+# 4. KIVILCIM (Fire Fox)
 # ===========================================================================
 def draw_kivilcim_frame(f_idx: int, anim_type: str, num_frames: int) -> Image.Image:
     img = Image.new("RGBA", (FRAME_SIZE, FRAME_SIZE), (0, 0, 0, 0))
@@ -927,7 +927,7 @@ def draw_kivilcim_frame(f_idx: int, anim_type: str, num_frames: int) -> Image.Im
 PET_SPECS = [
     {
         "name": "kabuk",
-        "display": "Kabuk (Kaplumbağa)",
+        "display": "Kabuk (Tortoise)",
         "draw_func": draw_kabuk_frame,
         "anims": [
             ("idle", 4, 6.0, True),
@@ -938,7 +938,7 @@ PET_SPECS = [
     },
     {
         "name": "curuf",
-        "display": "Cüruf (Kaya Golemi)",
+        "display": "Curuf (Rock Golem)",
         "draw_func": draw_curuf_frame,
         "anims": [
             ("idle", 4, 6.0, True),
@@ -949,7 +949,7 @@ PET_SPECS = [
     },
     {
         "name": "cik",
-        "display": "Cık (Kuzgun)",
+        "display": "Cik (Raven)",
         "draw_func": draw_cik_frame,
         "anims": [
             ("idle", 4, 6.0, True),
@@ -960,7 +960,7 @@ PET_SPECS = [
     },
     {
         "name": "kivilcim",
-        "display": "Kıvılcım (Ateş Tilkisi)",
+        "display": "Kivilcim (Fire Fox)",
         "draw_func": draw_kivilcim_frame,
         "anims": [
             ("idle", 4, 6.0, True),

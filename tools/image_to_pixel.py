@@ -108,23 +108,23 @@ GAME_STYLE_PROFILES = {
         },
     },
     "egregore-clay": {
-        "label": "HAM TANRILAR — Yoğrulmuş Kozmos (Kil & Stop-Motion)",
-        "description": "Locked 7-Color Egregore Clay Bible (Tablo 10) + Fırın Gölgeleri with tactile Bayer-4 dithering and #14100E outer contour.",
+        "label": "RAW GODS — Kneaded Cosmos (Clay & Stop-Motion)",
+        "description": "Locked 7-Color Egregore Clay Bible (Table 10) + Kiln Shadows with tactile Bayer-4 dithering and #14100E outer contour.",
         "settings": {
             "palette": {
                 "source": "custom",
-                "name": "Egregore Clay Bible (Tablo 10)",
+                "name": "Egregore Clay Bible (Table 10)",
                 "colors": [
-                    "#14100E",  # Derin Fırın Gölgesi / Kontur
-                    "#2B211D",  # Koyu Yanık Toprak
-                    "#4A3B5C",  # Gece Moru (Güleç Tepesi / Gülhin & Parazit)
-                    "#6C7B8C",  # Sis Mavisi (Vakarhane / Sekonsa Saat Metali)
-                    "#7A8C5A",  # Yosun Yeşili (Ören Passi / Kahtan İpleri)
-                    "#8E6D4F",  # Kuru Kil Gölgesi
-                    "#A35C3B",  # Kızıl Toprak (Kurşunhane / Mammonit / Alarm)
-                    "#C9A37B",  # Ham Kil (Temel Zemin / Sıvacı / Nötr Bedenler)
-                    "#E8B23A",  # Fırın Sarısı (Göz Parlaması / Ritüel Işığı / Altın)
-                    "#EDE6D6",  # Sıva Beyazı (Sıva Meydanı / UI / Vakayiname)
+                    "#14100E",  # Deep Kiln Shadow / Contour
+                    "#2B211D",  # Dark Burnt Earth
+                    "#4A3B5C",  # Night Purple (Gulec Hill / Gulhin & Parasite)
+                    "#6C7B8C",  # Mist Blue (Vakarhane / Sekonsa Clock Metal)
+                    "#7A8C5A",  # Moss Green (Oren Pass / Kahtan Ropes)
+                    "#8E6D4F",  # Dry Clay Shadow
+                    "#A35C3B",  # Red Earth (Kursunhane / Mammonite / Alarm)
+                    "#C9A37B",  # Raw Clay (Base Ground / Plasterer / Neutral Bodies)
+                    "#E8B23A",  # Kiln Yellow (Eye Glow / Ritual Light / Gold)
+                    "#EDE6D6",  # Plaster White (Plaster Square / UI / Chronicle)
                 ],
                 "distance": "oklab",
             },
@@ -135,12 +135,12 @@ GAME_STYLE_PROFILES = {
         },
     },
     "farming-25d": {
-        "label": "2.5D FARMING — 32-Renk Fosfor CRT & Bayer Dither (GDD v1.0)",
+        "label": "2.5D FARMING — 32-Color Phosphor CRT & Bayer Dither (GDD v1.0)",
         "description": "GDD Section 8.4: 32-Color Reference Palette (Soil, Foliage, Mine Ores, Phosphor Green CRT & Orange Warning) + Ordered Bayer Dither.",
         "settings": {
             "palette": {
                 "source": "custom",
-                "name": "2.5D Farming 32-Color Reference Palette (Bölüm 8.4)",
+                "name": "2.5D Farming 32-Color Reference Palette (Section 8.4)",
                 "colors": [
                     # CRT Void & Deep Shadows (4)
                     "#070B08", "#0D1610", "#142219", "#1C2F23",

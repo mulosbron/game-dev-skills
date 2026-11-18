@@ -214,9 +214,9 @@ def main():
     strips_to_generate["lava_hound_bite_strip4.png"] = (hound_bite, "character")
 
     # --------------------------------------------------------------------------
-    # 7. BOSS: KÖK DEVİ
+    # 7. BOSS: ROOT GIANT (kok_devi)
     # --------------------------------------------------------------------------
-    print("[Generating] Boss 1: Kök Devi (Root Giant)...")
+    print("[Generating] Boss 1: Root Giant...")
     kok_idle = create_strip([generate_kok_devi_frame("idle", i) for i in range(4)])
     kok_slam = create_strip([generate_kok_devi_frame("slam", i) for i in range(6)])
     kok_stomp = create_strip([generate_kok_devi_frame("stomp", i) for i in range(6)])
@@ -226,9 +226,9 @@ def main():
     strips_to_generate["boss_kok_devi_stomp_strip6.png"] = (kok_stomp, "character")
 
     # --------------------------------------------------------------------------
-    # 8. BOSS: PRİZMA GOLEMİ
+    # 8. BOSS: PRISM GOLEM (prizma_golemi)
     # --------------------------------------------------------------------------
-    print("[Generating] Boss 2: Prizma Golemi (Prism Golem)...")
+    print("[Generating] Boss 2: Prism Golem...")
     prizma_idle = create_strip([generate_prizma_golemi_frame("idle", i) for i in range(4)])
     prizma_beam = create_strip([generate_prizma_golemi_frame("beam", i) for i in range(6)])
     prizma_crush = create_strip([generate_prizma_golemi_frame("crush", i) for i in range(6)])
@@ -238,9 +238,9 @@ def main():
     strips_to_generate["boss_prizma_golemi_crush_strip6.png"] = (prizma_crush, "character")
 
     # --------------------------------------------------------------------------
-    # 9. BOSS: KÜL KİRPİSİ
+    # 9. BOSS: SPIKY ASH BEAST (kul_kirpisi)
     # --------------------------------------------------------------------------
-    print("[Generating] Boss 3: Kül Kirpisi (Spiky Ash Beast)...")
+    print("[Generating] Boss 3: Spiky Ash Beast...")
     kul_idle = create_strip([generate_kul_kirpisi_frame("idle", i) for i in range(4)])
     kul_charge = create_strip([generate_kul_kirpisi_frame("charge", i) for i in range(6)])
     kul_spikes = create_strip([generate_kul_kirpisi_frame("spikes", i) for i in range(6)])
@@ -250,9 +250,9 @@ def main():
     strips_to_generate["boss_kul_kirpisi_spikes_strip6.png"] = (kul_spikes, "character")
 
     # --------------------------------------------------------------------------
-    # 10. BOSS: ÇAMUR ANA
+    # 10. BOSS: MUD MOTHER (camur_ana)
     # --------------------------------------------------------------------------
-    print("[Generating] Boss 4: Çamur Ana (Mud Mother)...")
+    print("[Generating] Boss 4: Mud Mother...")
     camur_idle = create_strip([generate_camur_ana_frame("idle", i) for i in range(4)])
     camur_slam = create_strip([generate_camur_ana_frame("slam", i) for i in range(6)])
     camur_spit = create_strip([generate_camur_ana_frame("spit", i) for i in range(6)])
@@ -262,9 +262,9 @@ def main():
     strips_to_generate["boss_camur_ana_spit_strip6.png"] = (camur_spit, "character")
 
     # --------------------------------------------------------------------------
-    # 11. BOSS: CEVHER KRALI
+    # 11. BOSS: ORE KING (cevher_krali)
     # --------------------------------------------------------------------------
-    print("[Generating] Boss 5: Cevher Kralı (Ore King)...")
+    print("[Generating] Boss 5: Ore King...")
     cevher_idle = create_strip([generate_cevher_krali_frame("idle", i) for i in range(4)])
     cevher_smash = create_strip([generate_cevher_krali_frame("smash", i) for i in range(6)])
     cevher_erup = create_strip([generate_cevher_krali_frame("eruption", i) for i in range(6)])
@@ -426,7 +426,7 @@ def main():
         ENEMIES_DIR / "boss_camur_ana_frames.tres"
     )
 
-    # 11. Boss: Cevher Kralı
+    # 11. Boss: Ore King (cevher_krali)
     generate_sprite_frames_tres(
         "boss_cevher_krali",
         [

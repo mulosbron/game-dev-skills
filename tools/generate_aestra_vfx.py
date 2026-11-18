@@ -310,7 +310,7 @@ def generate_sword_slash_set():
 
 
 # ============================================================================
-# 2. KOR DÖNÜŞÜ / FIRE RING, TORNADO & BURST
+# 2. EMBER SPIN / FIRE RING, TORNADO & BURST
 # ============================================================================
 
 def generate_fire_ring():

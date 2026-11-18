@@ -1,54 +1,54 @@
 ---
 name: godot-fake-3d-character
 description: >-
-  Godot 4'te sadece 2D düğümler (Node2D, Sprite2D, RemoteTransform2D, Line2D) kullanarak sahte 3D
-  (Fake 3D / 2.5D) top-down kukla karakterler oluşturma tekniği. Üstten görünümlü (top-down) oyunlarda
-  3D model veya yüzlerce karelik sprite animasyonuna gerek kalmadan akıcı dönen, derinlik hissi veren
-  karakterler, prosedürel uzuvlar (Line2D) ve dinamik Z-sorting katmanları oluştururken kullanılır.
+  Technique for creating fake 3D (Fake 3D / 2.5D) top-down puppet characters in Godot 4 using only 2D nodes
+  (Node2D, Sprite2D, RemoteTransform2D, Line2D). Used in top-down games to build smoothly rotating characters
+  with a sense of depth, procedural limbs (Line2D), and dynamic Z-sorting layers without needing 3D models
+  or hundreds of sprite animation frames.
 ---
 
-# Godot Fake 3D Top-Down Karakter Sistemi (2D Puppet Tekniği)
+# Godot Fake 3D Top-Down Character System (2D Puppet Technique)
 
-Bu teknik, Godot'nun 2D dönüşüm hiyerarşisini (transform parenting) ve `RemoteTransform2D` düğümünü akıllıca kullanarak, tamamen 2D düğümlerden **3D gibi dönen ve derinliği olan bir kukla (puppet) karakter** yaratır.
+This technique cleverly uses Godot's 2D transform parenting hierarchy and the `RemoteTransform2D` node to create a **puppet character that rotates like 3D and has depth**, built entirely from 2D nodes.
 
-3D modelleme veya her açı için ayrı sprite çizmeye gerek kalmadan; yuvarlak, stilize karakterler (*ördek, balçık/slime, minik robotlar, chibi karakterler*) için kusursuz bir 2.5D illüzyonu sağlar.
+Without needing 3D modeling or drawing separate sprites for every angle, it delivers a seamless 2.5D illusion for rounded, stylized characters (*ducks, slimes, tiny robots, chibi characters*).
 
 ---
 
-## 1. Temel İlke ve Matematiksel Mantık
+## 1. Core Principle and Mathematical Logic
 
-İllüzyon üç basit gerçeğe dayanır:
+The illusion relies on three simple facts:
 
-1. **Kamera Açısı (Y-Ekseninde Sıkıştırma):** Bir üst ebeveyn düğümün (`Rig`) Y ölçeği küçültüldüğünde (`scale.y = 0.5` gibi), altındaki düzlemde dönen her nokta 2D ekranda bir **elips** çizer. Bu elips, izometrik veya top-down açıyla bakan bir kameranın yarattığı 3D perspektifle birebir örtüşür.
-2. **Yükseklik / İrtifa (Elevation):** Bir noktanın Y pozisyonu (`position.y`) değiştirildiğinde, o nokta sanal 3D dünyada yukarı/aşağı taşınır.
-3. **Ebeveynlikten Kaçış (`RemoteTransform2D`):** Eğer sprite'lar doğrudan bu sıkıştırılmış `Rig` altına konulursa, sprite'ların kendisi de basık (`squashed`) görünür. `RemoteTransform2D` düğümünün `update_scale = false` ve `update_rotation = false` ayarları kullanılarak, **sadece hesaplanan (x, y) pozisyonu** dışarıdaki `Visual` sprite'ına aktarılır; sprite'ın kendi orijinal ölçeği ve en-boy oranı bozulmaz.
+1. **Camera Angle (Y-Axis Compression):** When the Y scale of a parent node (`Rig`) is reduced (such as `scale.y = 0.5`), every point rotating on the plane beneath it traces an **ellipse** on the 2D screen. This ellipse matches the 3D perspective produced by an isometric or top-down angled camera.
+2. **Height / Elevation:** Changing a point's Y position (`position.y`) moves that point up or down in the virtual 3D world.
+3. **Escaping Parenting (`RemoteTransform2D`):** If sprites were placed directly under this squashed `Rig`, the sprites themselves would look squashed. By setting `update_scale = false` and `update_rotation = false` on `RemoteTransform2D`, **only the computed (x, y) position** is transferred to the external `Visual` sprite; the sprite's own original scale and aspect ratio remain intact.
 
 ```
-       [Sanal 3D Boşluk: Rig]                    [Ekrana Çizim: Visual]
-  Rig (scale.y = 0.5) [Kamera Açısı]
-     └── Anchor (rotation = açı) 
-           └── HeightOffset (position.y = -yükseklik)
-                 └── RemoteTransform2D (SADECE pozisyon gönderir!) ──> Sprite2D (Basılmamış, düzgün sprite)
+       [Virtual 3D Space: Rig]                    [Screen Drawing: Visual]
+  Rig (scale.y = 0.5) [Camera Angle]
+     └── Anchor (rotation = angle)
+           └── HeightOffset (position.y = -height)
+                 └── RemoteTransform2D (sends POSITION ONLY!) ──> Sprite2D (Unsquashed, clean sprite)
 ```
 
 ---
 
-## 2. Sahne Ağacı Mimarisi (Visual & Rig Ayrımı)
+## 2. Scene Tree Architecture (Visual & Rig Separation)
 
-Karakter düğümünü daima iki ana gruba ayırın:
-- **`Visual`**: Çizim sırası (Z-Index / Y-Sort) ve sprite'ları barındırır.
-- **`Rig`**: Sanal 3D uzaydaki açıları, yükseklikleri ve pozisyonları hesaplar.
+Always split the character node into two main groups:
+- **`Visual`**: Holds the draw order (Z-Index / Y-Sort) and sprites.
+- **`Rig`**: Computes angles, heights, and positions in virtual 3D space.
 
 ```text
-Duck (CharacterBody2D veya Node2D) - duck.gd
+Duck (CharacterBody2D or Node2D) - duck.gd
 ├── Visual (Node2D)
-│   ├── ShadowSprite (Sprite2D - sabit zemin gölgesi)
+│   ├── ShadowSprite (Sprite2D - fixed ground shadow)
 │   ├── FootSpriteL (Sprite2D)
 │   ├── FootSpriteR (Sprite2D)
-│   ├── LegLineL (Line2D - bacak bağı)
-│   ├── LegLineR (Line2D - bacak bağı)
+│   ├── LegLineL (Line2D - leg connector)
+│   ├── LegLineR (Line2D - leg connector)
 │   ├── BodySprite (Sprite2D)
-│   ├── NeckLine (Line2D - esnek boyun bağı)
+│   ├── NeckLine (Line2D - flexible neck connector)
 │   └── HeadGroup (Node2D)
 │       ├── HeadSprite (Sprite2D)
 │       ├── EyesSprite (Sprite2D)
@@ -60,7 +60,7 @@ Duck (CharacterBody2D veya Node2D) - duck.gd
     │   └── PlaneResult (RemoteTransform2D -> %FootSpriteR)
     ├── BodyAnchor (Node2D, position.y = -10)
     │   └── PlaneResult (RemoteTransform2D -> %BodySprite)
-    └── NeckPositionCopy (Node2D - Body'nin pozisyonunu alır)
+    └── NeckPositionCopy (Node2D - copies Body's position)
         └── HeadHeightOffset (Node2D, position.y = -25)
             └── HeadAnchor (Node2D)
                 ├── HeadPlane (RemoteTransform2D -> %HeadGroup)
@@ -71,24 +71,24 @@ Duck (CharacterBody2D veya Node2D) - duck.gd
 ```
 
 > [!IMPORTANT]
-> `PlaneResult` olarak kullanılan tüm `RemoteTransform2D` düğümlerinde Inspector'dan:
+> On every `RemoteTransform2D` node used as `PlaneResult`, set in the Inspector:
 > - `Update Position` = **ON**
-> - `Update Rotation` = **OFF** (Sprite'ın kendi rotasyonunu script kontrol edecekse)
-> - `Update Scale` = **OFF** (Rig'in 0.5 Y-scale'inin sprite'ı ezmesini engellemek için ŞART!)
+> - `Update Rotation` = **OFF** (if a script controls the sprite's own rotation)
+> - `Update Scale` = **OFF** (REQUIRED to prevent the Rig's 0.5 Y-scale from squashing the sprite!)
 
 ---
 
-## 3. GDScript Mantığı (`duck.gd`)
+## 3. GDScript Logic (`duck.gd`)
 
-Dönüş, Z-Index derinlik sıralaması ve bacak açılarını yöneten ana kontrolcü:
+The main controller managing rotation, Z-Index depth sorting, and leg angles:
 
 ```gdscript
 extends CharacterBody2D
 
-# 0 ile 360 derece arası Inspector ayarı (arkada radyan olarak tutulur)
+# Inspector setting from 0 to 360 degrees (stored internally as radians)
 @export_range(0.0, 360.0, 0.1, "radians") var direction: float = 0.0: set = _set_direction
 
-# Görsel Düğümler
+# Visual Nodes
 @onready var foot_sprite_l: Sprite2D = %FootSpriteL
 @onready var foot_sprite_r: Sprite2D = %FootSpriteR
 @onready var body_sprite: Sprite2D = %BodySprite
@@ -96,7 +96,7 @@ extends CharacterBody2D
 @onready var beak_sprite: Sprite2D = %BeakSprite
 @onready var eyes_sprite: Sprite2D = %EyesSprite
 
-# Rig İçerisindeki Döndürülecek Çapa (Anchor) Düğümleri
+# Anchor Nodes to Rotate Inside the Rig
 @onready var foot_anchor_l: Node2D = %FootAnchorL
 @onready var foot_anchor_r: Node2D = %FootAnchorR
 @onready var body_anchor: Node2D = %BodyAnchor
@@ -114,20 +114,20 @@ func _set_direction(value: float) -> void:
         
     direction = value
     
-    # Açıyı 0.0 ile TAU (2*PI) arasına sar
+    # Wrap angle between 0.0 and TAU (2*PI)
     var angle: float = wrapf(direction, 0.0, TAU)
     
-    # 1. Tüm çapa düğümlerini aynı açıya çevir
+    # 1. Rotate all anchor nodes to the same angle
     for anchor in all_anchors:
         anchor.rotation = angle
         
-    # 2. Ayak sprite rotasyonlarına tatlı bir ofset ver (vurgulu paytak yürüyüş için)
+    # 2. Give foot sprite rotations a subtle offset (for an expressive waddle walk)
     foot_sprite_l.rotation = angle + 0.3
     foot_sprite_r.rotation = angle - 0.3
     
-    # 3. Yüz ve Gövde Z-Index Sıralaması (Karakter Arkaya Baktığında)
-    # Kuzeye/yukarıya (arka tarafa) bakarken yüz elemanları gövdenin arkasında kalmalıdır:
-    # PI / 2 (90°) ile 3 * PI / 2 (270°) arası yukarı bakar
+    # 3. Face and Body Z-Index Sorting (When Character Faces Away)
+    # When facing north/up (away from camera), facial features must stay behind the body:
+    # Between PI / 2 (90°) and 3 * PI / 2 (270°) faces up
     var is_facing_north: bool = angle > (PI * 0.5) and angle < (PI * 1.5)
     
     if is_facing_north:
@@ -144,9 +144,9 @@ func _set_direction(value: float) -> void:
 
 ---
 
-## 4. Dinamik Uzuvlar & Esneme: `Line2D` (`limb_line_2d.gd`)
+## 4. Dynamic Limbs & Stretching: `Line2D` (`limb_line_2d.gd`)
 
-Boyun, bacaklar veya kollar için sprite çizmek yerine, iki rig noktası arasında dinamik gerilen bir `Line2D` kullanmak karakterin esnemesini (squash & stretch) ve doğallığını muazzam artırır.
+Instead of drawing sprites for the neck, legs, or arms, using a `Line2D` that stretches dynamically between two rig points dramatically improves squash & stretch and natural movement.
 
 ```gdscript
 # limb_line_2d.gd
@@ -156,9 +156,9 @@ extends Line2D
 @export var end_node: Node2D
 
 func _ready() -> void:
-    top_level = true # Kendi yerel dönüşümünden bağımsız, global koordinatla çiz
+    top_level = true # Draw in global coordinates, independent of local transform
     width = 6.0
-    default_color = Color("e0a526") # Bacak / boyun rengi
+    default_color = Color("e0a526") # Leg / neck color
     round_precision = 8
     begin_cap_mode = Line2D.LINE_CAP_ROUND
     end_cap_mode = Line2D.LINE_CAP_ROUND
@@ -172,47 +172,47 @@ func _process(_delta: float) -> void:
 
 ---
 
-## 5. Karakter Tasarımı (Art & Rigging Kuralları)
+## 5. Character Design (Art & Rigging Rules)
 
-Bu tekniği başarıyla uygulamak için grafik tasarımda şu kurallara dikkat edin:
+Follow these graphic design rules to apply this technique successfully:
 
-1. **Yuvarlak ve Organik Formlar:** Küre, elips, silindir ve yumuşak kıvrımlı tasarımlar açısı değiştikçe formunu korur. Keskin köşeli kutular bu teknikte sahte durur çünkü gerçek 3D poligon kenarları yoktur.
-2. **Karakter Mockup & Parçalara Ayırma (Figma / Inkscape / Photoshop):**
-   - Karakteri hafif yukarıdan (30°-45° oblique) bakış açısıyla çizin.
-   - Parçaları ayrı PNG olarak dışa aktarın:
+1. **Rounded and Organic Forms:** Spheres, ellipses, cylinders, and softly curved designs hold their silhouette as the angle changes. Sharp-cornered boxes look fake in this technique because there are no real 3D polygon edges.
+2. **Character Mockup & Part Splitting (Figma / Inkscape / Photoshop):**
+   - Draw the character from a slightly elevated (30°–45° oblique) perspective.
+   - Export parts as separate PNGs:
      - `body.png`
      - `head.png`
-     - `beak.png` (veya burun/ağız)
+     - `beak.png` (or nose/mouth)
      - `eye.png`
      - `foot_left.png`, `foot_right.png`
-     - `shadow.png` (yarı saydam siyah elips)
-3. **Animasyon (Tween & Wobble):**
-   - Karakter yürürken `BodyAnchor.position.y` değerini bir tween ile hafifçe zıplatın (`bobbing`).
-   - Ayak çapalarını (`FootAnchorL`, `FootAnchorR`) sırayla öne ve arkaya hareket ettirerek doğal bir top-down yürüme hissi yakalayın.
+     - `shadow.png` (semi-transparent black ellipse)
+3. **Animation (Tween & Wobble):**
+   - Gently bounce `BodyAnchor.position.y` with a tween while walking (`bobbing`).
+   - Move the foot anchors (`FootAnchorL`, `FootAnchorR`) alternately forward and backward for a natural top-down walk feel.
 
 ---
 
-## 7. İnsan (Humanoid) Karakter Uyarlaması: Saç, Kollar, Bacaklar ve Yüz
+## 7. Humanoid Character Adaptation: Hair, Arms, Legs, and Face
 
-İnsan karakterlerde (2 kol, 2 bacak, gövde, kafa, yüz ve saç) bu tekniği uygularken dikkat edilmesi gereken kritik tasarım ve katman mimarisi şöyledir:
+When applying this technique to humanoid characters (2 arms, 2 legs, torso, head, face, and hair), follow this critical design and layer architecture:
 
-### 1. Stil Kuralı (Orantı)
-- Gerçekçi (anatomik) insan formları bu matematikte garip görünebilir.
-- Bu teknik en çok **Chibi / Stylized / Cartoon** insan formlarında harikalar yaratır (*Animal Crossing, Zelda: Minish Cap / Link's Awakening, Fall Guys, Cult of the Lamb* tarzı).
-- Yuvarlak bir kafa formu, silindirik/yuvarlak bir gövde ve hafif abartılı saç kütleleri mükemmel sonuç verir.
+### 1. Style Rule (Proportions)
+- Realistic (anatomical) human forms can look awkward under this math.
+- This technique shines most with **Chibi / Stylized / Cartoon** humanoid proportions (*Animal Crossing, Zelda: Minish Cap / Link's Awakening, Fall Guys, Cult of the Lamb* style).
+- A round head form, cylindrical/rounded torso, and slightly exaggerated hair volumes yield great results.
 
-### 2. İnsan Karakter Parçaları (PNG Çıktıları)
-Tek bir çizimden (hafif yukarıdan/önden bakış) şu parçalar ayrıştırılır:
-- `shadow.png` (Zemin elips gölgesi)
-- `foot_l.png`, `foot_r.png` (Ayakkabılar)
-- `torso.png` (Gövde / Kıyafet)
-- `arm_l.png`, `arm_r.png` veya `hand_l.png`, `hand_r.png` (Eller / Kollar)
-- `head_base.png` (Yüzün ten rengi yuvarlak kafatası)
-- `face.png` (Gözler, kaşlar, ağız tek bir grupta)
-- `hair_front.png` (Ön saç / Kahkül)
-- `hair_back.png` (Arka saç / Ense / Saç arkası kütlesi - **Kritik Parça!**)
+### 2. Humanoid Character Parts (PNG Exports)
+Split a single drawing (slightly top-down/front view) into these parts:
+- `shadow.png` (Ground ellipse shadow)
+- `foot_l.png`, `foot_r.png` (Shoes)
+- `torso.png` (Torso / Outfit)
+- `arm_l.png`, `arm_r.png` or `hand_l.png`, `hand_r.png` (Hands / Arms)
+- `head_base.png` (Skin-toned round head base)
+- `face.png` (Eyes, eyebrows, mouth in a single group)
+- `hair_front.png` (Front hair / Bangs)
+- `hair_back.png` (Back hair / Nape / Back hair volume — **Critical Part!**)
 
-### 3. İnsan Rig Hiyerarşisi
+### 3. Humanoid Rig Hierarchy
 ```text
 HumanRig (Node2D, scale = Vector2(1.0, 0.5))
 ├── FeetLayer (position.y = 0)
@@ -230,31 +230,31 @@ HumanRig (Node2D, scale = Vector2(1.0, 0.5))
         └── HairFrontAnchor (position.y = -6) ──> RemoteTransform2D ──> HairFront
 ```
 
-### 4. İnsan Karakterde Saç & Kol Z-Index Mantığı (Ön vs Arka)
+### 4. Hair & Arm Z-Index Logic for Humanoids (Front vs Back)
 
-İnsan karakterin arkaya döndüğünü gösteren en büyük görsel numara **Saç Arkası (`hair_back`)** ve **Yüz (`face`)** katman sıralamasıdır:
+The biggest visual trick showing that a humanoid character has turned away is the layer ordering of **Back Hair (`hair_back`)** and **Face (`face`)**:
 
 ```gdscript
 func update_human_sorting(angle: float) -> void:
-    # Karakter arkaya/kuzeye bakıyor (PI/2 ile 3*PI/2 arası)
+    # Character is facing back/north (between PI/2 and 3*PI/2)
     var is_facing_back: bool = angle > (PI * 0.5) and angle < (PI * 1.5)
     
     if is_facing_back:
-        face_group.visible = false            # Yüz arkadan görünmez
+        face_group.visible = false            # Face is hidden from behind
         hair_front.z_index = 0
         head_base.z_index = 1
-        hair_back.z_index = 2                 # Arka saç kafanın ÜSTÜNE çıkar, kafanın arkasını örter!
+        hair_back.z_index = 2                 # Back hair moves ABOVE the head, covering the back of the head!
         torso.z_index = 1
     else:
-        face_group.visible = true             # Yüz görünür
-        hair_back.z_index = -1                # Arka saç kafanın arkasında kalır
+        face_group.visible = true             # Face is visible
+        hair_back.z_index = -1                # Back hair stays behind the head
         head_base.z_index = 0
-        face_group.z_index = 1                # Yüz kafanın üstünde
-        hair_front.z_index = 2                # Ön saç/kahkül yüzün üstünde
+        face_group.z_index = 1                # Face is above the head
+        hair_front.z_index = 2                # Front hair/bangs are above the face
         torso.z_index = 0
 
-    # Yanlara bakarken (Doğu / Batı) kolların derinliği:
-    # Örneğin 0 ile PI arası sağ kol önde, sol kol gövdenin arkasında kalabilir:
+    # Arm depth when facing sideways (East / West):
+    # For example, between 0 and PI the right arm can be in front while the left arm stays behind the torso:
     if angle > 0 and angle < PI:
         hand_r.z_index = torso.z_index + 1
         hand_l.z_index = torso.z_index - 1
@@ -263,17 +263,17 @@ func update_human_sorting(angle: float) -> void:
         hand_l.z_index = torso.z_index + 1
 ```
 
-### 5. Kollar ve Bacaklar İçin 2 Seçenek:
-1. **Rayman / Animal Crossing Tarzı (Floating Limbs):** Kollar ve bacaklar çizilmez, sadece eller ve ayaklar gövdenin etrafında süzülür. Hem çizimi çok kolaydır hem de son derece şirin bir cartoon havası verir.
-2. **Line2D Eklem Bağı:** Gövde omuz noktasından ele uzanan bir `Line2D` (`top_level = true`) ten veya tişört renginde dinamik kol çizer; el nereye giderse kol oraya esner.
+### 5. Two Options for Arms and Legs:
+1. **Rayman / Animal Crossing Style (Floating Limbs):** Arms and legs are not drawn; only hands and feet float around the torso. Very easy to draw and gives a charming cartoon look.
+2. **Line2D Joint Connector:** A `Line2D` (`top_level = true`) from the torso shoulder point to the hand draws a dynamic arm in skin or shirt color; wherever the hand moves, the arm stretches to follow.
 
 ---
 
-## 8. Sık Karşılaşılan Hatalar ve Çözümleri
+## 8. Common Issues and Solutions
 
-| Hata / Belirti | Nedeni | Çözüm |
+| Error / Symptom | Cause | Solution |
 |---|---|---|
-| **Sprite basık/ezik görünüyor** | `RemoteTransform2D` ölçeği kopyalıyor | `update_scale = false` yapın. |
-| **Kafa gövdeden bağımsız kopuyor** | Ebeveynlik zinciri kırılmış | `RemoteTransform2D` ile boyun/omuz pozisyonunu kafa köküne kopyalayın (`NeckPositionCopy`). |
-| **Arkaya döndüğünde gaga gövdenin önünde kalıyor** | Z-index güncellenmiyor | `_set_direction` içinde açı aralığına göre `z_index = -1` uygulayın. |
-| **Karakter titriyor (jitter)** | `_process` ile fizik çakışması | Karakter hareketi `CharacterBody2D` ile yapılıyorsa yön güncellemelerini fizik hızına göre yapın: `direction = velocity.angle()`. |
+| **Sprite looks squashed/flattened** | `RemoteTransform2D` is copying scale | Set `update_scale = false`. |
+| **Head detaches from the body** | Parenting chain is broken | Copy the neck/shoulder position to the head root via `RemoteTransform2D` (`NeckPositionCopy`). |
+| **Beak stays in front of body when facing away** | Z-index is not updated | Apply `z_index = -1` inside `_set_direction` based on the angle range. |
+| **Character jitters** | Conflict between `_process` and physics | If character movement uses `CharacterBody2D`, update direction from physics velocity: `direction = velocity.angle()`. |

@@ -39,11 +39,11 @@ A sect's identity is defined by **Palette + Shape Grammar (Polygonal Symmetry + 
 
 ### 4. Iterative Visual Language Dictionary (Prompt → Parameter Mapping)
 When the user critiques a visual preview using natural language, translate directly to SDF parameters:
-* *"Daha pikselize / retro olsun"* → Use `--mode pixel` or increase `pixel_scale` / lower `pixel_grid`.
-* *"Kenarları daha sert / keskin olsun"* → Increase `sharpness` (`0.90+`) and lower `noise_amp` (`0.10–0.20`).
-* *"Daha kaotik / vahşi / alevli dursun"* → Increase `noise_amp` (`0.75+`) and set `angular_facets = 0`.
-* *"Menzili / alanı yerde tam belli olmuyor"* → Adjust `--y-scale 0.65` and boost outer telegraph ring contrast.
-* *"Merkezi daha yoğun / patlayıcı olsun"* → Upgrade `--rarity legendary` or boost `glow_mult`.
+* *"Make it more pixelated / retro"* → Use `--mode pixel` or increase `pixel_scale` / lower `pixel_grid`.
+* *"Make the edges harder / sharper"* → Increase `sharpness` (`0.90+`) and lower `noise_amp` (`0.10–0.20`).
+* *"Make it more chaotic / wild / fiery"* → Increase `noise_amp` (`0.75+`) and set `angular_facets = 0`.
+* *"The range / area on the ground isn't clear enough"* → Adjust `--y-scale 0.65` and boost outer telegraph ring contrast.
+* *"Make the center denser / more explosive"* → Upgrade `--rarity legendary` or boost `glow_mult`.
 
 ---
 

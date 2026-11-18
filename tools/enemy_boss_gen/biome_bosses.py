@@ -1,6 +1,6 @@
 """
 Biome Bosses Sprite Generators for 'Aestra: The Last Wish'
-Includes Kök Devi, Prizma Golemi, Kül Kirpisi, Çamur Ana, Cevher Kralı (all 64x64).
+Includes Root Giant, Prism Golem, Spiky Ash Beast, Mud Mother, Ore King (all 64x64).
 """
 
 import math
@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw
 from .draw_utils import hex_to_rgba, pset, draw_circle, draw_rect, draw_poly, draw_capsule, add_outline
 
 # ==============================================================================
-# 1. KÖK DEVİ (Root Giant - Kuzey Ormanı Boss) - 64x64
+# 1. ROOT GIANT (Northern Forest Boss) - 64x64
 # ==============================================================================
 
 def generate_kok_devi_frame(action: str, frame_idx: int) -> Image.Image:
@@ -164,7 +164,7 @@ def generate_kok_devi_frame(action: str, frame_idx: int) -> Image.Image:
     return add_outline(img, (20, 12, 6, 255))
 
 # ==============================================================================
-# 2. PRİZMA GOLEMİ (Prism Golem - Kristal Vadi Boss) - 64x64
+# 2. PRISM GOLEM (Crystal Valley Boss) - 64x64
 # ==============================================================================
 
 def generate_prizma_golemi_frame(action: str, frame_idx: int) -> Image.Image:
@@ -276,7 +276,7 @@ def generate_prizma_golemi_frame(action: str, frame_idx: int) -> Image.Image:
     return add_outline(img, (8, 20, 35, 255))
 
 # ==============================================================================
-# 3. KÜL KİRPİSİ (Spiky Ash Beast - Külden Çalılıklar Boss) - 64x64
+# 3. SPIKY ASH BEAST (Ash Thicket Boss) - 64x64
 # ==============================================================================
 
 def generate_kul_kirpisi_frame(action: str, frame_idx: int) -> Image.Image:
@@ -396,7 +396,7 @@ def generate_kul_kirpisi_frame(action: str, frame_idx: int) -> Image.Image:
     return add_outline(img, (16, 14, 15, 255))
 
 # ==============================================================================
-# 4. ÇAMUR ANA (Mud Mother - Bataklık Kıyısı Boss) - 64x64
+# 4. MUD MOTHER (Swamp Coast Boss) - 64x64
 # ==============================================================================
 
 def generate_camur_ana_frame(action: str, frame_idx: int) -> Image.Image:

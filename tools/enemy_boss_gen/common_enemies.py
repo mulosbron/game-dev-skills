@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw
 from .draw_utils import hex_to_rgba, pset, draw_circle, draw_rect, draw_poly, add_outline
 
 # ==============================================================================
-# 1. SHADOW IMP (Gölge İblisi) - 32x32
+# 1. SHADOW IMP - 32x32
 # ==============================================================================
 
 def generate_shadow_imp_frame(action: str, frame_idx: int) -> Image.Image:
@@ -492,7 +492,7 @@ def generate_ash_crawler_frame(action: str, frame_idx: int) -> Image.Image:
     return add_outline(img, (15, 14, 14, 255))
 
 # ==============================================================================
-# 5. SWAMP SLIME (Bataklık Balçığı) - 32x32
+# 5. SWAMP SLIME - 32x32
 # ==============================================================================
 
 def generate_swamp_slime_frame(action: str, frame_idx: int) -> Image.Image:
@@ -571,7 +571,7 @@ def generate_swamp_slime_frame(action: str, frame_idx: int) -> Image.Image:
     return add_outline(img, (18, 24, 14, 255))
 
 # ==============================================================================
-# 6. LAVA HOUND (Lav Tazısı) - 40x32
+# 6. LAVA HOUND - 40x32
 # ==============================================================================
 
 def generate_lava_hound_frame(action: str, frame_idx: int) -> Image.Image:

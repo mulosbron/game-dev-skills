@@ -38,20 +38,20 @@ Always classify the request into Mode A, B, or C before editing project files or
 1. **Request or Co-Author a Markdown GDD (`GDD.md`) First:**
    - Ask the user for their **Markdown Game Design Document (`GDD.md`)** (or paste its sections).
    - **If they already have a `GDD.md`:** Read and validate it for gaps; ask only for missing technical choices (`Engine & Target Platform`, `Asset Pipeline`, `v1 Exclusions`) using `(Recommended)` defaults.
-   - **If they do NOT have a `GDD.md` yet:** Run 1 concise Q&A round (with `(Recommended)` defaults so `"sen seç"` works) covering: **Genre & Sub-genre (türü/cinsi)**, **Art Style & Palette**, **30-Second Core Loop & Camera**, **Engine & Platform** (`godot`, `web-2d-games`/`three-quarks`, `GameMaker`, `awesome-gamedev`, C++ `the-forge`/`jolt-physics`), and **Explicit v1 Exclusions** (e.g., no menu/save/multiplayer yet) — then generate a clean Markdown `GDD.md` (use `claude-code-game-studios/subskills/quick-design` or `game-docs` templates when helpful) and wait for approval.
+   - **If they do NOT have a `GDD.md` yet:** Run 1 concise Q&A round (with `(Recommended)` defaults so `"you choose"` works) covering: **Genre & Sub-genre**, **Art Style & Palette**, **30-Second Core Loop & Camera**, **Engine & Platform** (`godot`, `web-2d-games`/`three-quarks`, `GameMaker`, `awesome-gamedev`, C++ `the-forge`/`jolt-physics`), and **Explicit v1 Exclusions** (e.g., no menu/save/multiplayer yet) — then generate a clean Markdown `GDD.md` (use `claude-code-game-studios/subskills/quick-design` or `game-docs` templates when helpful) and wait for approval.
 2. **Skill Routing & 60-Second Prototype First:** Once `GDD.md` is approved, list the exact skills/tools to apply and build a single-scene 60-second runnable prototype first, then layer `game-feel`, VFX/SFX, and QA checks (`level-pipeline` / `voxl`).
 
 ### Mode B — Existing Game Project (Context → Audit → Action Report Gate)
 1. **Understand the Game First (Before Auditing or Changing Code):**
    - Scan the project root (`project.godot`, `package.json`, `*.yyp`, `Assets/ProjectSettings/`, `*.uproject`, `CMakeLists.txt`) via `skills/awesome-gamedev/router/SKILL.md` (`Step 1 Engine Detection`), AND ask/confirm with the user:
-     - **Game Genre & Sub-type (türü & cinsi):** e.g., roguelike action, cozy farming sim, turn-based RPG, platformer.
+     - **Game Genre & Sub-type:** e.g., roguelike action, cozy farming sim, turn-based RPG, platformer.
      - **Art Style & Technical Look:** e.g., top-down 16x16 pixel art, HD-2D, low-poly 3D, hand-drawn 2D.
      - **Target Improvement Scope:** What the user wants improved — **UI/UX, VFX, SFX/Audio, Game Feel, Core Loop/Progression, Camera, AI, or Physics** (or a full audit).
 2. **Detect Problems & Prepare an Action Report (Do NOT edit yet):**
    - Audit the codebase against the matching skills (`game-engineering`, `game-feel`, `platformer-forgiveness`, `godot-pixel-pipeline`, `vfx-forge`, `limboai`, `phantom-camera`, implicit-state-machine rule, etc.) and present a structured **Diagnostic & Action Report**:
-     - **Detected Issues (Tespit Edilen Sorunlar):** Concrete file paths, missing feedback/UX/VFX/SFX/loop gaps, or architectural bottlenecks.
-     - **Why It Hurts & Proposed Fix ("Şunu Şöyle Yapacağız"):** Exact plan per area (UI/UX, VFX, SFX, gameplay, scripts/shaders/tools to add or edit) and expected player-feel impact.
-3. **Wait for Approval, Then Execute Incrementally:** Present options if multiple fixes exist, obtain `"Onayla / Uygula"`, and apply changes without breaking existing architecture.
+     - **Detected Issues:** Concrete file paths, missing feedback/UX/VFX/SFX/loop gaps, or architectural bottlenecks.
+     - **Why It Hurts & Proposed Fix:** Exact plan per area (UI/UX, VFX, SFX, gameplay, scripts/shaders/tools to add or edit) and expected player-feel impact.
+3. **Wait for Approval, Then Execute Incrementally:** Present options if multiple fixes exist, obtain user approval, and apply changes without breaking existing architecture.
 
 ### Mode C — Standalone Asset, VFX, Audio, or Tool Production (Asset-Only)
 1. Use this mode when the user only wants **sprites, tilesets, 3D models, PBR materials, normal maps, VFX strips, or SFX/music**—never force a `GDD.md` or full-game audit here.
