@@ -1,0 +1,29 @@
+session,tester,build,second,event,location,note,assisted
+0.2-T01,T01,0.2.0,35,stuck,Warehouse,"Did not notice the door could be opened",no
+0.2-T01,T01,0.2.0,70,stuck,Warehouse,"Told player to go to the door",yes
+0.2-T01,T01,0.2.0,150,positive,Plaza,"Laughed after discovering the first jump shortcut",no
+0.2-T01,T01,0.2.0,420,quit,2nd Bridge,,no
+0.2-T02,T02,0.2.0,40,stuck,Warehouse,"Wandered around the door for three minutes",no
+0.2-T02,T02,0.2.0,210,died,2nd Bridge,"Hit by unseen archer on the bridge",no
+0.2-T02,T02,0.2.0,230,died,2nd Bridge,,no
+0.2-T02,T02,0.2.0,600,positive,Tower,"Stopped to take in the tower vista",no
+0.2-T03,T03,0.2.0,38,stuck,Warehouse,,no
+0.2-T03,T03,0.2.0,95,confused,Warehouse,"Did not know how to open inventory",no
+0.2-T03,T03,0.2.0,480,positive,Plaza,,no
+0.2-T04,T04,0.2.0,45,stuck,Warehouse,"Thought the door was locked",no
+0.2-T04,T04,0.2.0,300,died,2nd Bridge,,no
+0.2-T04,T04,0.2.0,540,quit,2nd Bridge,"Said 'I'm done with this'",no
+0.3-T05,T05,0.3.0,20,positive,Warehouse,"Door now glows, opened it immediately",no
+0.3-T05,T05,0.3.0,180,died,2nd Bridge,,no
+0.3-T06,T06,0.3.0,25,positive,Warehouse,,no
+0.3-T06,T06,0.3.0,160,died,2nd Bridge,"Archer is still off-screen",no
+0.3-T06,T06,0.3.0,620,positive,Tower,,no
+0.3-T07,T07,0.3.0,30,positive,Warehouse,,no
+0.3-T07,T07,0.3.0,175,died,2nd Bridge,,no
+0.3-T07,T07,0.3.0,700,quit,Tower,,no
+0.3-T08,T08,0.3.0,22,stuck,Warehouse,"Opened the door but could not find the objective",no
+0.3-T08,T08,0.3.0,190,died,2nd Bridge,,no
+0.3-T08,T08,0.3.0,650,positive,Plaza,,no
+0.3-T09,T09,0.3.0,28,positive,Warehouse,,no
+0.3-T09,T09,0.3.0,170,died,2nd Bridge,,no
+0.3-T09,T09,0.3.0,660,positive,Tower,,no

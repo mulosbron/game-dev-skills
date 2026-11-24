@@ -1,0 +1,22 @@
+{
+  "skill_name": "skill-to-script",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Review the skill in po-check/. Users complain it behaves inconsistently on each run and burns too many tokens. Refactor it and write the updated skill under outputs/po-check/.",
+      "expected_output": "Lint findings, separation of deterministic script work vs. model judgment, parameterized Python script with passing tests, and SKILL.md reduced to a condition -> command router.",
+      "files": [
+        "evals/files/po-check/SKILL.md",
+        "evals/files/po-check/scripts/calc_tax.py"
+      ],
+      "expectations": [
+        "Skill is linted with scripts/skill_lint.py and findings (unmentioned script, untested script, vague terms) are listed",
+        "Steps are split between deterministic scripts and model judgment (currency conversion and approval calls stay with the model)",
+        "A parameterized script handles numeric reconciliation and passes unit tests",
+        "Updated SKILL.md includes a situation -> command table and cites script filenames with .py",
+        "Updated skill passes scripts/skill_lint.py with zero ERROR and zero WARNING findings",
+        "Response is written in English; updated skill is placed under outputs/po-check and response.md is saved"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "person": "Alex (sample data)",
+  "skills": [
+    {
+      "name": "Digital Illustration",
+      "domain": "visual_art",
+      "level": "comfortable",
+      "note": "Three years of tablet drawing; completed small commissions."
+    },
+    {
+      "name": "Godot",
+      "domain": "game_engine",
+      "level": "beginner",
+      "note": "Started a platformer prototype but got tangled in scene tree organization."
+    }
+  ]
+}

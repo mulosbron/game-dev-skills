@@ -1,0 +1,39 @@
+{
+  "game": "Lighthouse Keeper (sample data)",
+  "build": "0.2.0",
+  "answers": {
+    "input": {
+      "coyote_time": {"status": "no", "note": "Pressing one frame after stepping off a ledge fails to jump"},
+      "input_buffer": {"status": "no", "note": "Pressing jump just before touching down is dropped"},
+      "hold_duration": {"status": "partial", "note": "Short hop exists, but height difference is too small"},
+      "rapid_repeat": "na",
+      "accidental_press": "partial"
+    },
+    "playtest": {
+      "five_testers_per_build": "no",
+      "live_observation": "yes",
+      "no_handholding": "partial",
+      "designer_ownership": "yes",
+      "iteration_loop": "partial"
+    },
+    "micro_animation": {
+      "locomotion_animations": "yes",
+      "turn_pivot": "no",
+      "jump_squash_stretch": "no",
+      "fall_animation": "no",
+      "subtle_details": "no"
+    },
+    "movement_momentum": {
+      "deliberate_feel_target": "yes",
+      "documented_parameters": "partial",
+      "intentional_exceptions": "yes"
+    },
+    "atmosphere": {
+      "impact_particles": "partial",
+      "ambient_particles": "no",
+      "parallax": "yes",
+      "lighting": "yes",
+      "sense_of_place": {"status": "partial", "note": "Should feel like a coastal lighthouse town; currently just a flat backdrop"}
+    }
+  }
+}

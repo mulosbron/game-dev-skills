@@ -1,6 +1,6 @@
 # Agent Game Forge & PlayForge (`game-dev-skills`) — Master Summary & Agent Tree Router
 
-Unified game development hub combining **PlayForge**, **Agent Game Forge (`GameMaker`)**, and curated multi-engine skills (**69 top-level skills**, **79 `awesome-gamedev` sub-skills**, **78 `claude-code-game-studios` sub-skills**, **24 Reverse-DNS libraries**, **5 commercial-cleared asset collections**, **35 Python CLI tools**, and **18 hierarchical agent specs** in [`agents/`](agents/README.md)).
+Unified game development hub combining **PlayForge**, **Agent Game Forge (`GameMaker`)**, and curated multi-engine skills (**73 top-level skills**, **79 `awesome-gamedev` sub-skills**, **78 `claude-code-game-studios` sub-skills**, **24 Reverse-DNS libraries**, **5 commercial-cleared asset collections**, **35 Python CLI tools**, and **18 hierarchical agent specs** in [`agents/`](agents/README.md)).
 
 > **Anti-Chaos Rule:** Never load unrelated 2D, 2.5D, and 3D skills at once. Classify the request (`Mode A / B / C`), detect the engine and perspective, and **route directly into the matching specialist in [`agents/`](agents/README.md)** for full step-by-step pipelines and CLI chains.
 
@@ -31,7 +31,7 @@ game-dev-skills/
 ├── exports/                   # Generated strips, normal maps, GLBs, heatmaps & shaders
 ├── docs/                      # Master guides (incl. godot-pixel-texture-rehberi.md)
 ├── projects/                  # Local game projects (gitignored; never pushed)
-└── skills/                    # 69 standardized skills + awesome-gamedev & claude-code-game-studios routers
+└── skills/                    # 73 standardized skills + awesome-gamedev & claude-code-game-studios routers
 ```
 
 ---
@@ -67,7 +67,7 @@ Classify every request before editing project files or writing game code (`Disco
 
 ## 4. Hierarchical Agent Tree & Routing Table (`agents/`)
 
-Full details, multi-step task chains, and exact PowerShell commands live inside each agent file (see [`agents/README.md`](agents/README.md) for the complete 69-skill & 35-tool ledger).
+Full details, multi-step task chains, and exact PowerShell commands live inside each agent file (see [`agents/README.md`](agents/README.md) for the complete 73-skill & 35-tool ledger).
 
 ### Fast-Path Cross-Tool Pipeline Agents (Root `agents/`)
 
@@ -83,7 +83,7 @@ Full details, multi-step task chains, and exact PowerShell commands live inside 
 
 | Game Type / Need | Specialist Agent to Load First | Core Skills & Tools Owned |
 |---|---|---|
-| **Intake, Engine Detection, Studio Rigor** | [`agents/00-orchestrator/game-director-router.md`](agents/00-orchestrator/game-director-router.md) | `awesome-gamedev`, `claude-code-game-studios`, `game-engineering`, `sustainable-indie-dev`, `asset_search.py`, `unpack_libraries.py` |
+| **Intake, Engine Detection, Studio Rigor** | [`agents/00-orchestrator/game-director-router.md`](agents/00-orchestrator/game-director-router.md) | `awesome-gamedev`, `claude-code-game-studios`, `game-engineering`, `sustainable-indie-dev`, `fantasy-first-design`, `new-game-developer`, `skill-to-script`, `asset_search.py`, `unpack_libraries.py` |
 | **2D / 2.5D Platformer & Metroidvania** | [`agents/01-2d-games/2d-platformer-specialist.md`](agents/01-2d-games/2d-platformer-specialist.md) | `platformer-forgiveness`, `camera-follow-2d`, `hit-feedback`, `game-feel`, `atmospheric-perspective`, `pixel-perfect`, `godot`, `web-2d-games`, `level-pipeline`, `ldtk` (`platformer_forgiveness.py`, `camera_follow_2d.py`, `hit_feedback.py`, `atmospheric_perspective.py`, `pixel_perfect.py`, `level_pipeline.py`) |
 | **2D Top-Down RPG / Roguelike / Cozy Sim** | [`agents/01-2d-games/2d-topdown-rpg-roguelike-specialist.md`](agents/01-2d-games/2d-topdown-rpg-roguelike-specialist.md) | `wang-tiles`, `water-shorelines`, `shadowcasting`, `see-through`, `loot-window`, `crafting-systems`, `game-engineering`, `dialogic`, `limboai`, `yuka`, `ldtk`, `generate2dmap`, `camera-follow-2d`, `hit-feedback`, `game-feel`, `godot` (`wang_tiles.py`, `water_shorelines.py`, `shadowcasting.py`, `see_through.py`, `loot_window.py`) |
 | **2.5D 2:1 Isometric (`flat2iso`)** | [`agents/02-25d-isometric/25d-isometric-flat2iso-specialist.md`](agents/02-25d-isometric/25d-isometric-flat2iso-specialist.md) | `flat2iso` (`tools/flat2iso.py` + `skills/flat2iso/assets/flat2iso.html` Studio), `spritefusion-sprite-normals`, `pixel-snapper`, `pixel-perfect`, `see-through`, `shadowcasting`, `vfx-forge`, `generate2dmap`, `wang-tiles`, `water-shorelines` |
@@ -95,13 +95,13 @@ Full details, multi-step task chains, and exact PowerShell commands live inside 
 | **3D Worlds, Physics, AI & C++17 Engines** | [`agents/04-3d-worlds-pipeline/3d-world-physics-engine-specialist.md`](agents/04-3d-worlds-pipeline/3d-world-physics-engine-specialist.md) | Godot 3D (`godot`, `godot-jolt`, `godot-voxel`, `terrain3d`, `phantom-camera`, `limboai`) & C++17 (`the-forge`, `jolt-physics`, `ozz-animation`, `recastnavigation`, `effekseer`) |
 | **Mixed-Source 3D Unification (6-Stage)** | [`agents/04-3d-worlds-pipeline/asset-harmonizer-specialist.md`](agents/04-3d-worlds-pipeline/asset-harmonizer-specialist.md) | `asset-harmonizer` (`asset_harmonizer.py`), `glb-forge`, `blender-kiln`, `material-maker`, `image-to-pixel` |
 | **Web 2D/3D, 67js, Colyseus & Yuka AI** | [`agents/05-web-multiplayer-qa/web-multiplayer-specialist.md`](agents/05-web-multiplayer-qa/web-multiplayer-specialist.md) | `web-2d-games`, `colyseus`, `three-quarks`, `yuka`, `build-67js-scene`, `render-67js-media`, `awesome-gamedev` (`micro_engine.py`, `glb_forge.py`) |
-| **Level BFS, Voxl 60FPS QA & Release** | [`agents/05-web-multiplayer-qa/level-qa-playtest-specialist.md`](agents/05-web-multiplayer-qa/level-qa-playtest-specialist.md) | `level-pipeline` (`level_pipeline.py`), `voxl` (`voxl_client.py`), `pixel-perfect`, `godot-pixel-pipeline`, `godot-mcp`, `sustainable-indie-dev`, `claude-code-game-studios` |
+| **Level BFS, Voxl 60FPS QA & Release** | [`agents/05-web-multiplayer-qa/level-qa-playtest-specialist.md`](agents/05-web-multiplayer-qa/level-qa-playtest-specialist.md) | `level-pipeline` (`level_pipeline.py`), `playtest`, `voxl` (`voxl_client.py`), `pixel-perfect`, `godot-pixel-pipeline`, `godot-mcp`, `sustainable-indie-dev`, `claude-code-game-studios` |
 
 ---
 
-## 5. Quick Skill Index (`skills/<name>/SKILL.md` — 69 Skills)
+## 5. Quick Skill Index (`skills/<name>/SKILL.md` — 73 Skills)
 
-- **Design, Routers & Production (11):** `awesome-gamedev` · `claude-code-game-studios` · `game-engineering` · `game-feel` · `hit-feedback` · `platformer-forgiveness` · `camera-follow-2d` · `crafting-systems` · `sustainable-indie-dev` · `web-2d-games` · `level-pipeline`
+- **Design, Routers & Production (15):** `awesome-gamedev` · `claude-code-game-studios` · `fantasy-first-design` · `game-engineering` · `game-feel` · `hit-feedback` · `new-game-developer` · `platformer-forgiveness` · `camera-follow-2d` · `crafting-systems` · `playtest` · `skill-to-script` · `sustainable-indie-dev` · `web-2d-games` · `level-pipeline`
 - **Godot 4 Ecosystem (10):** `godot` · `godot-fake-3d-character` · `godot-jolt` · `godot-voxel` · `terrain3d` · `limboai` · `phantom-camera` · `dialogic` · `godot-mcp` · `godot-pixel-pipeline`
 - **C++ Rendering, Physics, Anim, Nav & VFX (5):** `the-forge` · `jolt-physics` · `ozz-animation` · `recastnavigation` · `effekseer`
 - **Web 3D, Multiplayer & JS AI (5):** `colyseus` · `three-quarks` · `yuka` · `build-67js-scene` · `render-67js-media`

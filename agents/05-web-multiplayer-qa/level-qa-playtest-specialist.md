@@ -9,6 +9,7 @@ children:
   - agents/game-feel-qa.md
 skills:
   - level-pipeline
+  - playtest
   - voxl
   - pixel-perfect
   - godot-pixel-pipeline
@@ -80,6 +81,7 @@ When driving Godot directly, use `skills/godot-mcp/SKILL.md` (`libraries/com.git
   - `/playtest-report` (first-5-minutes friction & `CD-PLAYTEST` review)
   - `/gate-check` (`docs/director-gates/` phase transitions)
   - `/release-checklist` / `/launch-checklist`
+- **Human Observation Playtest Reports (`playtest`):** Read `skills/playtest/SKILL.md` and aggregate live 5-tester observation CSVs across builds via `python skills/playtest/scripts/playtest_report.py`.
 - **Indie Scope & Store Hook Check (`sustainable-indie-dev`):** Read `skills/sustainable-indie-dev/SKILL.md` to validate Steam/itch hook clarity, cut non-essential bloat (`/cut`), and lock realistic milestone scope.
 
 ---

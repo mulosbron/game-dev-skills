@@ -1,0 +1,13 @@
+Hi, I have a game idea called "Shadow Catcher", a 2D platformer.
+
+I want it to look a lot like Hollow Knight: same hand-drawn dark art, a masked bug-like protagonist, and a melancholic underground world. The premise: a little shadow catcher uses a lantern to catch lost spirits and bring them back to town.
+
+I don't know if anyone would buy this; I'm mostly making it for myself.
+
+Gameplay: slow spirits down with the lantern beam, then catch them in a net. Each captured spirit opens a new shop in town; no skill tree.
+
+Hollow Knight's cartographer and shop system are great—I want to take them verbatim (bug shopkeeper, cartographer, inn).
+
+I also like Celeste's "die at the start of a room, try again right away" loop, though I'm unsure if it fits.
+
+I need a single-sentence pitch for a Steam page.

@@ -28,6 +28,9 @@ skills:
   - claude-code-game-studios
   - game-engineering
   - sustainable-indie-dev
+  - fantasy-first-design
+  - new-game-developer
+  - skill-to-script
 cli_tools:
   - tools/asset_search.py
   - tools/unpack_libraries.py
@@ -56,6 +59,9 @@ You are the **Root Orchestrator** of the `game-dev-skills` agent tree. Your prim
 | Full Studio Production Framework | `skills/claude-code-game-studios/SKILL.md` | 7-phase production ladder, 49 studio agent roles, 69 genre chipsets, 28 director gates (`--review solo/lean/full`) |
 | Loop & Motivation Diagnostics | `skills/game-engineering/SKILL.md` | Diagnosing flat core loops, churn points, progression curves, and reward pacing |
 | Indie Scope & Release Strategy | `skills/sustainable-indie-dev/SKILL.md` | Preventing scope creep, vertical-slice planning, Steam/itch hook alignment |
+| Fantasy-First Concept & Clone Audit | `skills/fantasy-first-design/SKILL.md` | Grounding concepts in player fantasy, auditing borrowed friction vs. identity (`scripts/fantasy_brief.py`) |
+| Newcomer Background Onboarding | `skills/new-game-developer/SKILL.md` | Mapping non-game skills onto 3 core game-dev foundations (`scripts/skill_inventory.py`) |
+| Skill Linting & Script Conversion | `skills/skill-to-script/SKILL.md` | Converting repetitive prose steps to scripts and linting skills (`scripts/skill_lint.py`, `scripts/audit_skills.py`) |
 | Asset Discovery CLI | `tools/asset_search.py` | Offline search & inspection (`search`, `inspect`, `categories`, `index`) without flooding context |
 | Library Unpacker | `tools/unpack_libraries.py` | Extracts zipped packs under `libraries/` (`--all` or targeted library name) |
 

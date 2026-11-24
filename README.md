@@ -1,6 +1,6 @@
 # PlayForge & Agent Game Forge (`game-dev-skills`)
 
-Unified game development workspace, asset/library forge, CLI toolkit, hierarchical agent tree, and skill collection (**69 top-level skills**, **79 `awesome-gamedev` sub-skills**, **78 `claude-code-game-studios` studio sub-skills**, **24 Reverse-DNS libraries**, **5 commercial-cleared asset collections**, **35 Python CLI tools**, and **18 agent specs** in `agents/`). Compatible with Antigravity, Claude Code, Codex, Gemini CLI, Cursor, and Windsurf.
+Unified game development workspace, asset/library forge, CLI toolkit, hierarchical agent tree, and skill collection (**73 top-level skills**, **79 `awesome-gamedev` sub-skills**, **78 `claude-code-game-studios` studio sub-skills**, **24 Reverse-DNS libraries**, **5 commercial-cleared asset collections**, **35 Python CLI tools**, and **18 agent specs** in `agents/`). Compatible with Antigravity, Claude Code, Codex, Gemini CLI, Cursor, and Windsurf.
 
 ## Directory Layout
 
@@ -28,7 +28,7 @@ game-dev-skills/
 ├── exports/                   # Generated strips, normal maps, GLBs, levels & shaders
 ├── docs/                      # Reference guides (`godot-pixel-texture-rehberi.md`)
 ├── projects/                  # Local game projects (gitignored; never pushed)
-└── skills/                    # 69 top-level skill directories (indexed in AGENTS.md & agents/README.md)
+└── skills/                    # 73 top-level skill directories (indexed in AGENTS.md & agents/README.md)
 ```
 
 ## Step-by-Step User & Plugin Guide
@@ -38,9 +38,9 @@ All four major agent ecosystems are pre-configured at the root of `game-dev-skil
 
 | Client | Config File | How to Use |
 |---|---|---|
-| **Antigravity IDE / CLI** | `plugin.json` + `.agents/skills.json` | Installed under `~/.agents/game-dev-skills/` or opened as a workspace — `.agents/skills.json` auto-discovers all 69 skills in `skills/`; reference `@game-dev-skills`. |
+| **Antigravity IDE / CLI** | `plugin.json` + `.agents/skills.json` | Installed under `~/.agents/game-dev-skills/` or opened as a workspace — `.agents/skills.json` auto-discovers all 73 skills in `skills/`; reference `@game-dev-skills`. |
 | **Claude Code** | `.claude-plugin/plugin.json` + `CLAUDE.md` | Install/load plugin directory (`claude --plugin-dir ~/.agents/game-dev-skills` or copy into project). `CLAUDE.md` imports `@AGENTS.md` and `.claude-plugin/plugin.json` exposes `./skills/` and `./agents/`. |
-| **Codex** | `.codex-plugin/plugin.json` (`"skills": "./skills/"`, `"agents": "./agents/"`) | Register plugin/workspace directory so Codex indexes all 69 skills in `./skills/`, 18 agents in `./agents/`, plus `./AGENTS.md`. |
+| **Codex** | `.codex-plugin/plugin.json` (`"skills": "./skills/"`, `"agents": "./agents/"`) | Register plugin/workspace directory so Codex indexes all 73 skills in `./skills/`, 18 agents in `./agents/`, plus `./AGENTS.md`. |
 | **Gemini CLI** | `gemini-extension.json` (`"contextFileName": "AGENTS.md"`) | Link or install as an extension (`gemini extensions link ~/.agents/game-dev-skills`). |
 | **Cursor / Windsurf** | `AGENTS.md` | Add `@AGENTS.md` or copy `AGENTS.md` + needed `skills/` into your project root. |
 
@@ -61,7 +61,7 @@ All four major agent ecosystems are pre-configured at the root of `game-dev-skil
 
 ## Skill Highlights by Domain
 
-- **Design, Loops, Production & Multi-Engine Routing (11):** `game-feel`, `hit-feedback`, `platformer-forgiveness`, `camera-follow-2d`, `game-engineering`, `crafting-systems`, `sustainable-indie-dev`, `web-2d-games`, `level-pipeline`, `claude-code-game-studios` (78 studio subskills, 49 agents, QA gates), and `awesome-gamedev` (`router/SKILL.md` dispatching 79 engine/genre/publishing sub-skills).
+- **Design, Loops, Production & Multi-Engine Routing (15):** `game-feel`, `hit-feedback`, `platformer-forgiveness`, `camera-follow-2d`, `game-engineering`, `crafting-systems`, `fantasy-first-design`, `new-game-developer`, `playtest`, `skill-to-script`, `sustainable-indie-dev`, `web-2d-games`, `level-pipeline`, `claude-code-game-studios` (78 studio subskills, 49 agents, QA gates), and `awesome-gamedev` (`router/SKILL.md` dispatching 79 engine/genre/publishing sub-skills).
 - **Godot 4 Ecosystem (10):** `godot`, `godot-fake-3d-character`, `godot-jolt`, `godot-voxel`, `terrain3d`, `limboai`, `phantom-camera`, `dialogic`, `godot-mcp`, `godot-pixel-pipeline`.
 - **C++ Rendering, Physics, Animation, Navigation & VFX (5):** `the-forge`, `jolt-physics`, `ozz-animation`, `recastnavigation`, `effekseer`.
 - **Multiplayer, Web 3D & JS Game AI (5):** `colyseus` (v0.18 + `references/`), `three-quarks`, `yuka`, `build-67js-scene`, `render-67js-media`.
@@ -70,7 +70,7 @@ All four major agent ecosystems are pre-configured at the root of `game-dev-skil
 
 ## Hierarchical Agent Tree (`agents/`)
 
-See [`agents/README.md`](agents/README.md) for the full visual orchestration tree, 69-skill coverage ledger, and 35-tool routing matrix:
+See [`agents/README.md`](agents/README.md) for the full visual orchestration tree, 73-skill coverage ledger, and 35-tool routing matrix:
 - **Root Pipeline Entrypoints (`agents/`):** `asset-scout.md`, `pixel-2d-pipeline.md`, `3d-forge-pipeline.md`, `game-feel-qa.md`, `asset-harmonizer-agent.md`
 - **Orchestrator & Specialist Branches:** `00-orchestrator/` → `01-2d-games/` · `02-25d-isometric/` · `03-2d-asset-vfx-forge/` · `04-3d-worlds-pipeline/` · `05-web-multiplayer-qa/`
 

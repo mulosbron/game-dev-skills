@@ -1,0 +1,47 @@
+{
+  "game": "Night Shift (sample data)",
+  "fantasy": "Sit in the cockpit of a giant machine and operate it",
+  "craving": "The childhood wish to climb into an excavator at the park and command heavy machinery—see every lever do something immediately and master the controls.",
+  "fantasy_scale": "medium",
+  "target_audience": "Players who enjoy simulation and heavy-paced incremental games",
+  "mechanics": [
+    "Pulling levers and flipping switches inside the cockpit",
+    "Selling power surges to the grid to fund upgrades"
+  ],
+  "inspirations": [
+    {
+      "game": "Farming Simulator",
+      "borrowed": "Machine purpose is clear just by looking at it",
+      "category": "interaction_layout",
+      "type": "solution",
+      "my_context": "Instead of farm equipment, a fictional artillery-style rig where every lever visibly moves a part"
+    },
+    {
+      "game": "Armored Core 6",
+      "borrowed": "Single-currency economy",
+      "category": "currency_system",
+      "type": "solution",
+      "my_context": "Single currency called 'energy credits'; every upgrade spends it directly with no crafting"
+    },
+    {
+      "game": "Armored Core 6",
+      "borrowed": "Mission structure and between-run part slotting loop",
+      "category": "between_run_upgrades",
+      "type": "solution",
+      "my_context": "Cockpit circuit cards instead of mech parts; balancing power draw instead of weight"
+    },
+    {
+      "game": "PVKK",
+      "borrowed": "In-world tactile UI",
+      "category": "diegetic_ui",
+      "type": "solution",
+      "my_context": "Zero overlay menus; every setting is a physical toggle or dial mounted in the cockpit"
+    },
+    {
+      "game": "Armored Core 6",
+      "borrowed": "Mecha design and world",
+      "type": "identity",
+      "my_context": ""
+    }
+  ]
+}

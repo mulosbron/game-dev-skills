@@ -1,0 +1,23 @@
+{
+  "skill_name": "playtest",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Summarize my playtest notes in notes.txt: how many testers per build, what are the most common issues, and what should I fix first? Did the game improve from 0.4.0 to 0.5.0?",
+      "expected_output": "8-column observation CSV, tester counts per build (4 and 5), 5-tester warning for 0.4.0, assisted session flagged, bridge pillars ranked first, positive reactions counted.",
+      "files": [
+        "evals/files/notes.txt"
+      ],
+      "expectations": [
+        "Notes are converted into 8-column CSV (session,tester,build,second,event,location,note,assisted) and scripts/playtest_report.py runs cleanly",
+        "Build 0.4.0 reports 4 testers and build 0.5.0 reports 5 testers, with the 5-tester minimum warning for 0.4.0",
+        "Assistance given to Deniz (assisted=yes) is logged and highlighted in the response",
+        "Bridge pillars are identified as the most common issue in 0.5.0 and ranked first for fixing",
+        "Estimated timestamps are explicitly labeled as estimated",
+        "Positive reactions are counted along with where they occurred",
+        "Comparison from 0.4.0 to 0.5.0 notes that 0.4.0 only had four testers",
+        "Response is written in English and saved to outputs/response.md"
+      ]
+    }
+  ]
+}

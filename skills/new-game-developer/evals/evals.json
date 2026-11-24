@@ -1,0 +1,19 @@
+{
+  "skill_name": "new-game-developer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Hi! I'm 29 and work as a data analyst at a bank. I write Excel formulas and macros and know SQL. I studied textile engineering. I used to play the lute in high school and still play occasionally. I've never drawn anything. I installed Blender twice and closed it when I saw all the panels. I downloaded Godot, watched a few videos, and couldn't wrap my head around nodes and scenes. Everyone on YouTube says 'just make a small game right away.' I really want to make games—where should I start? Also, I'm not a CS major: Unreal or Unity?",
+      "expected_output": "Skill inventory mapped to the three foundations, per-foundation status, one concrete next step, and a direct answer to the engine question.",
+      "files": [],
+      "expectations": [
+        "Inventory uses valid domains and levels and scripts/skill_inventory.py runs without errors",
+        "All three foundations (balanced composition, complexity tolerance, practical developer skill) are reported separately",
+        "One clear next step is recommended consistent with the script's Next Step section",
+        "User is reassured that having a narrow or non-game background is normal and not discouraged from making games",
+        "The Unreal vs. Unity engine question is answered directly without being blocked",
+        "Response is written in English and saved to outputs/response.md"
+      ]
+    }
+  ]
+}

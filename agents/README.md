@@ -1,13 +1,13 @@
 # Hierarchical Agent Tree & Orchestration Index (`agents/`)
 
-Welcome to the **`game-dev-skills` Agent Tree**. Because this hub spans **2D, 2.5D (Isometric / Fake-3D / Sprite-Stacking / HD-2D / Retro FPS), and 3D** across **69 top-level skills**, **79 `awesome-gamedev` sub-skills**, **78 `claude-code-game-studios` subskills**, **24 Reverse-DNS libraries**, **5 asset collections**, and **35 Python CLI tools**, agents never load everything blindly.
+Welcome to the **`game-dev-skills` Agent Tree**. Because this hub spans **2D, 2.5D (Isometric / Fake-3D / Sprite-Stacking / HD-2D / Retro FPS), and 3D** across **73 top-level skills**, **79 `awesome-gamedev` sub-skills**, **78 `claude-code-game-studios` subskills**, **24 Reverse-DNS libraries**, **5 asset collections**, and **35 Python CLI tools**, agents never load everything blindly.
 
 Instead, every task enters at the root (`AGENTS.md` -> `agents/`) through either one of the **5 Root Cross-Tool Pipeline Agents** or the **Hierarchical Game-Domain Tree**:
 
 ```text
 AGENTS.md (Concise Master Summary & Root Router)
 └── agents/
-    ├── README.md                                          # This Master Agent Tree Map & 69-Skill Coverage Ledger
+    ├── README.md                                          # This Master Agent Tree Map & 73-Skill Coverage Ledger
     ├── asset-scout.md                                     # [Pipeline 1] Multi-Catalog Discovery (2D/3D/VFX/Audio + License Check)
     ├── pixel-2d-pipeline.md                               # [Pipeline 2] pixel_snapper -> flat2iso -> normals -> slicer -> vfx -> godot_pixel_tool
     ├── 3d-forge-pipeline.md                               # [Pipeline 3] abo/threejs/polyspoon/sand3d -> blender_kiln -> glb_forge -> harmonizer
@@ -94,9 +94,9 @@ Every agent chain passes a lightweight **Handoff Receipt** (or `--json` output f
 
 ---
 
-## Complete Coverage Ledger (69 Top-Level Skills & 35 Python CLI Tools)
+## Complete Coverage Ledger (73 Top-Level Skills & 35 Python CLI Tools)
 
-### All 69 Top-Level Skills (`skills/*/SKILL.md`)
+### All 73 Top-Level Skills (`skills/*/SKILL.md`)
 
 | Skill | Primary Owning Agent | Secondary / Cross-Branch Agent |
 |---|---|---|
@@ -114,6 +114,7 @@ Every agent chain passes a lightweight **Handoff Receipt** (or `--json` output f
 | `creature-gen` | [`03-2d-asset-vfx-forge/pixel-character-creature-forge.md`](03-2d-asset-vfx-forge/pixel-character-creature-forge.md) | — |
 | `dialogic` | [`01-2d-games/2d-topdown-rpg-roguelike-specialist.md`](01-2d-games/2d-topdown-rpg-roguelike-specialist.md) | — |
 | `effekseer` | [`03-2d-asset-vfx-forge/vfx-shaders-juice-specialist.md`](03-2d-asset-vfx-forge/vfx-shaders-juice-specialist.md) | [`04-3d-worlds-pipeline/3d-world-physics-engine-specialist.md`](04-3d-worlds-pipeline/3d-world-physics-engine-specialist.md) |
+| `fantasy-first-design` | [`00-orchestrator/game-director-router.md`](00-orchestrator/game-director-router.md) | — |
 | `flat2iso` | [`02-25d-isometric/25d-isometric-flat2iso-specialist.md`](02-25d-isometric/25d-isometric-flat2iso-specialist.md) | — |
 | `game-engineering` | [`00-orchestrator/game-director-router.md`](00-orchestrator/game-director-router.md) | [`01-2d-games/2d-topdown-rpg-roguelike-specialist.md`](01-2d-games/2d-topdown-rpg-roguelike-specialist.md) |
 | `game-feel` | [`03-2d-asset-vfx-forge/vfx-shaders-juice-specialist.md`](03-2d-asset-vfx-forge/vfx-shaders-juice-specialist.md) | [`01-2d-games/2d-platformer-specialist.md`](01-2d-games/2d-platformer-specialist.md), [`01-2d-games/2d-topdown-rpg-roguelike-specialist.md`](01-2d-games/2d-topdown-rpg-roguelike-specialist.md) |
@@ -138,6 +139,7 @@ Every agent chain passes a lightweight **Handoff Receipt** (or `--json` output f
 | `material-maker` | [`04-3d-worlds-pipeline/3d-model-material-forge.md`](04-3d-worlds-pipeline/3d-model-material-forge.md) | [`04-3d-worlds-pipeline/asset-harmonizer-specialist.md`](04-3d-worlds-pipeline/asset-harmonizer-specialist.md) |
 | `mcp-for-blender` | [`04-3d-worlds-pipeline/3d-model-material-forge.md`](04-3d-worlds-pipeline/3d-model-material-forge.md) | — |
 | `mesh-splatting` | [`04-3d-worlds-pipeline/3d-model-material-forge.md`](04-3d-worlds-pipeline/3d-model-material-forge.md) | — |
+| `new-game-developer` | [`00-orchestrator/game-director-router.md`](00-orchestrator/game-director-router.md) | — |
 | `ozz-animation` | [`04-3d-worlds-pipeline/3d-world-physics-engine-specialist.md`](04-3d-worlds-pipeline/3d-world-physics-engine-specialist.md) | — |
 | `phantom-camera` | [`04-3d-worlds-pipeline/3d-world-physics-engine-specialist.md`](04-3d-worlds-pipeline/3d-world-physics-engine-specialist.md) | [`02-25d-isometric/25d-fake3d-hd2d-specialist.md`](02-25d-isometric/25d-fake3d-hd2d-specialist.md) |
 | `pixel-art-atlas` | [`03-2d-asset-vfx-forge/pixel-character-creature-forge.md`](03-2d-asset-vfx-forge/pixel-character-creature-forge.md) | — |
@@ -147,12 +149,14 @@ Every agent chain passes a lightweight **Handoff Receipt** (or `--json` output f
 | `pixelfx` | [`03-2d-asset-vfx-forge/vfx-shaders-juice-specialist.md`](03-2d-asset-vfx-forge/vfx-shaders-juice-specialist.md) | — |
 | `pixelorama` | [`03-2d-asset-vfx-forge/pixel-cleanup-normals-pipeline.md`](03-2d-asset-vfx-forge/pixel-cleanup-normals-pipeline.md) | — |
 | `platformer-forgiveness` | [`01-2d-games/2d-platformer-specialist.md`](01-2d-games/2d-platformer-specialist.md) | — |
+| `playtest` | [`05-web-multiplayer-qa/level-qa-playtest-specialist.md`](05-web-multiplayer-qa/level-qa-playtest-specialist.md) | [`game-feel-qa.md`](game-feel-qa.md) |
 | `polyspoon` | [`04-3d-worlds-pipeline/3d-model-material-forge.md`](04-3d-worlds-pipeline/3d-model-material-forge.md) | — |
 | `recastnavigation` | [`04-3d-worlds-pipeline/3d-world-physics-engine-specialist.md`](04-3d-worlds-pipeline/3d-world-physics-engine-specialist.md) | — |
 | `render-67js-media` | [`05-web-multiplayer-qa/web-multiplayer-specialist.md`](05-web-multiplayer-qa/web-multiplayer-specialist.md) | — |
 | `sand3d-to-roblox` | [`04-3d-worlds-pipeline/3d-model-material-forge.md`](04-3d-worlds-pipeline/3d-model-material-forge.md) | — |
 | `see-through` | [`01-2d-games/2d-topdown-rpg-roguelike-specialist.md`](01-2d-games/2d-topdown-rpg-roguelike-specialist.md) | [`02-25d-isometric/25d-isometric-flat2iso-specialist.md`](02-25d-isometric/25d-isometric-flat2iso-specialist.md), [`02-25d-isometric/25d-fake3d-hd2d-specialist.md`](02-25d-isometric/25d-fake3d-hd2d-specialist.md), [`03-2d-asset-vfx-forge/vfx-shaders-juice-specialist.md`](03-2d-asset-vfx-forge/vfx-shaders-juice-specialist.md) |
 | `shadowcasting` | [`01-2d-games/2d-topdown-rpg-roguelike-specialist.md`](01-2d-games/2d-topdown-rpg-roguelike-specialist.md) | [`02-25d-isometric/25d-isometric-flat2iso-specialist.md`](02-25d-isometric/25d-isometric-flat2iso-specialist.md) |
+| `skill-to-script` | [`00-orchestrator/game-director-router.md`](00-orchestrator/game-director-router.md) | — |
 | `sprite-gen` | [`03-2d-asset-vfx-forge/pixel-character-creature-forge.md`](03-2d-asset-vfx-forge/pixel-character-creature-forge.md) | — |
 | `sprite-stacking` | [`02-25d-isometric/25d-fake3d-hd2d-specialist.md`](02-25d-isometric/25d-fake3d-hd2d-specialist.md) | — |
 | `spritefusion-pixel-snapper` | [`03-2d-asset-vfx-forge/pixel-cleanup-normals-pipeline.md`](03-2d-asset-vfx-forge/pixel-cleanup-normals-pipeline.md) | — |

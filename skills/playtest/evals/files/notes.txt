@@ -1,0 +1,16 @@
+Playtest notes - Fog Bridge
+
+Build 0.4.0 (4 testers)
+- Deniz: ignored the menu at first, entered game. Stayed in controls menu for two minutes, asked "which key jumps?" I told them (said Space). Then fell three times on the first bridge pillar, said "who designed this?" Played six minutes total and quit.
+- Emre: ran straight onto the bridge, cleared the first pillar on first try, laughed and said "that felt good." Fell twice on the second pillar. Quit afterward, saying "enough."
+- Ceren: played five minutes, couldn't figure out what to do at the dock, quit.
+- Faruk: no menu trouble. One fall on first pillar, one fall on second pillar. Looked at the vista on the dock, asked "am I supposed to hang here?" Played nine minutes total, died at the end of the bridge and quit.
+
+Build 0.5.0 (5 testers: Elif, Gokhan, Halil, Irem, Jale)
+- Elif: controls menu is gone, keys are shown on screen. One fall on first pillar. Two falls on second pillar, said "it's not working."
+- Gokhan: one fall on first pillar, three falls on second pillar. Laughed at the dock and admired the view.
+- Halil: two falls on first pillar, three falls on second pillar. Eventually quit.
+- Irem: one fall on first pillar, one fall on second pillar. Said "whoa" at the end of the bridge.
+- Jale: one fall on first pillar, two falls on second pillar. Finished.
+
+Did not write exact timestamps; all happened within the first ten minutes of each session.

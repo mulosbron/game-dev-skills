@@ -1,0 +1,22 @@
+{
+  "skill_name": "fantasy-first-design",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Evaluate my game idea in idea.txt: is there clone risk, what should the Steam one-liner be, and what should I borrow vs. avoid from other games? Produce a full design brief as well.",
+      "expected_output": "Completed design brief, identity elements flagged as clone risk, a fantasy-first Steam one-liner, and guidance to borrow design philosophy rather than identity.",
+      "files": [
+        "evals/files/idea.txt"
+      ],
+      "expectations": [
+        "brief.json is validated cleanly via scripts/fantasy_brief.py with no missing or invalid fields",
+        "Hollow Knight's identity elements (art, masked bug protagonist, underground world; verbatim shopkeeper and cartographer) are flagged as clone risk",
+        "Fantasy statement avoids genre labels ('platformer') and frames who the player gets to be",
+        "Recommendation removes identity elements and borrows design philosophy instead while keeping friction solutions (checkpoints, quest loop)",
+        "Steam one-liner stands on its own and communicates the 'Shadow Catcher' concept clearly",
+        "No fabricated audience size or sales estimates when scale is unspecified",
+        "Response is written in English and saved to outputs/response.md"
+      ]
+    }
+  ]
+}

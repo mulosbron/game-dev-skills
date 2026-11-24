@@ -1,0 +1,21 @@
+{
+  "skill_name": "game-feel",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "My Godot 4 platformer 'Tower Keeper' feels sluggish. I filled out survey.json. Please provide: (1) the full audit report, (2) Godot numbers for a jump height of 3.5 units, 0.3 s time-to-apex, 1.4 fall multiplier, and character height of 1 unit, (3) a comparison of 4, 6, and 8 frames for coyote time, and (4) an action plan of at most five items.",
+      "expected_output": "5-pillar score table (input pillar weakest), script-computed jump parameters, millisecond equivalents for the three coyote windows, a <=5-item plan starting with the input pillar, and a playtest recommendation.",
+      "files": [
+        "evals/files/survey.json"
+      ],
+      "expectations": [
+        "scripts/game_feel_audit.py is executed on the survey file and reports all five pillar scores",
+        "Jump numbers are script-computed: initial velocity 23.3 units/s, gravity_up 77.8, gravity_down 108.9 units/s^2",
+        "Coyote time windows for 4, 6, and 8 frames are expressed in milliseconds (~67, 100, and 133 ms)",
+        "Action plan has at most five items and starts from the weakest pillar (anticipating intended input)",
+        "Response notes that survey scores do not measure real feel and recommends live playtesting",
+        "Response is written in English and saved to outputs/response.md"
+      ]
+    }
+  ]
+}

@@ -17,6 +17,7 @@ skills:
   - pixel-perfect
   - godot-pixel-pipeline
   - level-pipeline
+  - playtest
   - voxl
   - godot-mcp
   - game-engineering
@@ -57,7 +58,7 @@ python tools/hit_feedback.py verify --json
 python tools/hit_feedback.py export-code --engine godot4 --out-dir "exports/code/hit_feedback"
 # Supported --engine targets: godot4, unity
 ```
-Pair every heavy impact with crisp synthesized/layered SFX (`skills/game-feel/SKILL.md`).
+Pair every heavy impact with crisp synthesized/layered SFX (`skills/game-feel/SKILL.md`), and run the 5-pillar feel audit (`skills/game-feel/scripts/game_feel_audit.py`), closed-form jump calculator (`skills/game-feel/scripts/jump_physics.py`), and frame-window simulator (`skills/game-feel/scripts/feel_sim.py`).
 
 ### Pillar 2 — Platformer Control Forgiveness & Explicit State Machine (`platformer-forgiveness`)
 Check player controller code for **Steve Ruiz Rule violations** (e.g., `if is_jumping and not is_climbing and not is_dead:` instead of an explicit `enum State { IDLE, RUN, JUMP_RISE, APEX, FALL, WALL_SLIDE, DASH, HITSTUN }`), then verify fixed-tick coyote time (`0.1s`), jump buffering (`0.1s`), and dual `4px` ledge/ceiling corner correction:
@@ -92,6 +93,8 @@ python tools/godot_pixel_tool.py check-integrity "projects/<game>"
 ```powershell
 python tools/level_pipeline.py validate "projects/<game>/levels/level_01.json"
 python tools/level_pipeline.py playtest-report "projects/<game>/levels/level_01.json" "projects/<game>/logs/playtest.jsonl" -o "exports/qa/heatmap.png"
+# Human observation CSV aggregation & build-over-build comparison (`skills/playtest/SKILL.md`)
+python skills/playtest/scripts/playtest_report.py "projects/<game>/logs/observations.csv" --json "exports/qa/playtest_summary.json"
 ```
 
 ### Pillar 6 — 60 FPS Remote Visual Stream Testing (`voxl`) & Live Engine Inspection (`godot-mcp`)

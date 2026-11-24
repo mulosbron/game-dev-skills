@@ -1,0 +1,39 @@
+{
+  "game": "Tower Keeper",
+  "build": "0.4.1",
+  "answers": {
+    "input": {
+      "coyote_time": {"status": "partial", "note": "Counter exists at 2 frames, but players still say 'I pressed jump and nothing happened'"},
+      "input_buffer": {"status": "no", "note": "Pressing jump right before landing is dropped"},
+      "hold_duration": {"status": "no", "note": "Short tap still produces a full-height jump"},
+      "rapid_repeat": "na",
+      "accidental_press": "partial"
+    },
+    "playtest": {
+      "five_testers_per_build": "yes",
+      "live_observation": "yes",
+      "no_handholding": "yes",
+      "designer_ownership": "yes",
+      "iteration_loop": "yes"
+    },
+    "micro_animation": {
+      "locomotion_animations": "yes",
+      "turn_pivot": "yes",
+      "jump_squash_stretch": "partial",
+      "fall_animation": "no",
+      "subtle_details": "partial"
+    },
+    "movement_momentum": {
+      "deliberate_feel_target": "yes",
+      "documented_parameters": "yes",
+      "intentional_exceptions": "yes"
+    },
+    "atmosphere": {
+      "impact_particles": "yes",
+      "ambient_particles": "partial",
+      "parallax": "yes",
+      "lighting": "yes",
+      "sense_of_place": {"status": "yes", "note": "Tower, mist, and lantern glow are established; testers love the atmosphere"}
+    }
+  }
+}
