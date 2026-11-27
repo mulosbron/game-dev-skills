@@ -1,6 +1,6 @@
 ---
 name: generate2dmedia
-description: "The art-route layer of the Forge skills. route_media.py is the one command that generates an image or an image-to-video clip - through the paid API of any provider whose key is configured (OpenAI, Google Gemini, xAI, BytePlus ModelArk, fal.ai; the configured key is the owner's consent), else through the user's own signed-in Codex or Grok CLI - and prints one JSON line with the route, artifact, sha256 and cost estimate; with no route it answers no-route (codeart2d is then the last resort). Also the capability check (forge_doctor), API key configuration, the spend ledger, resume and Codex image adoption. Use when a Forge skill sends a generation here, for the capability check, or when the user asks about keys, routes or spend. Not for planning, processing or QA of sprites, video frames or maps (generate2dsprite, video2dsprite, generate2dmap) or for code-drawn art (codeart2d)."
+description: The art-route layer of the Forge skills. route_media.py is the one command that generates an image or an image-to-video clip - through the paid API of any provider whose key is configured (OpenAI, Google Gemini, xAI, BytePlus ModelArk, fal.ai; the configured key is the owner's consent), else through the user's own signed-in Codex or Grok CLI - and prints one JSON line with the route, artifact, sha256 and cost estimate; with no route it answers no-route (codeart2d is then the last resort). Also the capability check (forge_doctor), API key configuration, the spend ledger, resume and Codex image adoption. Use when a Forge skill sends a generation here, for the capability check, or when the user asks about keys, routes or spend. Not for planning, processing or QA of sprites, video frames or maps (generate2dsprite, video2dsprite, generate2dmap) or for code-drawn art (codeart2d).
 ---
 
 # Generate 2D Media
@@ -61,12 +61,13 @@ Every call, paid or local, is a line in `<project>/.forge/ledger.jsonl` with its
 | Codex made an image that is not in the project | `cli_media.py adopt --codex-thread <thread-id> --output-dir <new>` |
 | Many jobs | `generate_media.py batch` or `cli_media.py batch` |
 | Verify a local route ahead of time (optional) | `forge_doctor.py --verify-route <route> --execute` (one quota call) |
+| List everything the Forge made under a folder (for a host) | `forge_index.py scan <dir>`: one `forge.asset_index.v1` JSON line (`references/schemas/host.schema.json`); an action's package is the chosen take's, an earlier one is `previousPackage` |
 
 ## Host notes
 
 - **Codex:** `image_gen` is your own tool: with no configured key use it and adopt the result (`cli_media.py adopt`); scripts reach Codex (local CLI) through `route_media.py`. This skill is explicit-only in Codex.
 - **Claude Code:** no media tools; `route_media.py` takes the API or the local CLIs. `<skill-dir>` is `${CLAUDE_SKILL_DIR}`; look at results with Read.
-- **Grok:** its native media tools are your own tools; the same `grok` executable is the "Grok (local CLI)" route for other hosts. Agent setups: [agent-profiles/README.md](references/agent-profiles/README.md).
+- **Grok:** its native media tools are your own tools; the same `grok` executable is the "Grok (local CLI)" route for other hosts. Every `grok` child runs with `HOME` and `USERPROFILE` on an empty folder the Forge owns (`%LOCALAPPDATA%\agent-sprite-forge\grok-home`; `FORGE_GROK_ISOLATED_HOME` overrides it), `GROK_HOME` on the real `~/.grok` and `GIT_CONFIG_GLOBAL` on the real `~/.gitconfig`, so it never loads the user's Claude Code plugins, MCP servers or skills. Agent setups: [agent-profiles/README.md](references/agent-profiles/README.md).
 
 ## Commands and outputs
 
