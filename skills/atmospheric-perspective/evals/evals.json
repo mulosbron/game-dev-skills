@@ -1,0 +1,23 @@
+{
+  "skill_name": "atmospheric-perspective",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "My Godot 4 pixel-art platformer has a Parallax2D background: sky at scroll_scale 0.03, far snowy peaks 0.08, jagged range 0.13, lower range 0.19, forested ridge 0.27, hills 0.38 and the ground. The far mountains look like a flat wall behind the trees. Add atmospheric perspective: each layer should blend toward the sky color behind it, more the farther away it is, with a slider I can tune. Layers are Sprite2D children of Parallax2D nodes, textures are 640x360 PNGs with the same height as the sky.",
+      "expected_output": "Godot canvas_item shader (mix, not modulate, alpha preserved) on each layer's Sprite2D, per-layer amount/mist from the tested table (0.80/0.20 peaks, 0.66/0.22 jagged, 0.52/0.22 lower, 0.40/0.20 ridge, 0.28 hills), a hazed_layer.gd attach script that duplicates the material per layer and computes art_top/art_bottom via get_used_rect(), a 1px sky row-color texture, strength 0 = old look, and a note that ground stays at 0.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I have sky.png plus far_peaks.png, high_clouds.png, jagged_range.png, lower_range.png, cloud_bank.png, forested_ridge.png, hills.png and trees.png in my project's art/background folder. My engine is a custom JavaScript canvas engine and sprites are drawn with drawImage, no shaders. Scroll factors are 0.08, 0.10, 0.13, 0.19, 0.23, 0.27, 0.38 and 0.6. Please bake the distance haze into the layer images at export so I don't need a shader.",
+      "expected_output": "Run scripts/haze.py (or port sky_colors/add_haze to a small Python bake) with per-layer amounts keyed to the scroll factors from the table (0.80/0.74/0.66+0.22 mist/0.52+0.22/0.46/0.40+0.20/0.28/0.04), hazed PNGs written out, alpha unchanged, strength baked at 1.0, and the checks from test_haze.py applied or a debug toggle offered.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "My Unity 2D game's parallax background looks flat — every mountain layer is as sharp as the foreground. The layers are SpriteRenderers with a follow camera, sky is a big gradient sprite behind everything. Make the far layers fade into the sky without making the whole scene gray or see-through.",
+      "expected_output": "Unity path (references/unity.md): lerp toward the sky's per-row color in a Shader Graph or URP sprite shader — NOT opacity fade (layers behind would show through) and NOT multiply tint (only darkens), per-layer material instances, tested amounts by scroll speed, ground/player at 0, and either a global strength property or baked alternative offered.",
+      "files": []
+    }
+  ]
+}

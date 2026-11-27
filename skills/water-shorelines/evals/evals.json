@@ -1,0 +1,46 @@
+{
+  "skill_name": "water-shorelines",
+  "evals": [
+    {
+      "id": 0,
+      "eval_name": "godot-tilemap-shoreline",
+      "prompt": "My Godot 4 project has a top-down 2D TileMapLayer with 16 px land tiles drawn over a flat blue ColorRect; the coast looks pasted on. Add shallows, a foam line, and waves that roll toward the land. The land tiles are transparent at the edges where the water shows. The map is 400x300 tiles, no changes to the coast during play.",
+      "expected_output": "Agent inspects the project first, then integrates: a ShoreDistance bake script (SubViewport land capture at load), the canvas_item shader on a Sprite2D under the TileMapLayer with Nearest filter, MAX_DIST 32 shared between bake and shader, wobble noise, and a debug view + effect-off toggle. No second water system.",
+      "files": [],
+      "assertions": [
+        "Agent examines the existing project files (engine, tilemap setup, tile size, tile transparency) before writing code",
+        "Distance map is baked once at load, not per frame, at art resolution per pixel (not per tile)",
+        "MAX_DIST value is identical in the bake and the shader, and settings are exposed/named for the user",
+        "Water visual is drawn under the land and sampled with Nearest filter",
+        "Depth bands (5/13/26 px), breathing foam, and waves toward the coast all present; wobble noise included",
+        "Includes a debug view of the raw map and a toggle that restores the old flat water"
+      ]
+    },
+    {
+      "id": 1,
+      "eval_name": "opaque-tiles-asks-before-guessing",
+      "prompt": "Add shallow water and shore foam to my 2D Unity game's ocean. Here is a land tile from my tileset (tile_water_merged.png) — the water color is painted into the tiles themselves. 16 px tiles, pixel-perfect camera.",
+      "expected_output": "Agent notices the land tiles are opaque with water painted in, and asks the user whether to build the mask from per-tile mask images or by keying out the water color, BEFORE guessing or writing the bake. May still prepare everything else that doesn't depend on the choice.",
+      "files": ["tile_water_merged.png"],
+      "assertions": [
+        "Agent checks the provided tile's alpha and sees water is painted in",
+        "Agent asks the user which mask source to use instead of guessing",
+        "Agent does not silently key out a color or fabricate a mask"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "custom-engine-bake-and-verify",
+      "prompt": "I'm writing my own tiny C++/SDL2 pixel-art engine (no shaders available, software renderer at 320x180 art resolution scaled up). Can I still get the distance-field shoreline effect with shallows, foam and moving waves? Bake the map for the test level I attached (level_land.png) and verify it's correct.",
+      "expected_output": "Agent explains the effect works fine in software: per-pixel color from the baked map. Uses the bundled bake script on the attached land image, runs verify_shore_bake.py, and provides the map plus a small software-render water_color function (CPU port of the shader) with nearest-neighbor upscale respected at art resolution.",
+      "files": ["level_land.png"],
+      "assertions": [
+        "Bakes an 8-bit map from the attached land image with the bundled script",
+        "Runs the verification battery and reports results honestly",
+        "Delivers a CPU/software color function equivalent to the shader",
+        "Keeps everything at art resolution with no smooth interpolation",
+        "Exposes the tunable numbers as settings scaled to the project's tile size"
+      ]
+    }
+  ]
+}

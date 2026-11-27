@@ -456,16 +456,21 @@ def render_contour_debug(
 def run_verification_suite(
     render_path: Optional[str] = None,
     custom_palette: Optional[Dict[str, str]] = None,
+    mask_path: Optional[str] = None,
+    map_path: Optional[str] = None,
+    max_dist: float = 32.0,
 ) -> Dict[str, Any]:
     """
-    Execute the 6 automated checks from the Water Shoreline specification:
+    Execute automated checks from the Water Shoreline specification:
       1. Felzenszwalb-Huttenlocher 2D EDT matches brute-force Euclidean search on every pixel
          + 8-bit clamped [0..32 px] quantization matches.
       2. With wobble/waves/foam off, water at d=4, 12, 25, 27 px is shoal, shallow, mid, deep.
-      3. Wave pixels appear strictly in (4, 20) px and repeat every 2.5 s (11 / 4.4).
+      3. Wave pixels appear strictly in (4, 20) px, move toward the coast at wave_speed,
+         and repeat every 2.5 s (11 / 4.4).
       4. Straight-coast foam with wobble off is 1 px at thinnest and 3 px at widest.
       5. Rendered water contains only the 6 water palette colors on the art pixel grid.
       6. Chunked world bakes with MAX_DIST neighbor margin + world wobble match identically across seam.
+      7. Optional real --mask / --map alignment and EDT parity check.
     """
     checks: Dict[str, Any] = {}
 
@@ -509,16 +514,27 @@ def run_verification_suite(
         "observed": observed_bands,
     }
 
-    # 3. Wave bounds (4 < d < 20) and 2.5 s periodicity
+    # 3. Wave bounds (4 < d < 20), inward motion toward coast, and 2.5 s periodicity
     wave_rgb = hex_to_rgba(pal["wave"])
     w0 = np.array(render_water_frame(u8_straight, time_sec=0.35, enable_waves=True, enable_foam=False, palette=pal))
+    w_later = np.array(render_water_frame(u8_straight, time_sec=0.85, enable_waves=True, enable_foam=False, palette=pal))
     w25 = np.array(render_water_frame(u8_straight, time_sec=2.85, enable_waves=True, enable_foam=False, palette=pal))
     wave_xs = np.where((w0[8, :, :3] == wave_rgb[:3]).all(axis=1))[0].tolist()
+    wave_xs_later = np.where((w_later[8, :, :3] == wave_rgb[:3]).all(axis=1))[0].tolist()
     waves_in_bounds = len(wave_xs) > 0 and all(4 < x < 20 for x in wave_xs)
     wave_repeats_2_5s = bool(np.array_equal(w0, w25))
+    # Over dt = 0.5 s at 4.4 px/s, existing wave rings move inward by ~2.2 px (smaller x)
+    # Check min(wave_xs_later) < min(wave_xs) so newly entering outer rings (near x=19) don't skew the mean.
+    wave_moves_inward = (
+        len(wave_xs) > 0
+        and len(wave_xs_later) > 0
+        and min(wave_xs_later) < min(wave_xs)
+    )
     checks["waves_bounds_and_period"] = {
-        "ok": waves_in_bounds and wave_repeats_2_5s,
+        "ok": waves_in_bounds and wave_repeats_2_5s and wave_moves_inward,
         "wave_x_positions": wave_xs,
+        "wave_x_after_0_5s": wave_xs_later,
+        "moves_toward_coast": wave_moves_inward,
         "repeats_at_2_5s": wave_repeats_2_5s,
     }
 
@@ -570,6 +586,31 @@ def run_verification_suite(
         "ok": chunk_diff == 0,
         "max_diff_vs_full_bake": chunk_diff,
     }
+
+    # 7. Optional real mask / map alignment & range verification
+    if mask_path or map_path:
+        real_ok = True
+        real_info: Dict[str, Any] = {}
+        real_mask = None
+        if mask_path:
+            real_mask = extract_land_mask(Image.open(mask_path), mask_mode="alpha")
+            real_info["mask_size"] = [int(real_mask.shape[1]), int(real_mask.shape[0])]
+            real_info["land_pixels"] = int(np.sum(real_mask))
+            real_info["water_pixels"] = int(np.sum(~real_mask))
+            if real_info["water_pixels"] == 0:
+                real_ok = False
+                real_info["warning"] = "Land mask has zero transparent water pixels (tiles may be opaque)."
+        if map_path:
+            real_map = np.array(Image.open(map_path).convert("L"))
+            real_info["map_size"] = [int(real_map.shape[1]), int(real_map.shape[0])]
+            real_info["map_range"] = [int(real_map.min()), int(real_map.max())]
+            if real_mask is not None and real_map.shape != real_mask.shape:
+                real_ok = False
+                real_info["alignment_error"] = (
+                    f"Map {real_map.shape[1]}x{real_map.shape[0]} != mask {real_mask.shape[1]}x{real_mask.shape[0]}"
+                )
+        real_info["ok"] = real_ok
+        checks["real_asset_alignment"] = real_info
 
     all_ok = all(bool(v["ok"]) for v in checks.values())
     return {"ok": all_ok, "checks": checks}
@@ -768,6 +809,74 @@ export function waterColorAtDistance(d: number, timeSec: number): string {
   return color;
 }
 """,
+    "glsl-shader": """// water_shoreline.frag — Generic OpenGL/WebGL2 fragment shader (Sample u_map with GL_NEAREST!)
+uniform sampler2D u_map;      // 8-bit baked distance map (1 texel = 1 art pixel)
+uniform float u_max_dist;     // MAX_DIST matching bake (default: 32.0)
+uniform float u_time;         // elapsed seconds
+uniform bool u_enabled;       // false restores flat deep water
+
+const vec3 DEEP    = vec3(0.110, 0.290, 0.502);
+const vec3 MID     = vec3(0.133, 0.384, 0.588);
+const vec3 SHALLOW = vec3(0.204, 0.549, 0.690);
+const vec3 SHOAL   = vec3(0.376, 0.745, 0.769);
+const vec3 WAVE    = vec3(0.588, 0.839, 0.855);
+const vec3 FOAM    = vec3(0.925, 0.965, 0.957);
+
+in vec2 v_uv;
+out vec4 fragColor;
+
+void main() {
+    if (!u_enabled) {
+        fragColor = vec4(DEEP, 1.0);
+        return;
+    }
+    float d = texture(u_map, v_uv).r * u_max_dist;
+    vec3 c = DEEP;
+    if (d < 26.0) c = MID;
+    if (d < 13.0) c = SHALLOW;
+    if (d < 5.0)  c = SHOAL;
+    float phase = mod(d + u_time * 4.4, 11.0);
+    if (phase < 1.6 && d > 4.0 && d < 20.0) c = WAVE;
+    if (d < 2.2 + 1.1 * sin(u_time * 2.5)) c = FOAM;
+    fragColor = vec4(c, 1.0);
+}
+""",
+    "cpp-software": """// water_shoreline_cpu.h — Header-only CPU software renderer for SDL2 / custom 2D engines
+#pragma once
+#include <cmath>
+#include <cstdint>
+
+struct WaterRGB { uint8_t r, g, b; };
+
+struct WaterSettings {
+    float max_dist = 32.0f;
+    float shoal_dist = 5.0f, shallow_dist = 13.0f, mid_dist = 26.0f;
+    float wave_spacing = 11.0f, wave_speed = 4.4f, wave_thickness = 1.6f;
+    float wave_min = 4.0f, wave_max = 20.0f;
+    float foam_base = 2.2f, foam_amp = 1.1f, foam_freq = 2.5f;
+    bool enabled = true;
+};
+
+inline WaterRGB water_color_at(uint8_t map8, float time_sec, const WaterSettings& s = {}) {
+    constexpr WaterRGB DEEP    = {0x1C, 0x4A, 0x80};
+    constexpr WaterRGB MID     = {0x22, 0x62, 0x96};
+    constexpr WaterRGB SHALLOW = {0x34, 0x8C, 0xB0};
+    constexpr WaterRGB SHOAL   = {0x60, 0xBE, 0xC4};
+    constexpr WaterRGB WAVE    = {0x96, 0xD6, 0xDA};
+    constexpr WaterRGB FOAM    = {0xEC, 0xF6, 0xF4};
+    if (!s.enabled) return DEEP;
+    const float d = (static_cast<float>(map8) / 255.0f) * s.max_dist;
+    WaterRGB c = DEEP;
+    if (d < s.mid_dist)     c = MID;
+    if (d < s.shallow_dist) c = SHALLOW;
+    if (d < s.shoal_dist)   c = SHOAL;
+    float phase = std::fmod(d + time_sec * s.wave_speed, s.wave_spacing);
+    if (phase < 0.0f) phase += s.wave_spacing;
+    if (phase < s.wave_thickness && d > s.wave_min && d < s.wave_max) c = WAVE;
+    if (d < s.foam_base + s.foam_amp * std::sin(time_sec * s.foam_freq)) c = FOAM;
+    return c;
+}
+""",
 }
 
 
@@ -878,31 +987,68 @@ def _cmd_bake(args: argparse.Namespace) -> int:
 def _cmd_render(args: argparse.Namespace) -> int:
     dist_u8 = np.array(Image.open(args.dist_map).convert("L"))
     land_arr = np.array(Image.open(args.land).convert("RGBA")) if args.land else None
+    if land_arr is not None and land_arr.shape[:2] != dist_u8.shape:
+        raise ValueError(
+            f"Distance map {dist_u8.shape[1]}x{dist_u8.shape[0]} doesn't match land "
+            f"{land_arr.shape[1]}x{land_arr.shape[0]} — must share origin and size."
+        )
     scale = (args.tile_size / 16.0) if args.auto_scale else 1.0
     max_dist = args.max_dist * scale
 
-    frame = render_water_frame(
-        dist_u8,
-        time_sec=args.time,
-        max_dist=max_dist,
-        shoal_dist=5.0 * scale,
-        shallow_dist=13.0 * scale,
-        mid_dist=26.0 * scale,
-        wave_spacing=11.0 * scale,
-        wave_speed=4.4 * scale,
-        wave_thickness=1.6 * scale,
-        wave_min_dist=4.0 * scale,
-        wave_max_dist=20.0 * scale,
-        foam_base=2.2 * scale,
-        foam_amp=1.1 * scale,
-        enable_waves=not args.no_waves,
-        enable_foam=not args.no_foam,
-        flat_water=args.flat_water,
-        land_rgba=land_arr,
-    )
-    if args.upscale > 1:
-        frame = frame.resize((frame.width * args.upscale, frame.height * args.upscale), resample=Image.Resampling.NEAREST)
+    def _make_frame(t: float) -> Image.Image:
+        fr = render_water_frame(
+            dist_u8,
+            time_sec=t,
+            max_dist=max_dist,
+            shoal_dist=5.0 * scale,
+            shallow_dist=13.0 * scale,
+            mid_dist=26.0 * scale,
+            wave_spacing=11.0 * scale,
+            wave_speed=4.4 * scale,
+            wave_thickness=1.6 * scale,
+            wave_min_dist=4.0 * scale,
+            wave_max_dist=20.0 * scale,
+            foam_base=2.2 * scale,
+            foam_amp=1.1 * scale,
+            enable_waves=not args.no_waves,
+            enable_foam=not args.no_foam,
+            flat_water=args.flat_water,
+            land_rgba=land_arr,
+        )
+        if args.upscale > 1:
+            fr = fr.resize((fr.width * args.upscale, fr.height * args.upscale), resample=Image.Resampling.NEAREST)
+        return fr
 
+    if args.frames > 1 or args.gif:
+        n_frames = max(2, int(args.frames)) if args.frames > 1 else 25
+        fps = max(1, int(args.fps))
+        frames_img = [_make_frame(args.time + i / float(fps)) for i in range(n_frames)]
+        out_path = Path(args.gif if args.gif else args.output)
+        if out_path.suffix.lower() != ".gif":
+            out_path = out_path.with_suffix(".gif")
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        frames_img[0].save(
+            out_path,
+            save_all=True,
+            append_images=frames_img[1:],
+            duration=max(10, int(round(1000.0 / fps))),
+            loop=0,
+        )
+        res = {
+            "ok": True,
+            "gif_path": str(out_path),
+            "size": [frames_img[0].width, frames_img[0].height],
+            "frames": n_frames,
+            "fps": fps,
+            "duration_sec": round(n_frames / float(fps), 2),
+        }
+        if args.json:
+            print(json.dumps(res, indent=2))
+        else:
+            print(f"Rendered {n_frames}-frame animated shoreline GIF ({fps} fps) -> {out_path}")
+        return 0
+
+    frame = _make_frame(args.time)
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     frame.save(out_path)
@@ -939,7 +1085,12 @@ def _cmd_update_region(args: argparse.Namespace) -> int:
 
 
 def _cmd_verify(args: argparse.Namespace) -> int:
-    res = run_verification_suite(render_path=args.render)
+    res = run_verification_suite(
+        render_path=args.render,
+        mask_path=args.mask,
+        map_path=args.map,
+        max_dist=args.max_dist,
+    )
     if args.json:
         print(json.dumps(res, indent=2))
     else:
@@ -956,6 +1107,8 @@ def _cmd_export_code(args: argparse.Namespace) -> int:
         "godot4-shader": "water_shoreline.gdshader",
         "unity-shader": "WaterShoreline.shader",
         "typescript": "waterShoreline.ts",
+        "glsl-shader": "water_shoreline.frag",
+        "cpp-software": "water_shoreline_cpu.h",
     }
 
     if args.out_dir:
@@ -1029,6 +1182,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_ren.add_argument("--no-foam", action="store_true", help="Disable foam line.")
     p_ren.add_argument("--flat-water", action="store_true", help="Render flat deep water (effect-off check).")
     p_ren.add_argument("--upscale", type=int, default=1, help="Nearest-neighbor integer upscale for visual inspection.")
+    p_ren.add_argument("--frames", type=int, default=1, help="Number of animation frames (>1 writes looping GIF, e.g. 50 at 20 fps = 2.5s exact loop).")
+    p_ren.add_argument("--fps", type=int, default=20, help="Animation FPS when rendering GIF (default: 20).")
+    p_ren.add_argument("--gif", help="Explicit output GIF path for animated preview.")
     p_ren.add_argument("--json", action="store_true", help="Output machine-readable JSON.")
     p_ren.set_defaults(func=_cmd_render)
 
@@ -1044,8 +1200,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_upd.set_defaults(func=_cmd_update_region)
 
     # verify
-    p_ver = sub.add_parser("verify", help="Run automated EDT, band, wave, foam, palette, and chunk-seam checks.")
+    p_ver = sub.add_parser("verify", help="Run automated EDT, band, wave, foam, palette, chunk-seam & real-asset checks.")
     p_ver.add_argument("--render", help="Optional rendered water PNG to verify 6-color pixel-grid constraint.")
+    p_ver.add_argument("--mask", help="Optional real land RGBA PNG to check transparency & dimensions.")
+    p_ver.add_argument("--map", help="Optional real baked distance map PNG to verify alignment with --mask.")
+    p_ver.add_argument("--max-dist", type=float, default=32.0, help="MAX_DIST for verification (default: 32.0).")
     p_ver.add_argument("--json", action="store_true", help="Output machine-readable JSON.")
     p_ver.set_defaults(func=_cmd_verify)
 

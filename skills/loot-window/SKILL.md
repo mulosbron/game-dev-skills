@@ -72,8 +72,8 @@ Before an item lands in slot `n`, the slot waits in **Common gray** (`#5e6878` b
 | `common` | `#5e6878` | `#8b96a6` | `#26212e` | `0` | `0` | `0` frames |
 | `uncommon` | `#3a7d3a` | `#6cbf4a` | `#1c2a22` | `4` | `0` | `0` frames |
 | `rare` | `#2f6fc4` | `#64b3f0` | `#1b2440` | `6` | `3` px | `0` frames |
-| `epic` | `#6d3aa8` | `#a974e0` | `#261c3a` | `8` | `5` px | `0` frames |
-| `legendary` | `#d9a440` | `#f2d16b` | `#33261a` | `14` | `0` | **`2` frames** solid white `(255,255,255)` |
+| `epic` | `#6d3aa8` | `#a974e0` | `#261c3a` | `8` | `5` px | `0` frames (border light runs every `1.4s`) |
+| `legendary` | `#d9a440` | `#f2d16b` | `#33261a` | `14` | `5` px | **`2` frames** solid white `(255,255,255)` + dense-to-sparse rays (`0.5s`) |
 
 ### Reveal Choreography (`t` in seconds)
 1. **`0.00s` — Chest Shake (`0.60s`):** Horizontal jitter ramping linearly from `1 px` to `3 px`.
@@ -124,21 +124,29 @@ vec3 glow = vec3(1.0, 178.0 / 255.0, 84.0 / 255.0) * clamp((ellip + shafts * ell
 Run the self-contained tool in `C:\Users\duggy\.agents\game-dev-skills`:
 
 ```bash
-# Run all 6 automated geometric/timing/FX checks
+# Run all 8 automated geometric/timing/FX/nearest-scale checks
 python tools/loot_window.py verify --json
+
+# Print curated ElevenLabs/SFX prompts (material pickup + rarity drop + pitch range 0.92..1.08)
+python tools/loot_window.py sfx-prompts --json
 
 # Render crisp 4x preview (loot_window_preview.png)
 python tools/loot_window.py demo --out exports/loot_window --scale 4 --json
 
 # Export Godot 4 (LootWindow.gd + loot_glow.gdshader) or Unity (LootWindowSlot.cs)
-python tools/loot_window.py export-code --engine godot4 --out out/godot4 --json
-python tools/loot_window.py export-code --engine unity --out out/unity --json
+python tools/loot_window.py export-code --engine godot4 --out-dir out/godot4 --json
+python tools/loot_window.py export-code --engine unity --out-dir out/unity --json
 ```
 
-### Verification Checklist (All 6 Checks Enforced by `verify`)
+### Bundled Placeholder Assets (`assets/`)
+Exact-dimension pixel-art placeholders are bundled under [`assets/`](assets/) (`frame.png` 96×96, `title_plate.png` 64×18, `button.png` 80×20, `chest_closed.png` + `chest_lid_0..7.png` 48×40, and 6× 32×32 icons in `assets/icons/`).
+
+### Verification Checklist (All 8 Checks Enforced by `verify`)
 1. `nine_slice(96x96, 96, 96)` matches source pixel-for-pixel.
 2. Top edge of `222 x 172` window repeats `x = 16..79` cleanly at `x = 80..143`.
 3. Slot `14` (`col = 4, row = 2`) computes to exact origin `(168, 96)`.
 4. With `12` items, last item lands `1.65s` after the first, and slot `11` stays Common `#5e6878` until its landing tick.
 5. Sparkle counts match `(0, 4, 6, 8, 14)` and ONLY `legendary` runs a `2`-frame solid `(255, 255, 255)` white flash.
 6. With reveal animation off, window alpha is `1.0` and all `12` items render at `t = 0.0`.
+7. Last slot (`14`) fits inside `222 px` width and finishes above Collect button (`y = 136`).
+8. 4× nearest-neighbor upscale contains strictly uniform `4×4` pixel blocks (zero bilinear blur).

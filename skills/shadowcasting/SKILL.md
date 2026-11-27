@@ -1,6 +1,6 @@
 ---
 name: shadowcasting
-description: 2D shadowcasting (Bergstrom 8-octant stack FOV) for torchlight that stops at walls, fog of war, and enemy line of sight in 2D top-down dungeons and 2D platformer caves/stealth. Includes stepped pixel-art falloff, 5px wall-top dilation, Godot 4/Unity/TypeScript templates, Albert Ford symmetry notes, and tools/shadowcasting.py verifier.
+description: "2D shadowcasting (Bergstrom 8-octant stack FOV) for torchlight that stops at walls, fog of war (explored gray-blue vs never-seen black), and enemy line of sight in 2D top-down dungeons and 2D platformer caves/stealth. Use whenever the user mentions shadows blocking light, light passing/bleeding through walls, line of sight, enemy vision/detection, fog of war, explored map memory, torch/lantern radius, or roguelike visibility in Godot 4, Unity, TypeScript, or custom 2D engines — even if they never say 'shadowcasting' (`tools/shadowcasting.py`)."
 ---
 
 # 2D Shadowcasting (Torchlight, Fog of War & Line of Sight)
@@ -70,7 +70,10 @@ OCTANTS = [
 
 - **Dual-grid / per-pixel alignment:** Lighting only whole `seen` cells makes front-facing wall edges or half-tile dual-grid bevels look abruptly clipped. Upscale to pixel resolution (or shader `fov_mask`) and dilate into walls by `~5 px` (`tile_size * 5 / 16`).
 - **Integer division bugs:** Writing `(dx - 1) / (dy + 1)` with integers breaks octant slopes immediately in GDScript, C#, or C++. Cast explicitly to `float`.
-- **Origin inside a wall or out of bounds:** Bounding checks on both the origin and every projected `(gx, gy)` cell prevent index-out-of-range panics near map edges.
+- **Origin inside a wall or out of bounds:** An origin inside a wall (e.g., torch held in front of a character hugging a wall) lights only 8 neighbors (thick wall) or leaks through both sides (1-cell-thin wall). Always call `resolve_origin(walls, ox, oy)` first to shift to the nearest open floor cell, plus bounds-check every `(gx, gy)`.
+- **Phantom 7th light band:** Floating-point `ceil(1.0 * 6)` can evaluate to `7` — always clamp `min(1.0, ceil(t * bands) / bands)`.
+- **`walls` != movement grid:** `walls` means "blocks light", not "blocks movement" (half-height barriers block movement but not light; glass doesn't block light). Ask the user when unclear, and update + recast when doors open.
+- **Clearing `explored` on recast:** Never clear `explored` on recast — it only ever grows (`explored |= seen`) and should be saved with the level.
 - **2D Platformer differences:** Gravity pulls characters onto tiles whose collision edge may sit right under `feet_y`; cast from the character/torch chest/head tile (`center_y - 0.5 * tile`) rather than foot contact coordinates so floor tiles don't immediately self-occlude octant 0.
 - **Asymmetric peeks in Bergstrom:** Bergstrom favors fast roguelike lighting where one tile at an oblique corner can occasionally be slightly asymmetric (`seen[B]` from `A` != `seen[A]` from `B`). For strict player-vs-guard stealth checks, enable **Albert Ford symmetric shadowcasting** (center-to-center + bevel-corner symmetric rules) so players never feel cheated behind cover.
 
@@ -79,16 +82,25 @@ OCTANTS = [
 ## CLI Workflow (`tools/shadowcasting.py`)
 
 ```bash
-# Run all 9 automated unit checks (octant counts, symmetry, single-wall shadow, corner bounds, vault leak, LOS, fog, toggle)
+# Run all 11 automated unit checks (octant counts, symmetry, single-wall shadow, corner bounds, vault leak, LOS, fog, toggle, resolve_origin, 6-band clamp)
 python tools/shadowcasting.py verify --json
 
 # Render side-by-side comparison PNGs (plain radial vs shadowcast + fog of war)
 python tools/shadowcasting.py demo --out-dir exports/shadowcasting --json
 
+# Render per-pixel light mask, banded light, fog walk & enemy sight from a real wall-layer PNG (ideal for dual-grid art)
+python tools/shadowcasting.py render path/to/walls_layer.png --light 120 88 92 --enemy 210 88 --sight-range 80 --walk 60,88 90,88 --scale 3 --out-dir exports/shadowcasting/preview --json
+
 # Export ready-to-paste engine code (godot4 GDScript + shader, unity C#, or typescript)
 python tools/shadowcasting.py export-code --engine godot4 --out exports/shadowcasting/Shadowcast.gd
 python tools/shadowcasting.py export-code --engine unity --out exports/shadowcasting/Shadowcast2D.cs
 ```
+
+### Engine References & Evals
+- **Godot 4:** [`references/godot4.md`](references/godot4.md) (`Shadowcast.gd` with `resolve_origin`, `ImageTexture` multiply shader, fog persistence, enemy LOS).
+- **Unity:** [`references/unity.md`](references/unity.md) (`Shadowcast.cs` with bottom-up texture row-flip warning, `FilterMode.Point`, `Unlit/Multiply` shader).
+- **Custom Engines (C++/SDL2/Raylib/LÖVE):** [`references/custom-engine.md`](references/custom-engine.md) (collision vs light-blocking grid separation, CPU/GPU composite).
+- **Skill Evals:** [`evals/evals.json`](evals/evals.json) (Godot tilemap torch/fog, dual-grid per-pixel fix, enemy LOS one-way pitfall).
 
 ---
 

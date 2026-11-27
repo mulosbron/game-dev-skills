@@ -1,6 +1,6 @@
 ---
 name: wang-tiles
-description: "Eliminates visible tile grid repetition across 2D game terrains (grass, sand, stone, water interiors) using 2-color edge-matched 16-tile Wang sets. Includes project audit protocol, canonical 4-bit indexing (top + 2*right + 4*bottom + 8*left), stored/looping/stateless-chunked placement, Godot 4 / Unity / TypeScript / Python snippets, autotile transition pairing, Efros & Freeman minimum-error-boundary-cut atlas slicing from a single seamless texture, and automated seam/invariant verification (`tools/wang_tiles.py`)."
+description: "Eliminates visible tile grid repetition and repeating ground patterns across 2D game terrains (grass, sand, stone floor, water interiors) using 2-color edge-matched 16-tile Wang sets. Use whenever the user mentions Wang tiles, edge-matched tiles, tilemap repetition, a visible grid on ground/terrain, ground texture variety, cutting tiles from a seamless texture, or procedural/chunked terrain tiling in Godot 4, Unity, Phaser/PixiJS, LÖVE (Love2D), or custom engines — even if they never say 'Wang' (`tools/wang_tiles.py`)."
 ---
 
 # Edge Wang Tiles (`wang-tiles`)
@@ -82,12 +82,19 @@ python tools/wang_tiles.py cut --demo --tile-size 32 --preview-map 20x20 --debug
 # 2. Generate & verify a deterministic map / chunk (finite, looping, or chunked)
 python tools/wang_tiles.py map --mode chunked --rows 20 --cols 20 --chunk-x 1 --chunk-y -2 --seed 42 --atlas exports/wang_tiles/demo_atlas.png --debug-overlay exports/wang_tiles/chunk_debug.png -o exports/wang_tiles/chunk.png --json
 
-# 3. Audit an existing 4x4 Wang atlas (64 H + 64 V joins) and/or map JSON
+# 3. Audit an existing 4x4 Wang atlas (64 H + 64 V joins), map JSON, and/or math self-test
+python tools/wang_tiles.py verify --selftest --json
 python tools/wang_tiles.py verify --atlas exports/wang_tiles/demo_atlas.png --tile-size 32 --json
 
-# 4. Print drop-in engine code (godot4, unity, typescript, python)
+# 4. Print drop-in engine code (godot4, unity, typescript, python, love2d)
 python tools/wang_tiles.py snippet --engine godot4 --json
+python tools/wang_tiles.py snippet --engine love2d --json
 ```
+
+### References & Evals
+- **Art & Cutting Guide:** [`references/art.md`](references/art.md) (3 art acquisition options, plainest-spot anchor rules, Efros & Freeman quilting, 47-tile blob autotile note).
+- **Engine Integration Notes:** [`references/engines.md`](references/engines.md) (Godot 4 `TileMapLayer`, Unity Y-up `-r` flip, Phaser/PixiJS/Canvas, LÖVE/Love2D, stateless chunk hashing).
+- **Skill Evals:** [`evals/evals.json`](evals/evals.json) (Godot repeating grass, atlas cutting + verification, Unity infinite chunked Y-up world).
 
 ---
 

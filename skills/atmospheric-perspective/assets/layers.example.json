@@ -1,0 +1,15 @@
+{
+  "strength": 1.0,
+  "layers": [
+    { "file": "far_peaks.png",       "amount": 0.80, "mist": 0.20 },
+    { "file": "high_clouds.png",     "amount": 0.74 },
+    { "file": "jagged_range.png",    "amount": 0.66, "mist": 0.22 },
+    { "file": "lower_range.png",     "amount": 0.52, "mist": 0.22 },
+    { "file": "cloud_bank.png",      "amount": 0.46 },
+    { "file": "forested_ridge.png",  "amount": 0.40, "mist": 0.20 },
+    { "file": "hills.png",           "amount": 0.28 },
+    { "file": "trees_behind.png",    "amount": 0.04 },
+    { "file": "ground.png",          "amount": 0.0 },
+    { "file": "player.png",          "amount": 0.0 }
+  ]
+}

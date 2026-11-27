@@ -856,6 +856,21 @@ def wang_tile_at(seed: int, row: int, col: int) -> int:
         left=edge_color(seed, col, row, 1),
     )
 """,
+    "love2d": """-- LÖVE (Love2D) — Edge Wang Tiles (4x4 index-ordered atlas, Y points down)
+local function wangTile(hEdges, vEdges, r, c)
+    local top    = hEdges[r][c]
+    local bottom = hEdges[r + 1][c]
+    local left   = vEdges[r][c]
+    local right  = vEdges[r][c + 1]
+    return top + 2 * right + 4 * bottom + 8 * left
+end
+
+local function drawWangCell(atlas, quads, hEdges, vEdges, r, c, tileSize)
+    local idx = wangTile(hEdges, vEdges, r, c)
+    -- Prebuild quads[0..15] with col = idx % 4, row = math.floor(idx / 4)
+    love.graphics.draw(atlas, quads[idx], (c - 1) * tileSize, (r - 1) * tileSize)
+end
+""",
 }
 
 
@@ -1000,9 +1015,54 @@ def _cmd_map(args: argparse.Namespace) -> int:
     return 0 if check["invariant_ok"] else 1
 
 
+def run_selftest() -> Dict[str, Any]:
+    """
+    Self-test finite, looping, and chunked Wang edge placement invariants:
+      1. Finite 24x24 grid neighbor agreement + seed determinism.
+      2. Looping 20x20 grid toroidal wrap-around neighbor agreement.
+      3. Two adjacent 16x16 chunks (chunk (0,0) and (1,0), plus (0,1)) agree on every shared border edge.
+      4. All 16 tile indices (0..15) decode/encode cleanly and map to 4x4 atlas coordinates.
+    """
+    g1, _, _ = generate_wang_grid(24, 24, seed=42, mode="finite")
+    g1_rep, _, _ = generate_wang_grid(24, 24, seed=42, mode="finite")
+    finite_res = verify_wang_grid(g1, looping=False)
+    deterministic_ok = (g1 == g1_rep)
+
+    g_loop, _, _ = generate_wang_grid(20, 20, seed=7, mode="looping")
+    loop_res = verify_wang_grid(g_loop, looping=True)
+
+    c00, _, _ = generate_wang_grid(16, 16, seed=99, mode="chunked", chunk_x=0, chunk_y=0)
+    c10, _, _ = generate_wang_grid(16, 16, seed=99, mode="chunked", chunk_x=1, chunk_y=0)
+    c01, _, _ = generate_wang_grid(16, 16, seed=99, mode="chunked", chunk_x=0, chunk_y=1)
+    h_stitch = [c00[r] + c10[r] for r in range(16)]
+    v_stitch = c00 + c01
+    chunk_h_res = verify_wang_grid(h_stitch, looping=False)
+    chunk_v_res = verify_wang_grid(v_stitch, looping=False)
+
+    codec_ok = all(
+        wang_index(*decode_wang_index(i)) == i and atlas_coords(i) == (i % 4, i // 4)
+        for i in range(16)
+    )
+
+    checks = {
+        "finite_24x24_invariant": {"ok": finite_res["invariant_ok"], "mismatch_count": finite_res["mismatch_count"]},
+        "seed_determinism": {"ok": deterministic_ok},
+        "looping_20x20_wrap_invariant": {"ok": loop_res["invariant_ok"], "mismatch_count": loop_res["mismatch_count"]},
+        "chunked_horizontal_seam": {"ok": chunk_h_res["invariant_ok"], "mismatch_count": chunk_h_res["mismatch_count"]},
+        "chunked_vertical_seam": {"ok": chunk_v_res["invariant_ok"], "mismatch_count": chunk_v_res["mismatch_count"]},
+        "index_codec_and_4x4_coords": {"ok": codec_ok},
+    }
+    return {"ok": all(bool(v["ok"]) for v in checks.values()), "checks": checks}
+
+
 def _cmd_verify(args: argparse.Namespace) -> int:
     result: Dict[str, Any] = {}
     ok = True
+
+    if args.selftest:
+        st = run_selftest()
+        result["selftest"] = st
+        ok = ok and bool(st["ok"])
 
     if args.atlas:
         atlas_img = Image.open(args.atlas)
@@ -1018,7 +1078,7 @@ def _cmd_verify(args: argparse.Namespace) -> int:
         ok = ok and bool(map_res.get("invariant_ok"))
 
     if not result:
-        raise ValueError("Provide --atlas and/or --map to verify.")
+        raise ValueError("Provide --selftest, --atlas, and/or --map to verify.")
 
     result["ok"] = ok
     if args.json:
@@ -1081,7 +1141,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_map.set_defaults(func=_cmd_map)
 
     # verify
-    p_ver = sub.add_parser("verify", help="Verify a 4x4 Wang atlas and/or a generated tile_indices map.")
+    p_ver = sub.add_parser("verify", help="Verify a 4x4 Wang atlas, generated tile_indices map, and/or math self-test.")
+    p_ver.add_argument("--selftest", action="store_true", help="Run built-in finite/looping/chunked/determinism self-test.")
     p_ver.add_argument("--atlas", help="Path to 4x4 Wang atlas PNG.")
     p_ver.add_argument("--tile-size", type=int, default=None, help="Expected tile size in pixels.")
     p_ver.add_argument("--map", help="Path to JSON file containing tile_indices.")

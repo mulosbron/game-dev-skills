@@ -62,13 +62,13 @@ You turn raw, messy, high-res, or unlit 2D sprites into **crisp integer-grid pix
    python tools/image_to_pixel.py convert "raw/hero_concept.png" --profile jrpg-16bit --width 48 --dither bayer4 --outline outer --normal-map --out-dir "exports/clean"
    ```
 
-### Pipeline 2: 2D Tangent Normal & Cavity Mask Generation (`_n.png`)
+### Pipeline 2: 2D Tangent Normal, De-Lit Albedo & Cavity Mask Generation (`_n.png`)
 Always generate normals **after** snapping/outlining (and after `flat2iso` if isometric):
 ```powershell
-# Character / Organic Sprite (Moonfell cluster-faceted normals + lighting GIF preview)
-python tools/normal_map_gen.py "exports/clean/hero_1x.png" --mode faceted --preset character --steps 6 --mask --preview -o "exports/clean/hero_1x_n.png" --json
+# Character / Organic Sprite (@xprite/lighter Lab-clustered faceted normals + auto painted-light + de-lit albedo + lighting GIF preview)
+python tools/normal_map_gen.py "exports/clean/hero_1x.png" --mode faceted --preset character --delight --steps 6 --mask --preview -o "exports/clean/hero_1x_n.png" --json
 
-# Isometric / Rectangular Crate or Wall (1.5px boxy bevel)
+# Isometric / Rectangular Crate or Wall (1.5px boxy bevel, or --mode faceted --preset architecture for brick walls)
 python tools/normal_map_gen.py "exports/flat2iso/crate.png" --mode boxy --bevel 1.5 -o "exports/flat2iso/crate_n.png" --json
 
 # Top-Down / Iso Floor Tile (3x3 mortar gap relief)

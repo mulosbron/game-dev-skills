@@ -93,6 +93,36 @@ def shadowcast(walls: np.ndarray, origin_x: int, origin_y: int, radius: int) -> 
     return seen
 
 
+def walls_from_image(image_path: Path) -> np.ndarray:
+    """Load an RGBA wall-layer PNG into a boolean walls grid (alpha > 0 = blocks light)."""
+    arr = np.array(Image.open(image_path).convert("RGBA"), dtype=np.uint8)
+    return arr[:, :, 3] > 0
+
+
+def resolve_origin(
+    walls: np.ndarray,
+    origin_x: int,
+    origin_y: int,
+    max_search: int = 2,
+) -> tuple[int, int]:
+    """
+    If (origin_x, origin_y) sits inside a wall cell, move it to the nearest open cell
+    within `max_search` Chebyshev radius. Prevents 8-neighbor-only lighting or thin-wall
+    leaks when a torch is held in front of a character hugging a wall.
+    """
+    walls_bool = np.asarray(walls, dtype=bool)
+    h, w = walls_bool.shape
+    if 0 <= origin_x < w and 0 <= origin_y < h and not walls_bool[origin_y, origin_x]:
+        return origin_x, origin_y
+    for r in range(1, max_search + 1):
+        for dy in range(-r, r + 1):
+            for dx in range(-r, r + 1):
+                nx, ny = origin_x + dx, origin_y + dy
+                if 0 <= nx < w and 0 <= ny < h and not walls_bool[ny, nx]:
+                    return nx, ny
+    return origin_x, origin_y
+
+
 def radial_mask(shape: tuple[int, int], origin_x: int, origin_y: int, radius: int) -> np.ndarray:
     """Compute plain radial visibility mask without wall occlusion (dx^2 + dy^2 < r^2)."""
     h, w = shape
@@ -179,7 +209,8 @@ def apply_torch_light(
     dist = np.sqrt((xx - ox_px) ** 2 + (yy - oy_px) ** 2)
     t = np.clip(1.0 - dist / radius_px, 0.0, 1.0) ** power
     if steps > 0:
-        light = np.ceil(t * steps) / steps
+        # Clamp ceil to 1.0 so floating-point 1.0 * steps never mints a phantom (steps+1)th band
+        light = np.minimum(1.0, np.ceil(t * steps) / steps)
     else:
         light = t
     light = light * lit_mask.astype(np.float32)
@@ -477,6 +508,29 @@ def run_verify() -> dict[str, Any]:
         "ok": (behind_plain > behind_sc * 2.0),
     }
 
+    # 10. resolve_origin moves an origin inside a wall to the nearest open floor cell
+    res_w = np.zeros((5, 5), dtype=bool)
+    res_w[2, 2] = True
+    rx, ry = resolve_origin(res_w, 2, 2)
+    results["10_resolve_origin_out_of_wall"] = {
+        "resolved": [rx, ry],
+        "ok": ((rx, ry) != (2, 2) and not bool(res_w[ry, rx])),
+    }
+
+    # 11. Band quantization produces at most 6 non-zero bands (no phantom 7th band)
+    empty11_scene = np.ones((11 * 8, 11 * 8, 3), dtype=np.float32)
+    lit_bands, _ = apply_torch_light(
+        empty11_scene, np.zeros((11, 11), dtype=bool), (5, 5), 5, tile_size=8, steps=6,
+        ambient=(0.0, 0.0, 0.0), torch_color=(1.0, 1.0, 1.0), wall_pad_px=0,
+    )
+    uniq_vals = np.unique(np.round(lit_bands[:, :, 0], 4))
+    nonzero_bands = [float(v) for v in uniq_vals if v > 0.0]
+    results["11_band_quantization_no_phantom_7th"] = {
+        "nonzero_band_count": len(nonzero_bands),
+        "max_band_value": max(nonzero_bands) if nonzero_bands else 0.0,
+        "ok": (1 <= len(nonzero_bands) <= 6 and (max(nonzero_bands) if nonzero_bands else 0.0) <= 1.0001),
+    }
+
     all_passed = all(v["ok"] for v in results.values())
     return {"all_passed": all_passed, "passed": sum(1 for v in results.values() if v["ok"]), "total": len(results), "checks": results}
 
@@ -713,6 +767,94 @@ export function shadowcast(walls: boolean[][], ox: number, oy: number, radius: n
 """
 
 
+def render_walls_preview(
+    walls_png: Path,
+    light_x: int,
+    light_y: int,
+    light_radius: int,
+    out_dir: Path,
+    tile_size: int = 16,
+    wall_pad_px: int = 5,
+    steps: int = 6,
+    scale: int = 1,
+    enemy: tuple[int, int] | None = None,
+    sight_range: int = 0,
+    walk_points: list[tuple[int, int]] | None = None,
+) -> dict[str, Any]:
+    """
+    Per-pixel shadowcasting preview on a real wall-layer RGBA PNG (alpha > 0 = wall).
+    Writes 1_light_mask.png, 2_light_banded.png, 3_scene_composed.png, and optional
+    4_fog_of_war.png / 5_enemy_sight.png.
+    """
+    out_dir.mkdir(parents=True, exist_ok=True)
+    wall_rgba = np.array(Image.open(walls_png).convert("RGBA"), dtype=np.uint8)
+    walls = wall_rgba[:, :, 3] > 0
+    h, w = walls.shape
+
+    ox, oy = resolve_origin(walls, light_x, light_y)
+    seen = shadowcast(walls, ox, oy, light_radius)
+    lit_mask = dilate_wall_tops(seen, walls, pad_px=wall_pad_px)
+
+    # Build stand-in scene from wall alpha if user only provided wall silhouette
+    scene = np.zeros((h, w, 3), dtype=np.float32)
+    scene[~walls] = (0.42, 0.38, 0.34)
+    scene[walls] = (0.28, 0.30, 0.37)
+    # Blend actual RGB where walls have color
+    if np.any(walls):
+        wall_rgb = wall_rgba[:, :, :3].astype(np.float32) / 255.0
+        if wall_rgb[walls].max() > 0.01:
+            scene[walls] = wall_rgb[walls]
+
+    yy, xx = np.mgrid[:h, :w]
+    dist = np.sqrt((xx - ox) ** 2 + (yy - oy) ** 2)
+    t = np.clip(1.0 - dist / max(1.0, float(light_radius)), 0.0, 1.0) ** 0.8
+    banded = np.minimum(1.0, np.ceil(t * steps) / steps) if steps > 0 else t
+    banded = banded * lit_mask.astype(np.float32)
+
+    amb = np.array(DEFAULT_AMBIENT, dtype=np.float32).reshape(1, 1, 3)
+    torch = np.array(DEFAULT_TORCH_COLOR, dtype=np.float32).reshape(1, 1, 3)
+    composed = np.clip(scene * (amb + torch * banded[..., None]), 0.0, 1.0)
+
+    def _save(arr_f: np.ndarray, name: str) -> str:
+        u8 = np.clip(np.round(arr_f * 255.0), 0, 255).astype(np.uint8)
+        im = Image.fromarray(u8)
+        if scale > 1:
+            im = im.resize((w * scale, h * scale), resample=Image.Resampling.NEAREST)
+        p = out_dir / name
+        im.save(p)
+        return str(p)
+
+    outputs: dict[str, Any] = {
+        "ok": True,
+        "size": [w, h],
+        "resolved_origin": [ox, oy],
+        "seen_pixels": int(np.count_nonzero(seen)),
+        "light_mask": _save(np.repeat(lit_mask[:, :, None].astype(np.float32), 3, axis=2), "1_light_mask.png"),
+        "light_banded": _save(np.repeat(banded[:, :, None], 3, axis=2), "2_light_banded.png"),
+        "scene_composed": _save(composed, "3_scene_composed.png"),
+    }
+
+    if walk_points:
+        explored = np.zeros((h, w), dtype=bool)
+        for wx, wy in walk_points:
+            rx, ry = resolve_origin(walls, wx, wy)
+            explored |= shadowcast(walls, rx, ry, light_radius)
+        explored |= seen
+        fog_vis = apply_fog_of_war_visual(composed, scene, seen, explored, walls, tile_size=1, wall_pad_px=wall_pad_px)
+        outputs["fog_of_war"] = _save(fog_vis, "4_fog_of_war.png")
+
+    if enemy is not None:
+        ex, ey = resolve_origin(walls, enemy[0], enemy[1])
+        s_rad = sight_range if sight_range > 0 else light_radius
+        e_seen = shadowcast(walls, ex, ey, s_rad)
+        e_vis = composed.copy()
+        e_vis[e_seen] = np.clip(e_vis[e_seen] * 0.65 + np.array([0.45, 0.12, 0.12], dtype=np.float32), 0.0, 1.0)
+        outputs["enemy_sight"] = _save(e_vis, "5_enemy_sight.png")
+        outputs["enemy_sees_light_origin"] = bool(e_seen[oy, ox])
+
+    return outputs
+
+
 def export_code(engine: str) -> str:
     """Return engine-specific shadowcasting template."""
     if engine == "godot4":
@@ -735,6 +877,18 @@ def main() -> int:
     p_demo.add_argument("--out-dir", type=Path, default=Path("exports/shadowcasting"))
     p_demo.add_argument("--json", action="store_true")
 
+    p_ren = sub.add_parser("render", help="Render per-pixel shadowcast light/fog/LOS previews from a real wall-layer PNG")
+    p_ren.add_argument("walls_png", type=Path, help="RGBA wall-layer PNG (alpha > 0 = blocks light)")
+    p_ren.add_argument("--light", nargs=3, type=int, metavar=("X", "Y", "RADIUS"), required=True, help="Light origin X Y and radius in pixels")
+    p_ren.add_argument("--enemy", nargs=2, type=int, metavar=("X", "Y"), help="Optional enemy origin X Y")
+    p_ren.add_argument("--sight-range", type=int, default=0, help="Enemy sight radius in pixels (default: same as light radius)")
+    p_ren.add_argument("--walk", nargs="*", help="Optional explored trail waypoints 'x,y' for fog-of-war preview")
+    p_ren.add_argument("--wall-pad", type=int, default=5, help="Wall-top dilation in pixels (default: 5)")
+    p_ren.add_argument("--steps", type=int, default=6, help="Quantized light bands (default: 6; 0 = smooth)")
+    p_ren.add_argument("--scale", type=int, default=1, help="Nearest-neighbor output upscale factor")
+    p_ren.add_argument("--out-dir", type=Path, default=Path("exports/shadowcasting/preview"))
+    p_ren.add_argument("--json", action="store_true")
+
     p_exp = sub.add_parser("export-code", help="Export engine code snippet")
     p_exp.add_argument("--engine", choices=["godot4", "unity", "typescript"], required=True)
     p_exp.add_argument("--out", type=Path)
@@ -755,6 +909,32 @@ def main() -> int:
             print(json.dumps(res, indent=2))
         else:
             print(f"Rendered shadowcasting demos to {args.out_dir}")
+        return 0
+
+    if args.cmd == "render":
+        walk_pts = None
+        if args.walk:
+            walk_pts = []
+            for wp in args.walk:
+                xs, ys = wp.split(",")
+                walk_pts.append((int(xs.strip()), int(ys.strip())))
+        res = render_walls_preview(
+            walls_png=args.walls_png,
+            light_x=args.light[0],
+            light_y=args.light[1],
+            light_radius=args.light[2],
+            out_dir=args.out_dir,
+            wall_pad_px=args.wall_pad,
+            steps=args.steps,
+            scale=args.scale,
+            enemy=tuple(args.enemy) if args.enemy else None,
+            sight_range=args.sight_range,
+            walk_points=walk_pts,
+        )
+        if args.json:
+            print(json.dumps(res, indent=2))
+        else:
+            print(f"Rendered wall preview to {args.out_dir} (origin={res['resolved_origin']})")
         return 0
 
     if args.cmd == "export-code":

@@ -90,10 +90,10 @@ python tools/flat2iso.py box --front "f.png" --side "s.png" --top "t.png" --ligh
 python tools/flat2iso.py serve --port 8765
 ```
 
-### Stage 3 — 2D Tangent Normal Map & Height Relief (`_n.png`)
-Generate normals **after** final silhouette/isometric projection so edge bevels match lit directions:
+### Stage 3 — 2D Tangent Normal Map, De-Lit Albedo & Height Relief (`_n.png`)
+Generate normals **after** final silhouette/isometric projection so edge bevels match lit directions (uses `@xprite/lighter` CIELAB clustering + automatic painted-light estimation; add `--delight` to export flat-lit `_delit.png` albedo for dynamic 2D lights):
 ```powershell
-python tools/normal_map_gen.py "exports/clean/hero_snap.png" --mode faceted --preset character -o "exports/clean/hero_snap_n.png"
+python tools/normal_map_gen.py "exports/clean/hero_snap.png" --mode faceted --preset character --delight -o "exports/clean/hero_snap_n.png" --json
 ```
 *(Or use Rust/WASM `skills/spritefusion-sprite-normals/SKILL.md` for batch Web/CLI normal extraction.)*
 

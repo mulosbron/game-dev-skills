@@ -1,6 +1,6 @@
 ---
 name: atmospheric-perspective
-description: "Adds atmospheric perspective depth to 2D parallax platformers and 2.5D / Limbo-style layered games by blending each background plane toward the average RGB color of the sky on its matching vertical row, plus base mist for mountain ridge separation and global strength control. Covers pre-code audit, tested scroll-speed presets (0.08..0.60), 2.5D Sprite3D depth cards, patchy outline cleanup, Godot 4 / Unity shaders, and 6-point automated verification (`tools/atmospheric_perspective.py`)."
+description: "Adds atmospheric perspective (distance haze) to 2D parallax platformers and 2.5D / Limbo-style layered games by blending each background plane toward the average RGB color of the sky on its matching vertical row, plus base mist for mountain ridge separation and global strength control. Use whenever the user mentions atmospheric perspective, haze, distance fade, depth cueing, parallax depth, layers looking flat or too sharp, far mountains looking like a wall behind the trees, 'my background looks flat', 'add depth to my parallax', or 'make mountains fade into the sky' in Godot 4, Unity, or custom 2D engines (`tools/atmospheric_perspective.py`)."
 ---
 
 # Atmospheric Perspective for 2D Parallax & 2.5D Depth (`atmospheric-perspective`)
@@ -59,12 +59,21 @@ python tools/atmospheric_perspective.py demo --style limbo --out-dir exports/atm
 # 3. Bake static atmospheric haze into one layer (+ clean patchy dark AI outlines)
 python tools/atmospheric_perspective.py bake-layer --sky sky.png --layer far_peaks.png --amount 0.80 --mist 0.20 --clean-outline --save-sky-rows sky_rows.png -o far_peaks_hazed.png --json
 
+# 3b. Batch-bake an entire parallax stack from a layers.json manifest (see assets/layers.example.json)
+python tools/atmospheric_perspective.py bake-stack --sky sky.png --layers layers.json --out-dir exports/atmospheric_perspective/hazed --save-sky-rows exports/atmospheric_perspective/sky_rows.png --composite exports/atmospheric_perspective/preview.png --json
+
 # 4. Fix patchy dark exterior outlines on a far silhouette layer only
 python tools/atmospheric_perspective.py clean-outline far_peaks.png -o far_peaks_clean.png --json
 
 # 5. Export Godot 4 (2D + 2.5D Limbo card) & Unity shaders/scripts
 python tools/atmospheric_perspective.py export-code --target all --out-dir exports/atmospheric_perspective/code --json
 ```
+
+### Engine References, Example Manifest & Evals
+- **Godot 4:** [`references/godot.md`](references/godot.md) (`atmospheric_perspective.gdshader`, `hazed_layer.gd` with `material.duplicate()` and `get_used_rect()`, `Parallax2D` setup).
+- **Unity:** [`references/unity.md`](references/unity.md) (Shader Graph `Sprite Unlit` node recipe + URP HLSL fragment shader).
+- **Batch Manifest Template:** [`assets/layers.example.json`](assets/layers.example.json) (tested 10-layer scroll-speed config for `bake-stack`).
+- **Skill Evals:** [`evals/evals.json`](evals/evals.json) (Godot `Parallax2D`, custom JS Canvas export bake, Unity `SpriteRenderer` depth).
 
 ---
 

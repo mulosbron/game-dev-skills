@@ -1,0 +1,47 @@
+{
+  "skill_name": "shadowcasting",
+  "evals": [
+    {
+      "id": 0,
+      "eval_name": "godot-tilemap-torchlight-fog",
+      "prompt": "My Godot 4 top-down game has a TileMapLayer with 16 px dungeon walls, a plain radial PointLight2D-style glow that shines straight through walls, and no fog or vision code. Add torchlight that stops at walls, fog of war where explored areas stay dim gray and unexplored is black, and keep my current light radius (7 tiles) and warm torch color. 23x11 room grid, art is a plain tileset on the tile grid.",
+      "expected_output": "Agent inspects the project first (engine, wall storage, tile size, existing light pass), then adds one Shadowcast static class (scan copied exactly), casts per tile (art is on the tile grid), builds an ImageTexture light with the banded falloff, keeps radius 7 and the user's torch color, accumulates a persistent explored grid, exposes settings, and adds a debug view + off toggle. No second lighting system.",
+      "files": [],
+      "assertions": [
+        "Agent examines the existing project (engine, how walls are stored, tile size, current light drawing) before writing code",
+        "One shadowcast scan function serves light, fog and sight — not three separate systems or a second lighting pass",
+        "Scan is copied exactly with float division and the strict radius test (a cell exactly radius away is not seen)",
+        "Fog of war uses a persistent explored grid that is saved with the level and never cleared on recast",
+        "Keeps the user's light radius (7 tiles) and torch color; settings are exposed and their location reported",
+        "Includes a debug view of the seen grid and a toggle restoring the old radial light"
+      ]
+    },
+    {
+      "id": 1,
+      "eval_name": "dual-grid-art-needs-per-pixel",
+      "prompt": "Here is my dungeon wall layer (walls_layer.png, 384x256, dual-grid tileset where the wall tiles sit half a tile off the grid) for my Godot 4 game. My friend added per-tile visibility to my torch and now the light is square blocks that cut through the drawn walls. Fix it and show me it works before touching the game.",
+      "expected_output": "Agent recognizes dual-grid art makes per-tile visibility produce square light that cuts through drawn walls, switches to per-pixel casting on the wall layer Image (opaque = wall), handles the wall-top 1 px edge by dilating ~5 px into walls, and runs the bundled preview/verify scripts to show the result before integrating. Recasts only when the origin moves to a new pixel cell.",
+      "files": ["walls_layer.png"],
+      "assertions": [
+        "Agent identifies per-tile visibility as the cause of square light and switches to per-pixel casting on the wall layer",
+        "Uses the bundled scripts (render_light_preview.py / verify_shadowcast.py) to preview or verify before engine integration",
+        "Wall-top dilation (~5 px, scaled to tile size) applied so walls facing the light are not 1 px edges",
+        "Recast strategy limits per-pixel cost (only on origin cell change, or a C# port suggestion)"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "enemy-los-one-way-pitfall",
+      "prompt": "In my custom C++/SDL2 pixel engine I have a collision bool grid (same grid blocks movement and light), enemies with sight_range 10, and the player. Enemies keep spotting the player through walls and also fail to see the player when the player clearly sees them standing in a doorway. Add proper enemy line of sight. Also my current glow is a distance loop that ignores walls.",
+      "expected_output": "Agent separates 'blocks light' from 'blocks movement' (half-height/barrier tiles, glass, doors) and asks the user which tiles block light if unclear; adds the shadowcast scan ported exactly from the reference; casts sight from the enemy's position explaining the one-way asymmetry; applies resolve_origin for the doorway-hugging case; replaces the wall-ignoring glow with seen*falloff; verifies with the test battery.",
+      "files": [],
+      "assertions": [
+        "Agent distinguishes blocks-light from blocks-movement and asks the user which tiles block light rather than silently reusing the collision grid",
+        "Enemy sight is cast from the enemy, with the one-way asymmetry explained (and symmetric shadowcasting offered if fairness both ways is needed)",
+        "resolve_origin (nearest floor cell) applied before casting for wall-adjacent origins",
+        "Scan ported exactly from the tested reference (float division, strict radius cutoff, radius<=0 and out-of-bounds guards)",
+        "Verification battery run (or its checks mirrored) and results reported honestly"
+      ]
+    }
+  ]
+}

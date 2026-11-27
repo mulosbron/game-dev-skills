@@ -532,6 +532,73 @@ def _cmd_demo(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_bake_stack(args: argparse.Namespace) -> int:
+    sky_path = Path(args.sky)
+    manifest_path = Path(args.layers)
+    out_dir = Path(args.out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    strength = float(args.strength) if args.strength is not None else float(manifest.get("strength", 1.0))
+    entries = manifest.get("layers", manifest if isinstance(manifest, list) else [])
+
+    sky_img = Image.open(sky_path).convert("RGBA")
+    rows = sky_row_colors(sky_img)
+
+    sky_rows_out = None
+    if args.save_sky_rows:
+        sr_path = Path(args.save_sky_rows)
+        sr_path.parent.mkdir(parents=True, exist_ok=True)
+        Image.fromarray(rows[:, None, :], mode="RGB").save(sr_path)
+        sky_rows_out = str(sr_path)
+
+    base_dir = Path(args.base_dir) if args.base_dir else manifest_path.parent
+    baked_images: List[Image.Image] = []
+    results: List[Dict[str, Any]] = []
+
+    for entry in entries:
+        fpath = Path(entry["file"])
+        if not fpath.is_absolute():
+            fpath = base_dir / fpath
+        layer_img = Image.open(fpath).convert("RGBA")
+        cleaned_px = 0
+        if args.clean_outline and float(entry.get("amount", 0.0)) > 0.0:
+            layer_img, cleaned_px = clean_patchy_outline(layer_img, luma_drop_threshold=args.outline_threshold)
+        amt = float(entry.get("amount", 0.0))
+        mist = float(entry.get("mist", 0.0))
+        hazed = apply_atmospheric_haze(layer_img, rows, amount=amt, mist=mist, strength=strength)
+        dest = out_dir / fpath.name
+        hazed.save(dest)
+        baked_images.append(hazed)
+        results.append({
+            "file": fpath.name,
+            "output": str(dest),
+            "amount": amt,
+            "mist": mist,
+            "cleaned_outline_pixels": cleaned_px,
+        })
+
+    comp_out = None
+    if args.composite:
+        cp = Path(args.composite)
+        cp.parent.mkdir(parents=True, exist_ok=True)
+        composite_stack(sky_img, baked_images).save(cp)
+        comp_out = str(cp)
+
+    payload = {
+        "ok": True,
+        "sky": str(sky_path),
+        "strength": strength,
+        "out_dir": str(out_dir),
+        "sky_rows_path": sky_rows_out,
+        "composite_path": comp_out,
+        "layers_baked": len(results),
+        "layers": results,
+    }
+    print(json.dumps(payload, indent=2) if args.json else f"Baked {len(results)} layers -> {out_dir}")
+    return 0
+
+
 def _cmd_presets(args: argparse.Namespace) -> int:
     print(json.dumps({"ok": True, "presets": SCROLL_SPEED_PRESETS}, indent=2))
     return 0
@@ -591,6 +658,19 @@ def build_parser() -> argparse.ArgumentParser:
     p_bake.add_argument("--save-sky-rows", help="Optional 1xH sky_colors lookup PNG output path.")
     p_bake.add_argument("--json", action="store_true", help="Output machine-readable JSON.")
     p_bake.set_defaults(func=_cmd_bake_layer)
+
+    p_stack = sub.add_parser("bake-stack", help="Batch-bake an entire parallax stack from a layers.json manifest.")
+    p_stack.add_argument("--sky", required=True, help="Sky layer PNG (same height as layers).")
+    p_stack.add_argument("--layers", required=True, help="JSON manifest listing layer files with amount/mist (see assets/layers.example.json).")
+    p_stack.add_argument("--base-dir", help="Optional base directory for relative layer filenames (default: manifest directory).")
+    p_stack.add_argument("--out-dir", required=True, help="Output directory for hazed layer PNGs.")
+    p_stack.add_argument("--strength", type=float, default=None, help="Override manifest global strength [0..1].")
+    p_stack.add_argument("--clean-outline", action="store_true", help="Clean patchy dark outlines on hazed layers.")
+    p_stack.add_argument("--outline-threshold", type=float, default=24.0, help="Luma drop threshold for outline cleaning.")
+    p_stack.add_argument("--save-sky-rows", help="Optional 1xH sky_colors lookup PNG output path.")
+    p_stack.add_argument("--composite", help="Optional composited stack preview PNG path.")
+    p_stack.add_argument("--json", action="store_true", help="Output machine-readable JSON.")
+    p_stack.set_defaults(func=_cmd_bake_stack)
 
     p_clean = sub.add_parser("clean-outline", help="Fix patchy dark outlines on generated far parallax silhouettes.")
     p_clean.add_argument("layer", help="Input layer PNG.")

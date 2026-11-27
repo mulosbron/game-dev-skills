@@ -145,28 +145,43 @@ try {
 
 ---
 
-## Outline Bevel, Floor Tiles & Stepped Pixel-Art Lighting (`tools/normal_map_gen.py`)
+## Faceted Normals, Painted-Light De-Lighting, Outline Bevel & Stepped Lighting (`tools/normal_map_gen.py`)
 
-When Rust/Cargo is unavailable, or when you specifically need **quarter-circle outline bevels** (`outline` / `boxy`), **3×3 seamless floor-tile gap normals** (`floor-tile`), or **stepped pixel-art lighting** (`bands = 6`), use `tools/normal_map_gen.py`:
+When Rust/Cargo is unavailable, or when you need **@xprite/lighter-upgraded cluster-faceted normals** (perceptual CIELAB clustering, automatic painted-light direction estimation, sprite-scale-adaptive faceting, architecture straight-edge alignment, and painted-light removal / `--delight`), **quarter-circle outline bevels** (`outline` / `boxy`), **3×3 seamless floor-tile gap normals** (`floor-tile`), or **stepped pixel-art lighting** (`bands = 6`), use `tools/normal_map_gen.py`:
+
+### Why Faceted Mode (`@xprite/lighter` Engine) Excels on Pixel Art
+- **Perceptual CIELAB Clustering (`--region-mode perceptual`, default):** Groups subtly shaded or anti-aliased pixel regions (`ΔE ≤ 6` edge / `ΔE ≤ 10` region, `Δα < 48`) while preserving sharp palette/alpha boundaries; `--region-mode exact-rgb` is also available.
+- **Auto Painted-Light Estimation & Handling (`--painted-light-angle`, `--painted-light-influence`):** Fits contour normals against chroma-grouped luminance with 4-fold spatial holdout and component consistency checks. Automatically tilts normals toward the painted light instead of turning painted shadows into geometry dents (fades smoothly for weak confidence `fit ∈ [0.2, 0.45]`).
+- **Sprite-Scale-Adaptive Faceting & Architecture Edge Alignment:** Small sprites keep a concave `√distance` bevel ramp; larger sprites transition to a linear ramp with footprint-scaled facet splitting. `architecture` preset aligns straight exterior walls across brick color variations.
+- **Painted-Light Removal / De-Lighting (`--delight`):** Divides out baked-in directional lighting (`ambient = 0.15 + Lambert @ 45°`) in linear sRGB to export a flat-lit albedo (`<stem>_delit.png`) and eliminate double-lighting when dynamically relit in-engine.
 
 ### Pre-Code Project Audit
 Before adding 2D normal-mapped lights, inspect: engine & language, how sprites and 2D lights are currently drawn, and sprite sizes. Fit into existing lights/build pipeline instead of creating a parallel system; keep existing light positions and colors. If no 2D lights exist yet, ask the user before inventing them.
 
 ### CLI Recipes (`tools/normal_map_gen.py`)
 ```powershell
-# 1. Round/organic pixel sprite (~30 px wide): 1px-padded quarter-circle bevel (bevel=5, top=12, detail=1.5)
+# 1. Cluster-faceted pixel sprite (CIELAB perceptual clustering + auto painted-light estimation + de-lit albedo + cavity mask + stepped preview)
+python tools/normal_map_gen.py hero.png --mode faceted --preset character --delight --mask --preview --steps 6 --json
+
+# 2. Estimate baked-in painted light direction & confidence without generating files
+python tools/normal_map_gen.py hero.png --estimate-light --json
+
+# 3. Architecture / wall sprite (continuous straight edges across bricks, manual painted-light hint)
+python tools/normal_map_gen.py wall.png --mode faceted --preset architecture --painted-light-angle 135 --json
+
+# 4. Round/organic pixel sprite (~30 px wide): 1px-padded quarter-circle bevel (bevel=5, top=12, detail=1.5)
 python tools/normal_map_gen.py pots.png --mode outline --steps 6 --preview --json
 
-# 2. Boxy sprite (crates/chests): small bevel prevents puffy pillow rounding
+# 5. Boxy sprite (crates/chests): small bevel prevents puffy pillow rounding
 python tools/normal_map_gen.py crate.png --mode boxy --json
 
-# 3. Seamless floor tile (no transparent edges): 3x3 wrap + darkest 30% mortar gaps (bevel=3, top=2.5, detail=1.0)
+# 6. Seamless floor tile (no transparent edges): 3x3 wrap + darkest 30% mortar gaps (bevel=3, top=2.5, detail=1.0)
 python tools/normal_map_gen.py floor.png --mode floor-tile --json
 
-# 4. Export Godot 4 stepped canvas_item light() shader (or Unity URP 2D guidance)
+# 7. Export Godot 4 stepped canvas_item light() shader (or Unity URP 2D guidance)
 python tools/normal_map_gen.py --export-shader godot4 --json
 
-# 5. Run automated normal-map & stepped-lighting verification suite
+# 8. Run automated normal-map, perceptual clustering, painted-light, delight & stepped-lighting verification suite
 python tools/normal_map_gen.py --verify --json
 ```
 

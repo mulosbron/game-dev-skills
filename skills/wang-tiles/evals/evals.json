@@ -1,0 +1,48 @@
+{
+  "skill_name": "wang-tiles",
+  "evals": [
+    {
+      "id": 0,
+      "eval_name": "godot-replace-repeating-grass",
+      "prompt": "My Godot 4 project has a TileMapLayer ground layer with 16x16 grass tiles. Big grass areas show a visible grid because the same tile repeats everywhere. Replace the interior grass with edge Wang tiles: 16 tiles, random edge colors, keep my existing transition tiles where grass meets dirt. Tile size is 16 px and I have no Wang atlas yet.",
+      "expected_output": "Integration code that builds h/v edge arrays sized (rows+1) x cols and rows x (cols+1), computes index = top + 2*right + 4*bottom + 8*left, maps it to a 4x4 atlas in index order via set_cell(Vector2i(c, r), source_id, Vector2i(i % 4, i / 4)), keeps autotiles at terrain borders, generates edges once (not per frame), includes a neighbor-agreement assert, and addresses the missing art (offers the art options from references/art.md rather than inventing an atlas).",
+      "assertions": [
+        "Index formula used is top + 2*right + 4*bottom + 8*left",
+        "h edge array has rows+1 rows (or wrap variant), v edge array has cols+1 columns",
+        "Atlas lookup uses column = index % 4, row = floor(index / 4) or equivalent",
+        "Edge colors are generated once, not per frame or per load",
+        "Transitions between terrains are kept (Wang only for one terrain's interior)",
+        "Some verification is included: neighbor-agreement assert, debug overlay, or rendered 20x20 check",
+        "Missing art is handled by asking/presenting options (free set, cut from texture, or generate), not silently invented"
+      ],
+      "files": []
+    },
+    {
+      "id": 1,
+      "eval_name": "cut-atlas-from-texture",
+      "prompt": "Here is my seamless terrain texture (texture.png, 280x298). Cut a 4x4 edge Wang atlas of 32 px tiles from it and prove the 16 tiles join: render a map from the atlas and show the checks pass.",
+      "expected_output": "Uses scripts/cut_wang_atlas.py to produce a 128x128 atlas in index order, then scripts/render_wang_map.py (or equivalent) to assert edge consistency and render a >=20x20 map from a fixed seed; reports that the same seed reproduces the same map.",
+      "assertions": [
+        "A 128x128 (4x4 of 32px) atlas PNG is produced",
+        "Atlas tiles are in index order (column = i % 4, row = i // 4)",
+        "A rendered map of at least 20x20 cells is produced from a fixed seed",
+        "Edge-color consistency is checked (asserts or debug overlay showing matching bars)",
+        "Same seed gives the same map on a second run"
+      ],
+      "files": ["texture.png"]
+    },
+    {
+      "id": 2,
+      "eval_name": "unity-infinite-chunked-world",
+      "prompt": "My Unity game has an infinite chunked world; ground tiles are 32 px, terrain ids come from a noise function, y axis points up. Right now each chunk fills grass with one repeated tile and there are visible seams between chunks. I want Wang tiles so the grass stops showing a grid, and the chunks must agree without sharing data.",
+      "expected_output": "Hash-based edge colors (hash of (seed, edge x, edge y, horizontal) -> one bit), wang index in C#, SetTile with new Vector3Int(c, -r, 0) respecting the y-up axis, chunks recomputing shared edges from the hash, and a warning about the y-axis pitfall.",
+      "assertions": [
+        "Edge colors come from a hash of (seed, x, y, orientation), not from per-chunk random state",
+        "Unity placement flips the row: Vector3Int(c, -r, 0)",
+        "Chunks agree on shared edges because the hash depends only on world coordinates",
+        "Index formula top + 2*right + 4*bottom + 8*left is used"
+      ],
+      "files": []
+    }
+  ]
+}

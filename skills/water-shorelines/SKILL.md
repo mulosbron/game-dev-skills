@@ -1,6 +1,6 @@
 ---
 name: water-shorelines
-description: "Replaces flat 2D top-down water with pixel-grid distance field shorelines: depth bands (shoal, shallow, mid, deep), breathing foam lines, and incoming coastal wave rings baked once per level or chunk using Felzenszwalb-Huttenlocher 2D Euclidean Distance Transforms and smooth wobble noise. Covers pre-code project audit, Godot 4 (ShoreDistance.gd + canvas_item shader), Unity (Point-filtered Sprite shader), TypeScript/Web 2D, incremental dirty-window coast updates, chunk border margins, and automated EDT/band/foam verification (`tools/water_shorelines.py`)."
+description: "Replaces flat 2D top-down water ('water looks flat', 'land looks pasted on') with pixel-grid distance field shorelines: depth bands (shoal, shallow, mid, deep), breathing foam lines, and incoming coastal wave rings baked once per level or chunk using Felzenszwalb-Huttenlocher 2D Euclidean Distance Transforms and smooth wobble noise. Use whenever the user mentions water, shoreline, coast, beach edge, shallows, foam, ocean/lake/sea waves, tilemap water effects, or SpriteCook-style shoreline baking/verification in Godot 4, Unity, TypeScript/Web, GLSL, or custom C++/SDL2 2D engines (`tools/water_shorelines.py`)."
 ---
 
 # 2D Water Shoreline Distance Fields (`water-shorelines`)
@@ -58,18 +58,26 @@ python tools/water_shorelines.py bake path/to/land_layer.png -o exports/water_sh
 # 1b. Run built-in 360x322 sand island + cove demo
 python tools/water_shorelines.py bake --demo --preview exports/water_shorelines/demo_preview.png --contour-debug exports/water_shorelines/demo_contour.png --save-land exports/water_shorelines/demo_land.png -o exports/water_shorelines/demo_dist.png --time 0.4 --json
 
-# 2. Render frames (or flat-water A/B comparison / band-only debug)
+# 2. Render static frame OR looping animated GIF preview (50 frames @ 20 fps = exact 2.5s wave loop)
 python tools/water_shorelines.py render exports/water_shorelines/demo_dist.png --land exports/water_shorelines/demo_land.png --time 0.4 -o exports/water_shorelines/frame.png --json
+python tools/water_shorelines.py render exports/water_shorelines/demo_dist.png --land exports/water_shorelines/demo_land.png --frames 50 --fps 20 --gif exports/water_shorelines/water_preview.gif --json
 
 # 3. Incremental coast edit (recomputes 2*MAX_DIST window, writes back MAX_DIST region)
 python tools/water_shorelines.py update-region --land updated_land.png --dist-map shore_distance.png --bbox 96,96,128,128 -o shore_distance_updated.png --json
 
-# 4. Run automated verification suite (EDT vs brute-force, bands, waves, foam, 6-color check, chunk seams)
+# 4. Run automated verification suite (EDT vs brute-force, bands, wave bounds/direction/period, foam, 6-color check, chunk seams, optional real --mask/--map check)
 python tools/water_shorelines.py verify --json
+python tools/water_shorelines.py verify --mask path/to/land_layer.png --map exports/water_shorelines/shore_distance.png --json
 
-# 5. Export Godot 4 / Unity / TypeScript baker & shader files
+# 5. Export Godot 4 / Unity / TypeScript / GLSL / C++ CPU software renderer files
 python tools/water_shorelines.py export-code --target all --out-dir exports/water_shorelines/code --json
 ```
+
+### Engine Integration References & Evals
+- **Godot 4:** [`references/godot4.md`](references/godot4.md) (`SubViewport` land capture, `ShoreDistance.gd`, `water_shoreline.gdshader`, Nearest filter & debug toggle).
+- **Unity:** [`references/unity.md`](references/unity.md) (Built-in/URP HLSL shader, Shader Graph node recipe, `FilterMode.Point`, C# EDT note).
+- **Custom / Software Engines (C++/SDL2/GLSL):** [`references/custom-engine.md`](references/custom-engine.md) (GLSL fragment shader, Felzenszwalb-Huttenlocher pseudocode, CPU `water_color_at` export).
+- **Skill Evals:** [`evals/evals.json`](evals/evals.json) (Godot tilemap integration, opaque-tile stop-and-ask guardrail, custom C++/SDL2 software bake & verify).
 
 ---
 

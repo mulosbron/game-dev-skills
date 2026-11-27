@@ -44,7 +44,33 @@ RARITIES: dict[str, dict[str, Any]] = {
     "uncommon": {"border": "#3a7d3a", "light": "#6cbf4a", "fill": "#1c2a22", "sparkles": 4, "ring_px": 0},
     "rare": {"border": "#2f6fc4", "light": "#64b3f0", "fill": "#1b2440", "sparkles": 6, "ring_px": 3},
     "epic": {"border": "#6d3aa8", "light": "#a974e0", "fill": "#261c3a", "sparkles": 8, "ring_px": 5},
-    "legendary": {"border": "#d9a440", "light": "#f2d16b", "fill": "#33261a", "sparkles": 14, "ring_px": 0},
+    "legendary": {"border": "#d9a440", "light": "#f2d16b", "fill": "#33261a", "sparkles": 14, "ring_px": 5},
+}
+
+SFX_PROMPTS: dict[str, str] = {
+    "chest_shake": "cartoony treasure chest shaking hard, wooden lid clattering, metal latch rattling and coins jingling inside, building up",
+    "lid_open": "heavy cartoony wooden treasure chest lid creaking then slamming wide open with a deep solid wooden thunk",
+    "reveal_chime": "cartoony RPG treasure chest opening chime, long magical harp glissando with twinkling bells and a warm shimmering pad, rising and sparkling",
+    "metal_land": "cartoony RPG item pickup, short metallic armor and blade clink",
+    "glass_land": "cartoony RPG potion pickup, short glass bottle clink with a little slosh",
+    "coins_land": "cartoony RPG coins pickup, short bright coin jingle",
+    "wood_land": "cartoony RPG item pickup, short wooden thud",
+    "leather_land": "cartoony RPG item pickup, soft leather rustle",
+    "paper_land": "cartoony RPG item pickup, light paper flutter",
+    "leaves_land": "cartoony RPG item pickup, dry leaf rustle",
+    "gems_land": "cartoony RPG gem pickup, small crystal chime",
+    "drop_common": "",
+    "drop_uncommon": "cartoony RPG uncommon item drop, soft bell tap",
+    "drop_rare": "cartoony RPG rare item drop, crisp crystal bell ding with a shimmering magic tail",
+    "drop_epic": "cartoony RPG epic item drop, magical rising chord of glassy bells with a soft whoosh and bright sparkles",
+    "drop_legendary": "cartoony RPG legendary item drop, powerful golden choir hit with bright ringing bells, shimmering magic and a deep soft boom",
+    "tooltip": "soft video game menu hover sound, a gentle warm blip",
+}
+
+MATERIAL_TO_SFX: dict[str, str] = {
+    "metal": "metal_land", "glass": "glass_land", "coins": "coins_land",
+    "wood": "wood_land", "leather": "leather_land", "paper": "paper_land",
+    "leaves": "leaves_land", "gems": "gems_land",
 }
 
 # Tiny 3x5 pixel digits 0-9 for bottom-right stack counts
@@ -498,6 +524,26 @@ def run_verify() -> dict[str, Any]:
         "ok": (st_off["window_alpha"] == 1.0 and all_shown_immediately),
     }
 
+    # 7. Last slot fits cleanly inside window width and ends above Collect button
+    x14, y14 = slot_position(COLS * ROWS - 1)
+    fits_ok = (x14 + SLOT_SIZE <= WINDOW_W) and (y14 + SLOT_SIZE <= BUTTON_Y)
+    checks["7_grid_fits_above_button"] = {
+        "last_slot_bottom_right": [x14 + SLOT_SIZE, y14 + SLOT_SIZE],
+        "limits": [WINDOW_W, BUTTON_Y],
+        "ok": fits_ok,
+    }
+
+    # 8. Integer 4x nearest-neighbor upscale produces strictly uniform 4x4 pixel blocks
+    scaled4 = Image.fromarray(arr_222, mode="RGBA").resize((WINDOW_W * 4, WINDOW_H * 4), resample=Image.Resampling.NEAREST)
+    arr4 = np.asarray(scaled4.convert("RGB"))
+    blocks = arr4.reshape(WINDOW_H, 4, WINDOW_W, 4, 3)
+    uniform_blocks = bool((blocks == blocks[:, :1, :, :1, :]).all())
+    checks["8_nearest_4x_uniform_blocks"] = {
+        "scaled_size": [scaled4.width, scaled4.height],
+        "uniform_4x4_blocks": uniform_blocks,
+        "ok": uniform_blocks,
+    }
+
     all_passed = all(v["ok"] for v in checks.values())
     return {"all_passed": all_passed, "passed": sum(1 for v in checks.values() if v["ok"]), "total": len(checks), "checks": checks}
 
@@ -631,6 +677,9 @@ def main() -> int:
     p_exp.add_argument("--out-dir", type=Path, default=Path("exports/loot_window"))
     p_exp.add_argument("--json", action="store_true")
 
+    p_sfx = sub.add_parser("sfx-prompts", help="Print curated material-pickup + rarity-drop SFX prompts & pitch rules")
+    p_sfx.add_argument("--json", action="store_true")
+
     args = parser.parse_args()
     if args.cmd == "verify":
         res = run_verify()
@@ -645,6 +694,11 @@ def main() -> int:
     if args.cmd == "export-code":
         files = export_code(args.engine, args.out_dir)
         print(json.dumps({"engine": args.engine, "files": files}, indent=2) if args.json else str(files))
+        return 0
+
+    if args.cmd == "sfx-prompts":
+        payload = {"ok": True, "pitch_range": [0.92, 1.08], "material_to_sfx": MATERIAL_TO_SFX, "prompts": SFX_PROMPTS}
+        print(json.dumps(payload, indent=2))
         return 0
 
     return 1
