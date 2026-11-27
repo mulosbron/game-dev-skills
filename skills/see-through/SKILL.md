@@ -1,6 +1,6 @@
 ---
 name: see-through
-description: "Keeps 2D characters visible behind trees, fog, miasma, walls, and roofs using four context-routed looks: Fade (A: single tree), 4x4 Bayer Dither (B: fog/mist/canopy zones), Hard Cutout (C: spell spheres/miasma/energy zones), and Clipped Silhouette with Stealth Alarm-Red state (D: walls/stealth near discovery). Includes pre-code project audit, depth + 3x4 opaque cover testing, 0.2s per-object easing, Godot 4 / Unity scripts & shaders, and 10-point automated verification (`tools/see_through.py`)."
+description: "Keeps 2D characters visible behind trees, fog, miasma, walls, and roofs using six context-routed looks: Fade, 4x4 Bayer Dither, Dithered Fade (keep 6/16), Hard Cutout, Clipped Flat Silhouette (with Stealth Alarm-Red state), and 1 px Clipped Outline. Use whenever the player disappears under a canopy or behind a building, or when asked for see-through, dither window, cutout, or x-ray sprite occlusion in Godot 4, Unity, or Web/Canvas/Phaser (`tools/see_through.py`)."
 ---
 
 # 2D See-Through Occlusion (`see-through`)
@@ -62,7 +62,13 @@ python tools/see_through.py demo --out-dir exports/see_through --upscale 2 --jso
 python tools/see_through.py export-code --target all --out-dir exports/see_through/code --json
 ```
 
-### Exported Templates
+### Bundled References & Multi-Engine Runtime Scripts
+- **Deep References (`references/`):** [`project-fit.md`](references/project-fit.md), [`algorithm.md`](references/algorithm.md), [`engines.md`](references/engines.md), [`pitfalls.md`](references/pitfalls.md), [`acceptance.md`](references/acceptance.md).
+- **Godot 4 (`scripts/godot/`):** `see_through.gd`, `see_through_math.gd`, `see_through.gdshader`, `see_through_scaled.gdshader`, `flat_color.gdshader`, `outline.gdshader` (1 px clipped outline look).
+- **Unity (`scripts/unity/`):** `SeeThroughOccluder.cs`, `SeeThroughWindow.shader`, `SeeThroughWindow.hlsl`, `SeeThroughFlat.shader`, `SeeThroughOutline.shader`.
+- **Web / Canvas / Phaser (`scripts/web/`):** `see-through.mjs` (zero-dependency ESM runtime) + `see-through.test.mjs` (`node skills/see-through/scripts/web/see-through.test.mjs`).
+
+### Exported CLI Templates (`tools/see_through.py export-code`)
 - `godot4-script` (`see_through.gd`): Per-object `ShaderMaterial`, `is_pixel_opaque` 3×4 cover test, `CLIP_CHILDREN_AND_DRAW` ghost sync (`animation`, `frame`, `flip_h`), and stealth `alert_ratio` alarm-red switching.
 - `godot4-window-shader` (`see_through.gdshader`): Unified `DITHER` (`soft > 0`) + `CUTOUT` (`soft = 0`) with `pixel_scale` division so scaled scenes keep crisp art-pixel Bayer dots.
 - `godot4-flat-shader` (`flat_color.gdshader`): Flat silhouette tint for the clipped character ghost.
